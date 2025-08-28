@@ -14,9 +14,10 @@ export const tradingPostFactoryFunction = (id: number, tradingPostData: BaseCard
         mainFunctionality: {
             requirement: ['choice'],
             execute: ({ player, context }) => {
-                if (context === 'trade') {
+                const { choice } = context as { choice: string }
+                if (choice === 'trade') {
                     addTradeFunct(player, 1)
-                } else if (context === 'authority') {
+                } else if (choice === 'authority') {
                     addAuthorityFunct(player, 1)
                 }
             }

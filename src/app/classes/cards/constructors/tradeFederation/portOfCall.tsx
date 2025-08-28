@@ -21,8 +21,9 @@ export const portOfCallFactoryFunction = (id: number, portOfCallData: BaseCardTy
             requirement: ['base'],
             execute: ({ player, context }) => {
                 drawFunct(player, 1)
-                if (context as BaseType) {
-                    destroyTargetBaseFunct(player, context as BaseType)
+                if (context) {
+                    const { base } = context as { base: BaseType }
+                    destroyTargetBaseFunct(player, base)
                 }
             }
         }

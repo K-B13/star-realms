@@ -1,0 +1,8 @@
+{
+    "name": "Battle Pod",
+    "cost": 2,
+    "combat": 4,
+    "mainDescription": "<img src='/images/combat.png' /> +4",
+    "secondaryDescription": "May scrap a card in the trade row.",
+    "allyDescription": "<img src='/images/combat.png' /> +2"
+}

@@ -26,11 +26,9 @@ export type CardFunctionality = {
     requirement: string[];
     execute: ({
         player, 
-        card, 
         context
     }: {
         player: PlayerType, 
-        card?: CardType, 
-        context?: unknown
+        context?: Record<string, unknown>
     }) => void;
 };

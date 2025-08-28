@@ -1,0 +1,8 @@
+{
+    "name": "Trade Pod",
+    "cost": 2,
+    "trade": 3,
+    "mainDescription": "<img src='/images/coin.png' /> +3",
+    "allyDescription": "<img src='/images/combat.png' /> +2",
+    "extraText": "The loading and offloading process is efficient but disgusting."
+}

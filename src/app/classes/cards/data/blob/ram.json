@@ -1,0 +1,8 @@
+{
+    "name": "Ram",
+    "cost": 3,
+    "combat": 5,
+    "mainDescription": "<img src='/images/combat.png' /> +5",
+    "allyDescription": "<img src='/images/combat.png' /> +2",
+    "scrapDescription": "<img src='/images/coin.png' /> +3"
+}

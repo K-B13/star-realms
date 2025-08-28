@@ -13,9 +13,10 @@ export const centralOfficeFactoryFunction = (id: number, centralOfficeData: Base
         choice: ['yes', 'no'],
         mainFunctionality: {
             requirement: ['choice'],
-            execute: ({ player, context }) => {                
+            execute: ({ player, context }) => {
                 addTradeFunct(player, 2)
-                if (context === 'yes') {
+                const { choice } = context as { choice: string }
+                if (choice === 'yes') {
                     player.nextCardLocation = 'deck'   
                 }
             }

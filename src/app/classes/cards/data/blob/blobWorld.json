@@ -1,0 +1,7 @@
+{
+    "name": "Blob World",
+    "cost": 8,
+    "combat": 5,
+    "mainDescription": "<img src='/images/combat.png' /> +5 or",
+    "secondaryDescription": "Draw a card for each blob card that you've played this turn."
+}

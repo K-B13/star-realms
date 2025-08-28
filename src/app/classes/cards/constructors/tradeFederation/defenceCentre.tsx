@@ -14,9 +14,10 @@ export const defenceCentreFactoryFunction = (id: number, defenceCentreData: Base
         mainFunctionality: {
             requirement: ['choice'],
             execute: ({ player, context }) => {
-                if (context === 'authority') {
+                const { choice } = context as { choice: string }
+                if (choice === 'authority') {
                     addAuthorityFunct(player, 3)
-                } else if (context === 'combat') {
+                } else if (choice === 'combat') {
                     addCombatFunct(player, 2)
                 }
             }

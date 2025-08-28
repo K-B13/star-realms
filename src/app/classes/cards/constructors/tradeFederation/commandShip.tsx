@@ -23,8 +23,9 @@ export const commandShipFactoryFunction = (id: number, commandShipData: BaseCard
         allyFunctionality: {
             requirement: ['base'],
             execute: ({ player, context }) => {
-                if (context as BaseType) {
-                    destroyTargetBaseFunct(player, context as BaseType)
+                if (context) {
+                    const { base } = context as { base: BaseType }
+                    destroyTargetBaseFunct(player, base)
                 }
             }
         }

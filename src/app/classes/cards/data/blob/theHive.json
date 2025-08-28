@@ -1,0 +1,7 @@
+{
+    "name": "The Hive",
+    "cost": 5,
+    "combat": 3,
+    "mainDescription": "<img src='/images/combat.png' /> +3",
+    "scrapDescription": "Draw a card."
+}

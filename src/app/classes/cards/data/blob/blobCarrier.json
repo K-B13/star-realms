@@ -1,0 +1,8 @@
+{
+    "name": "Blob Carrier",
+    "cost": 6,
+    "combat": 7,
+    "mainDescription": "<img src='/images/combat.png' /> +7",
+    "allyDescription": "Acquire any ship for free and put it on top of your deck.",
+    "extraText": "Is that... a whale?"
+}

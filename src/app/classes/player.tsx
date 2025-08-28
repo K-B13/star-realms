@@ -134,10 +134,14 @@ export const takeDamage = (player: PlayerType, damage: number) => {
     player.authority = leftover
 }
 
-export const cardAcquisition = (player: PlayerType, card: CardType) => {
+// will need to handle removal of the card on the frontend
+export const cardAcquisition = (player: PlayerType, card: CardType, free?: boolean) => {
     if (player.trade < card.cost) return
+    card.id = player.deckKey
     player[player.nextCardLocation].push(card)
+    player.nextCardLocation = 'discard'
     player.deckKey++
+    if (free) return
     player.trade -= card.cost
     return player.trade
 }

@@ -1,0 +1,8 @@
+{
+    "name": "Blob Destroyer",
+    "cost": 4,
+    "combat": 6,
+    "mainDescription": "<img src='/images/combat.png' /> +6",
+    "allyDescription": "You may destroy target base and or scrap a card in the trade row",
+    "extraText": "When this monstrous ship shows up on a colony's sensors they know the end is near."
+}

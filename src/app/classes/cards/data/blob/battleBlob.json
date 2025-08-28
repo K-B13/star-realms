@@ -1,0 +1,8 @@
+{
+    "name": "Battle Blob",
+    "cost": 6,
+    "combat": 8,
+    "mainDescription": "<img src='/images/combat.png' /> +8",
+    "allyDescription": "Draw a card.",
+    "scrapDescription": "<img src='/images/combat.png' /> +4"
+}

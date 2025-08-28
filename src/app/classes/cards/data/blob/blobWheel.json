@@ -1,0 +1,7 @@
+{
+    "name": "Blob Wheel",
+    "cost": 3,
+    "combat": 1,
+    "mainDescription": "<img src='/images/combat.png' /> +1",
+    "scrapDescription": "<img src='/images/coin.png' /> +3"
+}

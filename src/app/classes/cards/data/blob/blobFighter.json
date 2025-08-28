@@ -1,0 +1,8 @@
+{
+    "name": "Blob Fighter",
+    "cost": 1,
+    "combat": 3,
+    "mainDescription": "<img src='/images/combat.png' /> +3",
+    "allyDescription": "Draw a card.",
+    "extraText": "Either kill it before it signals the hive or run. There are other choices but non you'll live through."
+}
