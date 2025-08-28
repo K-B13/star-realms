@@ -1,0 +1,9 @@
+{
+    "name": "Flag Ship",
+    "faction": "Trade Federation",
+    "cost": 6,
+    "combat": 5,
+    "mainDescription": "<img src='/images/combat.png' /> +5",
+    "allyDescription": "<img src='/images/authority.svg' /> +5",
+    "secondaryDescription": "Draw a card."
+}

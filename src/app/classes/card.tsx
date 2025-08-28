@@ -24,5 +24,13 @@ export interface BaseCardType {
 
 export type CardFunctionality = {
     requirement: string[];
-    execute: (player: PlayerType, card: CardType, context?: unknown) => void;
+    execute: ({
+        player, 
+        card, 
+        context
+    }: {
+        player: PlayerType, 
+        card?: CardType, 
+        context?: unknown
+    }) => void;
 };

@@ -1,0 +1,9 @@
+{
+    "name": "Federation Shuttle",
+    "faction": "Trade Federation",
+    "cost": 1,
+    "trade": 2,
+    "mainDescription": "<img src='/images/coin.png' /> +2",
+    "allyDescription": "<img src='/images/authority.svg' /> +4",
+    "extraText": "Fast? This baby doesn't just haul cargo. She hauls..."
+}

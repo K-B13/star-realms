@@ -1,0 +1,9 @@
+{
+    "name": "Trading Post",
+    "faction": "Trade Federation",
+    "cost": 3,
+    "trade": 1,
+    "authority": 1,
+    "mainDescription": "<img src='/images/authority.svg' /> +1 or <img src='/images/coin.png' /> +1",
+    "scrapDescription": "<img src='/images/combat.png' /> + 3"
+}

@@ -1,0 +1,10 @@
+{
+    "name": "Embassy Yacht",
+    "faction": "Trade Federation",
+    "cost": 3,
+    "trade": 2,
+    "authority": 3,
+    "mainDescription": "<img src='/images/authority.svg' /> +2 <img src='/images/coin.png' /> +2",
+    "secondaryDescription": "If you have two or more bases in play, draw two cards",
+    "extraText": "War should always be a last resort. It's bad for the bottom line"
+}

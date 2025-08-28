@@ -1,0 +1,9 @@
+{
+    "name": "Defence Centre",
+    "faction": "Trade Federation",
+    "cost": 5,
+    "combat": 2,
+    "authority": 3,
+    "mainDescription": "<img src='/images/authority.svg' /> +3 <img src='/images/combat.png' /> +2",
+    "allyDescription": "<img src='/images/combat.png' /> + 2"
+}

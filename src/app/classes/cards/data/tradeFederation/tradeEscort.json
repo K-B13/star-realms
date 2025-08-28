@@ -1,0 +1,10 @@
+{
+    "name": "Trade Escort",
+    "faction": "Trade Federation",
+    "cost": 5,
+    "authority": 4,
+    "combat": 4,
+    "mainDescription": "<img src='/images/authority.svg' /> +4 <img src='/images/combat.png' /> +4",
+    "allyDescription": "Draw a card.",
+    "extraText": "This heavily-armoured Escort class was the Federation's first response to the Blob threat."
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Central Office",
+    "faction": "Trade Federation",
+    "cost": 7,
+    "trade": 2,
+    "mainDescription": "<img src='/images/authority.svg' /> +3 <img src='/images/coin.png' /> +2",
+    "allyDescription": "Draw a card.",
+    "secondaryDescription": "You may put the next ship you acquire this turn on top of your deck."
+}

@@ -1,0 +1,10 @@
+{
+    "name": "Cutter",
+    "faction": "Trade Federation",
+    "cost": 2,
+    "combat": 2,
+    "authority": 4,
+    "mainDescription": "<img src='/images/authority.svg' /> +4 <img src='/images/coin.png' /> +2",
+    "allyDescription": "<img src='/images/combat.png' /> +2",
+    "extraText": "Built for cargo, armed for conflict. Versatility for an unpredictable universe."
+}

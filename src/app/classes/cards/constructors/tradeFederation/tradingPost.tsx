@@ -1,0 +1,32 @@
+import { addCombatFunct, addTradeFunct } from "@/app/cardFunctions";
+import { addAuthorityFunct } from "@/app/cardFunctions/addAuthorityFunct";
+import { BaseType } from "@/app/classes/base";
+import { BaseCardType } from "@/app/classes/card";
+
+export const tradingPostFactoryFunction = (id: number, tradingPostData: BaseCardType) => {
+    const tradingPost: BaseType = {
+        ...tradingPostData,
+        id,
+        type: 'base',
+        choice: ['trade', 'authority'],
+        shield: 4,
+        outpost: true,
+        mainFunctionality: {
+            requirement: ['choice'],
+            execute: ({ player, context }) => {
+                if (context === 'trade') {
+                    addTradeFunct(player, 1)
+                } else if (context === 'authority') {
+                    addAuthorityFunct(player, 1)
+                }
+            }
+        },
+        scrapFunctionality: {
+            requirement: [''],
+            execute: ({ player }) => {
+                addCombatFunct(player, 3)
+            }
+        }
+    }
+    return tradingPost
+}

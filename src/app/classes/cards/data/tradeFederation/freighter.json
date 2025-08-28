@@ -1,0 +1,9 @@
+{
+    "name": "Freighter",
+    "faction": "Trade Federation",
+    "cost": 4,
+    "trade": 4,
+    "mainDescription": "<img src='/images/coin.png' /> +4",
+    "allyDescription": "Put the next ship you acquire this turn on top of your deck",
+    "extraText": "This class of mammoth cargo ships is one of the keys to the federations vast trade-based wealth"
+}

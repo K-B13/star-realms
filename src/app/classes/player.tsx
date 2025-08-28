@@ -64,7 +64,6 @@ export const drawCard = (player: PlayerType) => {
 
 export const startTurnDraw = (player: PlayerType) => {
     for(let i = 1; i <= 5; i++) {
-        if(player.deck.length === 0) refreshDeck(player)
         drawCard(player)
     }    
 }
@@ -91,6 +90,11 @@ export const refreshDeck = (player: PlayerType) => {
 export const discardCard = (player: PlayerType, card: CardType) => {
     player.hand.splice(player.hand.indexOf(card), 1)
     player.discard.push(card)
+}
+
+export const removeBase = (player: PlayerType, targetBase: BaseType) => {
+    player.bases = player.bases.filter(base => base.id !== targetBase.id)
+    player.discard.push(targetBase)
 }
 
 export const addCombatPower = (player: PlayerType, amount: number) => {
