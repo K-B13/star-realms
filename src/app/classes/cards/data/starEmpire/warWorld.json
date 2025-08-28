@@ -1,0 +1,7 @@
+{
+    "name": "War World",
+    "cost": 5,
+    "combat": 3,
+    "mainDescription": "<img src='/images/combat.png' /> +3",
+    "allyDescription": "<img src='/images/combat.png' /> +4"
+}

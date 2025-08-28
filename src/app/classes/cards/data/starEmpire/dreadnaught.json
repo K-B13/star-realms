@@ -1,0 +1,8 @@
+{
+    "name": "Dreadnaught",
+    "cost": 7,
+    "combat": 7,
+    "mainDescription": "<img src='/images/combat.png' /> +7",
+    "scrapDescription": "img src='/images/combat.png' /> +5",
+    "secondaryDescription": "Draw a card."
+}

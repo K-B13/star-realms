@@ -1,0 +1,8 @@
+{
+    "name": "Space Stations",
+    "cost": 4,
+    "combat": 2,
+    "mainDescription": "<img src='/images/combat.png' /> +2",
+    "allyDescription": "<img src='/images/combat.png' /> +2",
+    "scrapDescription": "<img src='/images/coin.png' /> +4"
+}

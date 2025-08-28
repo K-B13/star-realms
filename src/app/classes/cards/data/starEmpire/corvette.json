@@ -1,0 +1,8 @@
+{
+    "name": "Corvette",
+    "cost": 2,
+    "combat": 1,
+    "mainDescription": "<img src='/images/combat.png' /> +1",
+    "allyDescription": "<img src='/images/combat.png' /> +2",
+    "secondaryDescription": "Draw a card."
+}

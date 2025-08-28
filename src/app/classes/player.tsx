@@ -21,6 +21,7 @@ export interface PlayerType {
     status: 'alive' | 'eliminated'
     nextCardLocation: 'deck' | 'discard' | 'hand',
     deckKey: number,
+    trackShipsPlayed: boolean
 }
 
 export const playerFactoryFunction = (name: string, host: boolean, uid: string) => {
@@ -43,7 +44,8 @@ export const playerFactoryFunction = (name: string, host: boolean, uid: string) 
         bases: [],
         status: 'alive',
         nextCardLocation: 'discard',
-        deckKey: 0
+        deckKey: 0,
+        trackShipsPlayed: false
     }
     return player
 }
@@ -78,6 +80,7 @@ export const startTurn = (player: PlayerType) => {
         "Star Empire": 0
     }
     player.nextCardLocation = 'discard'
+    player.trackShipsPlayed = false
     startTurnDraw(player)
 }
 
@@ -88,7 +91,7 @@ export const refreshDeck = (player: PlayerType) => {
 }
 
 export const discardCard = (player: PlayerType, card: CardType) => {
-    player.hand.splice(player.hand.indexOf(card), 1)
+    player.hand = player.hand.filter(item => item.id !== card.id)
     player.discard.push(card)
 }
 
