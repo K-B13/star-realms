@@ -1,0 +1,8 @@
+{
+    "name": "Missile Bot",
+    "cost": 2,
+    "combat": 2,
+    "mainDescription": "<img src='/images/combat.png' /> +2",
+    "secondaryDescription": "You may scrap a card in your hand or discard pile.",
+    "allyDescription": "<img src='/images/combat.png' /> +2"
+}

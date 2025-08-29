@@ -1,0 +1,8 @@
+{
+    "name": "Supply Bot",
+    "cost": 3,
+    "trade": 2,
+    "mainDescription": "<img src='/images/coin.png' /> +2",
+    "secondaryDescription": "You may scrap a card in your hand or discard pile.",
+    "allyDescription": "<img src='/images/combat.png' /> +2"
+}

@@ -1,0 +1,7 @@
+{
+    "name": "Battle Station",
+    "cost": 3,
+    "mainDescription": "",
+    "scrapDescription": "<img src='/images/combat.png' /> +5",
+    "extraDescription": "A Battle Station fusion core can double as a devastating weapon... once."
+}

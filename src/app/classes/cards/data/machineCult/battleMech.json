@@ -1,0 +1,8 @@
+{
+    "name": "Battle Mech",
+    "cost": 5,
+    "combat": 4,
+    "mainDescription": "<img src='/images/combat.png' /> +4",
+    "allyDescription": "Draw a card.",
+    "secondaryDescription": "You may scrap a card in your hand or discard pile"
+}

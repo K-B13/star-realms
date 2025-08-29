@@ -1,0 +1,7 @@
+{
+    "name": "Brain World",
+    "cost": 8,
+    "mainDescription": "Scrap up to two cards from your hand and or discard pile.",
+    "extraText": "The Machine Cult build these supercomputing space station to run every aspect of their society. Now they worship them as gods.",
+    "secondaryDescription": "Draw a card for each card scrapped this way."
+}

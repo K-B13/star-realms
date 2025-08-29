@@ -12,7 +12,7 @@ export const battlePodFactoryFunction = (id: number, battlePodData: BaseCardType
             requirement: ['yes', 'scrapTradeRow'],
             execute: ({ player, context }) => {
                 if (context) {
-                    const [card, scrapPile] = context as [CardType, CardType[]]
+                    const { card, scrapPile } = context as { card: CardType, scrapPile: CardType[] }
                     scrapCardInTradeRowFunct(player, card, scrapPile)
                 }
                 addCombatFunct(player, 4)

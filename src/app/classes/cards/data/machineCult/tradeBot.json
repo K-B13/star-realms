@@ -1,0 +1,10 @@
+{
+    "name": "Trade Bot",
+    "cost": 1,
+    "trade": 1,
+    "mainDescription": "<img src='/images/coin.png' /> +1",
+    "secondaryDescription": "You may scrap a card in your hand or discard pile.",
+    "allyDescription": "<img src='/images/combat.png' /> +2"
+    
+
+}

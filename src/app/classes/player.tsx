@@ -22,6 +22,7 @@ export interface PlayerType {
     nextCardLocation: 'deck' | 'discard' | 'hand',
     deckKey: number,
     trackShipsPlayed: boolean
+    cardsPlayedThisTurn: CardType[]
 }
 
 export const playerFactoryFunction = (name: string, host: boolean, uid: string) => {
@@ -45,7 +46,8 @@ export const playerFactoryFunction = (name: string, host: boolean, uid: string) 
         status: 'alive',
         nextCardLocation: 'discard',
         deckKey: 0,
-        trackShipsPlayed: false
+        trackShipsPlayed: false,
+        cardsPlayedThisTurn: []
     }
     return player
 }
