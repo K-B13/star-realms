@@ -5,7 +5,7 @@ import { BaseCardType, CardType } from "@/app/classes/card"
 import { PlayerType } from "@/app/classes/player"
 import { ShipType } from "@/app/classes/ship"
 
-export const surveyShipFactoryFunction = (id: number, surveyShipData: BaseCardType) => {
+const surveyShipFactoryFunction = (id: number, surveyShipData: BaseCardType) => {
     const surveyShip: ShipType = {
         ...surveyShipData,
         id,
@@ -27,3 +27,5 @@ export const surveyShipFactoryFunction = (id: number, surveyShipData: BaseCardTy
     }  
     return surveyShip  
 }
+
+export default surveyShipFactoryFunction

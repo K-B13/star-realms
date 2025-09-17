@@ -3,7 +3,7 @@ import { addAuthorityFunct } from "@/app/cardFunctions/addAuthorityFunct";
 import { BaseType } from "@/app/classes/base";
 import { BaseCardType } from "@/app/classes/card";
 
-export const defenceCentreFactoryFunction = (id: number, defenceCentreData: BaseCardType) => {
+export const defenceCentreFactoryFunction = (id: string, defenceCentreData: BaseCardType) => {
     const defenceCentre: BaseType = {
         ...defenceCentreData,
         id,

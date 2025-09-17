@@ -2,7 +2,7 @@ import scrapAndDraw, { cardToScrapType } from "@/app/cardFunctions/scrapAndDraw"
 import { BaseType } from "@/app/classes/base";
 import { BaseCardType, CardType } from "@/app/classes/card";
 
-export const brainWorldFactoryFunction = (id: number, brainWorldData: BaseCardType) => {
+const brainWorldFactoryFunction = (id: number, brainWorldData: BaseCardType) => {
     const brainWorld: BaseType = {
         ...brainWorldData,
         id,
@@ -22,3 +22,5 @@ export const brainWorldFactoryFunction = (id: number, brainWorldData: BaseCardTy
 
     return brainWorld
 }
+
+export default brainWorldFactoryFunction

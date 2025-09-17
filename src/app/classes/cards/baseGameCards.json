@@ -1,0 +1,55 @@
+{
+    "Trade Federation": [
+        "barterWorld",
+        "centralOffice",
+        "commandShip",
+        "cutter",
+        "defenceCentre",
+        "embassyYacht",
+        "federationShuttle",
+        "flagShip",
+        "freighter",
+        "portOfCall",
+        "tradeEscort",
+        "Trading Post"
+    ],
+    "Machine Cult": [
+        "battleMech",
+        "battleStation",
+        "brainWorld",
+        "junkyard",
+        "machineBase",
+        "mechWorld",
+        "missileBot",
+        "missleMech",
+        "patrolMech",
+        "supplyBot",
+        "tradeBot"
+    ],
+    "The Blob": [
+        "battleBlob",
+        "battlePod",
+        "blobCarrier",
+        "blobDestroyer",
+        "blobFighter",
+        "blobWheel",
+        "blobWorld",
+        "mothership",
+        "ram",
+        "theHive",
+        "tradePod"
+    ],
+    "Star Empire": [
+        "battlecruiser",
+        "corvette",
+        "dreadnaught",
+        "fleetHQ",
+        "imperialFighter",
+        "imperialFrigate",
+        "recyclingStation",
+        "royalRedoubt",
+        "spaceStations",
+        "surveyShip",
+        "warWorld"
+    ]
+}

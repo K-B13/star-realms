@@ -3,7 +3,7 @@ import { drawFunct } from "@/app/cardFunctions/drawFunct"
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const blobWorldFactoryFunction = (id: number, blobWorldData: BaseCardType) => {
+const blobWorldFactoryFunction = (id: number, blobWorldData: BaseCardType) => {
     const blobWorld: BaseType = {
         ...blobWorldData,
         id,
@@ -25,3 +25,5 @@ export const blobWorldFactoryFunction = (id: number, blobWorldData: BaseCardType
     }
     return blobWorld
 }
+
+export default blobWorldFactoryFunction

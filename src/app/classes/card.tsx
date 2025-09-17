@@ -1,7 +1,7 @@
 import { PlayerType } from "./player";
 
 export interface CardType extends BaseCardType {
-    id: number,
+    id: string,
     mainFunctionality: CardFunctionality,
     allyFunctionality?: CardFunctionality,
     scrapFunctionality?: CardFunctionality,

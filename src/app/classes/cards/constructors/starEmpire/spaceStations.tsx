@@ -2,7 +2,7 @@ import { addCombatFunct, addTradeFunct } from "@/app/cardFunctions"
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const spaceStationFactoryFunction = (id: number, spaceStationData: BaseCardType) => {
+const spaceStationFactoryFunction = (id: number, spaceStationData: BaseCardType) => {
     const spaceStation: BaseType = {
         ...spaceStationData,
         id,
@@ -30,3 +30,5 @@ export const spaceStationFactoryFunction = (id: number, spaceStationData: BaseCa
     }
     return spaceStation
 }
+
+export default spaceStationFactoryFunction

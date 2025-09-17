@@ -4,7 +4,7 @@ import scrapCardInTradeRowFunct from "@/app/cardFunctions/scrapCardInTradeRowFun
 import { BaseCardType, CardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const battleMechFactoryFunction = (id: number, battleMechData: BaseCardType) => {
+const battleMechFactoryFunction = (id: number, battleMechData: BaseCardType) => {
     const battleMech: ShipType = {
         ...battleMechData,
         id,
@@ -30,3 +30,5 @@ export const battleMechFactoryFunction = (id: number, battleMechData: BaseCardTy
     }
     return battleMech
 }
+
+export default battleMechFactoryFunction

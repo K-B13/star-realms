@@ -10,10 +10,12 @@ export const viperFactoryFunction = (id: number, viperData: BaseCardType) => {
         type: 'ship',
         mainFunctionality: {
             requirement: [''],
-            execute: (player: PlayerType) => {
+            execute: ({ player }) => {
                 addCombatFunct(player, 1)
             }
         }
     }
     return viper
 }
+
+export default viperFactoryFunction

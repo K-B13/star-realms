@@ -10,10 +10,12 @@ export const scoutFactoryFunction = (id: number, scoutData: BaseCardType) => {
         type: 'ship',
         mainFunctionality: {
             requirement: [''],
-            execute: (player: PlayerType) => {
+            execute: ({ player }) => {
                 addTradeFunct(player, 1)
             }
         }
     }
     return scout
 }
+
+export default scoutFactoryFunction

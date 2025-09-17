@@ -2,7 +2,7 @@ import { addCombatFunct } from "@/app/cardFunctions"
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const battleStationFactoryFunction = (id: number, battleStationData: BaseCardType) => {
+const battleStationFactoryFunction = (id: number, battleStationData: BaseCardType) => {
     const battleStation: BaseType = {
         ...battleStationData,
         id,
@@ -24,3 +24,5 @@ export const battleStationFactoryFunction = (id: number, battleStationData: Base
     }
     return battleStation
 }
+
+export default battleStationFactoryFunction

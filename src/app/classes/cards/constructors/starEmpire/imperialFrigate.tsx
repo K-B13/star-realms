@@ -5,7 +5,7 @@ import { BaseCardType, CardType } from "@/app/classes/card"
 import { PlayerType } from "@/app/classes/player"
 import { ShipType } from "@/app/classes/ship"
 
-export const imperialFrigateFactoryFunction = (id: number, imperialFrigateData: BaseCardType) => {
+const imperialFrigateFactoryFunction = (id: number, imperialFrigateData: BaseCardType) => {
     const imperialFrigate: ShipType = {
         ...imperialFrigateData,
         id,
@@ -33,3 +33,5 @@ export const imperialFrigateFactoryFunction = (id: number, imperialFrigateData: 
     }
     return imperialFrigate
 }
+
+export default imperialFrigateFactoryFunction

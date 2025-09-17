@@ -2,7 +2,7 @@ import scrapCardInTradeRowFunct from "@/app/cardFunctions/scrapCardInTradeRowFun
 import { BaseType } from "@/app/classes/base";
 import { BaseCardType, CardType } from "@/app/classes/card";
 
-export const junkyardFactoryFunction = (id: number, junkyardData: BaseCardType) => {
+const junkyardFactoryFunction = (id: number, junkyardData: BaseCardType) => {
     const junkyard: BaseType = {
         ...junkyardData,
         id,
@@ -20,3 +20,5 @@ export const junkyardFactoryFunction = (id: number, junkyardData: BaseCardType) 
     }
     return junkyard
 }
+
+export default junkyardFactoryFunction

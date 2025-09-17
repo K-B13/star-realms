@@ -3,7 +3,7 @@ import { drawFunct } from "@/app/cardFunctions/drawFunct"
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const theHiveFactoryFunction = (id: number, theHiveData: BaseCardType) => {
+const theHiveFactoryFunction = (id: number, theHiveData: BaseCardType) => {
     const theHive: BaseType = {
         ...theHiveData,
         id,
@@ -25,3 +25,5 @@ export const theHiveFactoryFunction = (id: number, theHiveData: BaseCardType) =>
     }
     return theHive
 }
+
+export default theHiveFactoryFunction

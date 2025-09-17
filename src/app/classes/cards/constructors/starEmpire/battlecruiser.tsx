@@ -7,7 +7,7 @@ import { BaseCardType, CardType } from "@/app/classes/card"
 import { PlayerType } from "@/app/classes/player"
 import { ShipType } from "@/app/classes/ship"
 
-export const battlecruiserFactoryFunction = (id: number, battlecruiserData: BaseCardType) => {
+const battlecruiserFactoryFunction = (id: number, battlecruiserData: BaseCardType) => {
     const battlecruiser: ShipType = {
         ...battlecruiserData,
         id,
@@ -39,3 +39,5 @@ export const battlecruiserFactoryFunction = (id: number, battlecruiserData: Base
     }
     return battlecruiser
 }
+
+export default battlecruiserFactoryFunction

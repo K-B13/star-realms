@@ -5,7 +5,7 @@ import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const missileMechFactoryFunction = (id: number, missileMechData: BaseCardType) => {
+const missileMechFactoryFunction = (id: number, missileMechData: BaseCardType) => {
     const missileMech: ShipType = {
         ...missileMechData,
         id,
@@ -27,3 +27,5 @@ export const missileMechFactoryFunction = (id: number, missileMechData: BaseCard
     }
     return missileMech
 }
+
+export default missileMechFactoryFunction

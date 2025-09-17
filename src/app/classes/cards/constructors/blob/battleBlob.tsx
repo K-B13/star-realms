@@ -3,7 +3,7 @@ import { drawFunct } from "@/app/cardFunctions/drawFunct"
 import { BaseCardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const battleBlobFactoryFunction = (id: number, battleBlobData: BaseCardType) => {
+const battleBlobFactoryFunction = (id: number, battleBlobData: BaseCardType) => {
     const battleBlob: ShipType = {
         ...battleBlobData,
         id,
@@ -29,3 +29,5 @@ export const battleBlobFactoryFunction = (id: number, battleBlobData: BaseCardTy
     }
     return battleBlob
 }
+
+export default battleBlobFactoryFunction

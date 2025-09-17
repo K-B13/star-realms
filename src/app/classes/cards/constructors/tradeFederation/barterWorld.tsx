@@ -3,7 +3,7 @@ import { addAuthorityFunct } from "@/app/cardFunctions/addAuthorityFunct"
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const barterWorldFactoryFunction = (id: number, barterWorldData: BaseCardType) => {
+export const barterWorldFactoryFunction = (id: string, barterWorldData: BaseCardType) => {
     const barterWorld: BaseType = {
         ...barterWorldData,
         id,

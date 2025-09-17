@@ -1,7 +1,7 @@
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const mechWorldFactoryFunction = (id: number, mechWorldData: BaseCardType) => {
+const mechWorldFactoryFunction = (id: number, mechWorldData: BaseCardType) => {
     const mechWorld: BaseType = {
         ...mechWorldData,
         id,
@@ -17,3 +17,5 @@ export const mechWorldFactoryFunction = (id: number, mechWorldData: BaseCardType
     }
     return mechWorld
 }
+
+export default mechWorldFactoryFunction

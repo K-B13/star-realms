@@ -3,7 +3,7 @@ import acquireFreeTradeRowCardFunct from "@/app/cardFunctions/acquireFreeTradeRo
 import { BaseCardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const blobCarrierFactoryFunction = (id: number, blobCarrierData: BaseCardType) => {
+const blobCarrierFactoryFunction = (id: number, blobCarrierData: BaseCardType) => {
     const blobCarrier: ShipType = {
         ...blobCarrierData,
         id,
@@ -25,3 +25,5 @@ export const blobCarrierFactoryFunction = (id: number, blobCarrierData: BaseCard
     }
     return blobCarrier
 }
+
+export default blobCarrierFactoryFunction

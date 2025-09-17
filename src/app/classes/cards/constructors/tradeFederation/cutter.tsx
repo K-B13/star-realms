@@ -4,7 +4,7 @@ import { BaseCardType } from "@/app/classes/card";
 import { addAuthority } from "@/app/classes/player";
 import { ShipType } from "@/app/classes/ship";
 
-export const cutterFactoryFunction = (id: number, cutterData: BaseCardType) => {
+export const cutterFactoryFunction = (id: string, cutterData: BaseCardType) => {
     const cutter: ShipType = {
         ...cutterData,
         id,

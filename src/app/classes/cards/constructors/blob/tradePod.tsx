@@ -2,7 +2,7 @@ import { addCombatFunct, addTradeFunct } from "@/app/cardFunctions"
 import { BaseCardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const tradePodFactoryFunction = (id: number, tradePodData: BaseCardType) => {
+const tradePodFactoryFunction = (id: number, tradePodData: BaseCardType) => {
     const tradePod: ShipType = {
         ...tradePodData,
         id,
@@ -22,3 +22,5 @@ export const tradePodFactoryFunction = (id: number, tradePodData: BaseCardType) 
     }
     return tradePod
 }
+
+export default tradePodFactoryFunction

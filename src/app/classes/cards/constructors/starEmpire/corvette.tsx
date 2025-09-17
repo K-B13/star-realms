@@ -3,7 +3,7 @@ import { drawFunct } from "@/app/cardFunctions/drawFunct"
 import { BaseCardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const corvetteFactoryFunction = (id: number, corvetteData: BaseCardType) => {
+const corvetteFactoryFunction = (id: number, corvetteData: BaseCardType) => {
     const corvette: ShipType = {
         ...corvetteData,
         id,
@@ -24,3 +24,5 @@ export const corvetteFactoryFunction = (id: number, corvetteData: BaseCardType) 
     }
     return corvette
 }
+
+export default corvetteFactoryFunction

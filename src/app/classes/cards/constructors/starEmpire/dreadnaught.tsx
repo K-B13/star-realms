@@ -3,7 +3,7 @@ import { drawFunct } from "@/app/cardFunctions/drawFunct"
 import { BaseCardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const dreadnaughtFactoryFunction = (id: number, dreadnaughtData: BaseCardType) => {
+const dreadnaughtFactoryFunction = (id: number, dreadnaughtData: BaseCardType) => {
     const dreadnaught: ShipType = {
         ...dreadnaughtData,
         id,
@@ -24,3 +24,5 @@ export const dreadnaughtFactoryFunction = (id: number, dreadnaughtData: BaseCard
     }
     return dreadnaught
 }
+
+export default dreadnaughtFactoryFunction

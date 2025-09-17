@@ -2,7 +2,7 @@ import { addTradeFunct } from "@/app/cardFunctions";
 import { BaseCardType } from "@/app/classes/card";
 import { ShipType } from "@/app/classes/ship";
 
-export const freighterFactoryFunction = (id: number, freighterData: BaseCardType) => {
+export const freighterFactoryFunction = (id: string, freighterData: BaseCardType) => {
     const freighter: ShipType = {
         ...freighterData,
         id,

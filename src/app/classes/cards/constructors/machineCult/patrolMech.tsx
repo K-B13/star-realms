@@ -3,7 +3,7 @@ import scrapCardInTradeRowFunct from "@/app/cardFunctions/scrapCardInTradeRowFun
 import { BaseCardType, CardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const patrolMechFactoryFunction = (id: number, patrolMechData: BaseCardType) => {
+const patrolMechFactoryFunction = (id: number, patrolMechData: BaseCardType) => {
     const patrolMech: ShipType = {
         ...patrolMechData,
         id,
@@ -34,3 +34,5 @@ export const patrolMechFactoryFunction = (id: number, patrolMechData: BaseCardTy
     }
     return patrolMech
 }
+
+export default patrolMechFactoryFunction

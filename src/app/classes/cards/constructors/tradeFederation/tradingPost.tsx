@@ -3,7 +3,7 @@ import { addAuthorityFunct } from "@/app/cardFunctions/addAuthorityFunct";
 import { BaseType } from "@/app/classes/base";
 import { BaseCardType } from "@/app/classes/card";
 
-export const tradingPostFactoryFunction = (id: number, tradingPostData: BaseCardType) => {
+export const tradingPostFactoryFunction = (id: string, tradingPostData: BaseCardType) => {
     const tradingPost: BaseType = {
         ...tradingPostData,
         id,
@@ -14,6 +14,7 @@ export const tradingPostFactoryFunction = (id: number, tradingPostData: BaseCard
         mainFunctionality: {
             requirement: ['choice'],
             execute: ({ player, context }) => {
+                player.cardsPlayedThisTurn.push(tradingPost)
                 const { choice } = context as { choice: string }
                 if (choice === 'trade') {
                     addTradeFunct(player, 1)

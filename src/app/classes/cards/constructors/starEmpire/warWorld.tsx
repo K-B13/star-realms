@@ -2,7 +2,7 @@ import { addCombatFunct } from "@/app/cardFunctions"
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const warWorldFactoryFunction = (id: number, warWorldData: BaseCardType) => {
+const warWorldFactoryFunction = (id: number, warWorldData: BaseCardType) => {
     const warWorld: BaseType = {
         ...warWorldData,
         id,
@@ -24,3 +24,5 @@ export const warWorldFactoryFunction = (id: number, warWorldData: BaseCardType) 
     }
     return warWorld
 }
+
+export default warWorldFactoryFunction

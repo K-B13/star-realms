@@ -5,7 +5,7 @@ import { BaseType } from "@/app/classes/base";
 import { BaseCardType, CardType } from "@/app/classes/card";
 import { ShipType } from "@/app/classes/ship";
 
-export const blobDestroyerFactoryFunction = (id: number, blobDestroyerData: BaseCardType) => {
+const blobDestroyerFactoryFunction = (id: number, blobDestroyerData: BaseCardType) => {
     const blobDestroyer: ShipType = {
         ...blobDestroyerData,
         id,
@@ -32,3 +32,5 @@ export const blobDestroyerFactoryFunction = (id: number, blobDestroyerData: Base
     }
     return blobDestroyer
 }
+
+export default blobDestroyerFactoryFunction

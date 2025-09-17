@@ -20,12 +20,12 @@ export interface PlayerType {
     bases: BaseType[],
     status: 'alive' | 'eliminated'
     nextCardLocation: 'deck' | 'discard' | 'hand',
-    deckKey: number,
     trackShipsPlayed: boolean
     cardsPlayedThisTurn: CardType[]
 }
 
 export const playerFactoryFunction = (name: string, host: boolean, uid: string) => {
+    // create the 8 scouts and 2 vipers.
     const player: PlayerType = {
         name,
         host,
@@ -45,17 +45,16 @@ export const playerFactoryFunction = (name: string, host: boolean, uid: string) 
         bases: [],
         status: 'alive',
         nextCardLocation: 'discard',
-        deckKey: 0,
         trackShipsPlayed: false,
         cardsPlayedThisTurn: []
     }
     return player
 }
 
-export const shuffle = (player: PlayerType) => {
-    for (let i = player.deck.length - 1; i > 0; i--) { 
+export const shuffleDeck = (deck: CardType[]) => {
+    for (let i = deck.length - 1; i > 0; i--) { 
         const j = Math.floor(Math.random() * (i + 1)); 
-        [player.deck[i], player.deck[j]] = [player.deck[j], player.deck[i]];
+        [deck[i], deck[j]] = [deck[j], deck[i]];
     } 
 }
 
@@ -89,7 +88,7 @@ export const startTurn = (player: PlayerType) => {
 export const refreshDeck = (player: PlayerType) => {
     player.deck = player.discard
     player.discard = []
-    shuffle(player)
+    shuffleDeck(player.deck)
 }
 
 export const discardCard = (player: PlayerType, card: CardType) => {
@@ -142,10 +141,8 @@ export const takeDamage = (player: PlayerType, damage: number) => {
 // will need to handle removal of the card on the frontend
 export const cardAcquisition = (player: PlayerType, card: CardType, free?: boolean) => {
     if (player.trade < card.cost) return
-    card.id = player.deckKey
     player[player.nextCardLocation].push(card)
     player.nextCardLocation = 'discard'
-    player.deckKey++
     if (free) return
     player.trade -= card.cost
     return player.trade

@@ -4,7 +4,7 @@ import { drawFunct } from "@/app/cardFunctions/drawFunct"
 import { BaseCardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const tradeEscortFactoryFunction = (id: number, tradeEscortData: BaseCardType) => {
+export const tradeEscortFactoryFunction = (id: string, tradeEscortData: BaseCardType) => {
     const tradeEscort: ShipType = {
         ...tradeEscortData,
         id,

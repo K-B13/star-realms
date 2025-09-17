@@ -3,7 +3,7 @@ import { drawFunct } from "@/app/cardFunctions/drawFunct"
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const centralOfficeFactoryFunction = (id: number, centralOfficeData: BaseCardType) => {
+export const centralOfficeFactoryFunction = (id: string, centralOfficeData: BaseCardType) => {
     const centralOffice: BaseType = {
         ...centralOfficeData,
         id,

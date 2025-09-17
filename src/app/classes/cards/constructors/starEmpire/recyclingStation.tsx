@@ -4,7 +4,7 @@ import { BaseType } from "@/app/classes/base"
 import { BaseCardType, CardType } from "@/app/classes/card"
 import { discardCard } from "@/app/classes/player"
 
-export const recyclingStationFactoryFunction = (id: number, recyclingStationData: BaseCardType) => {
+const recyclingStationFactoryFunction = (id: number, recyclingStationData: BaseCardType) => {
     const recyclingStation: BaseType = {
         ...recyclingStationData,
         id,
@@ -29,3 +29,5 @@ export const recyclingStationFactoryFunction = (id: number, recyclingStationData
     }
     return recyclingStation
 }
+
+export default recyclingStationFactoryFunction

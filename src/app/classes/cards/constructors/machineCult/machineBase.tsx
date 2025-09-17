@@ -3,7 +3,7 @@ import scrapCardInTradeRowFunct from "@/app/cardFunctions/scrapCardInTradeRowFun
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType, CardType } from "@/app/classes/card"
 
-export const machineBaseFactoryFunction = (id: number, machineBaseData: BaseCardType) => {
+const machineBaseFactoryFunction = (id: number, machineBaseData: BaseCardType) => {
     const machineBase: BaseType = {
         ...machineBaseData,
         id,
@@ -26,3 +26,5 @@ export const machineBaseFactoryFunction = (id: number, machineBaseData: BaseCard
     }
     return machineBase
 }
+
+export default machineBaseFactoryFunction

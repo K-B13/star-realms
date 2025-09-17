@@ -1,0 +1,7 @@
+{
+    "name": "Stealth Needle",
+    "cost": 4,
+    "mainDescription": "Copy another ship you have played this turn.",
+    "secondaryDescription": "Needle ship has that ship's faction as well as Machine Cult.",
+    "extraText": "The Needle's ability to mimic other ships represents the pinnacle of Cult technology."
+}

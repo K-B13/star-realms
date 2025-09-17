@@ -3,7 +3,7 @@ import scrapCardInTradeRowFunct from "@/app/cardFunctions/scrapCardInTradeRowFun
 import { BaseCardType, CardType } from "@/app/classes/card"
 import { ShipType } from "@/app/classes/ship"
 
-export const missileBotFactoryFunction = (id: number, missileBotData: BaseCardType) => {
+const missileBotFactoryFunction = (id: number, missileBotData: BaseCardType) => {
     const missileBot: ShipType = {
         ...missileBotData,
         id,
@@ -28,3 +28,5 @@ export const missileBotFactoryFunction = (id: number, missileBotData: BaseCardTy
     }
     return missileBot
 }
+
+export default missileBotFactoryFunction

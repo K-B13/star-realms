@@ -4,7 +4,7 @@ import { BaseCardType, CardType } from "@/app/classes/card"
 import { PlayerType } from "@/app/classes/player"
 import { ShipType } from "@/app/classes/ship"
 
-export const imperialFighterFactoryFunction = (id: number, imperialFighterData: BaseCardType) => {
+const imperialFighterFactoryFunction = (id: number, imperialFighterData: BaseCardType) => {
     const imperialFighter: ShipType = {
         ...imperialFighterData,
         id,
@@ -20,3 +20,5 @@ export const imperialFighterFactoryFunction = (id: number, imperialFighterData: 
     }
     return imperialFighter
 }
+
+export default imperialFighterFactoryFunction

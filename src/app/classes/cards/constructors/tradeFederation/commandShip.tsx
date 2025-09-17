@@ -6,7 +6,7 @@ import { BaseType } from "@/app/classes/base";
 import { BaseCardType } from "@/app/classes/card";
 import { ShipType } from "@/app/classes/ship";
 
-export const commandShipFactoryFunction = (id: number, commandShipData: BaseCardType) => {
+export const commandShipFactoryFunction = (id: string, commandShipData: BaseCardType) => {
     const commandShip: ShipType = {
         ...commandShipData,
         id,

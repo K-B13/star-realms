@@ -2,7 +2,7 @@ import { addCombatFunct, addTradeFunct } from "@/app/cardFunctions"
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const blobWheelFactoryFunction = (id: number, blobWheelData: BaseCardType) => {
+const blobWheelFactoryFunction = (id: number, blobWheelData: BaseCardType) => {
     const blobWheel: BaseType = {
         ...blobWheelData,
         id,
@@ -24,3 +24,5 @@ export const blobWheelFactoryFunction = (id: number, blobWheelData: BaseCardType
     }
     return blobWheel
 }
+
+export default blobWheelFactoryFunction

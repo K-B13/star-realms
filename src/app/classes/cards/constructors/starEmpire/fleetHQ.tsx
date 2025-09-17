@@ -1,7 +1,7 @@
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const fleetHQFactoryFunction = (id: number, fleetHQData: BaseCardType) => {
+const fleetHQFactoryFunction = (id: number, fleetHQData: BaseCardType) => {
     const fleetHQ: BaseType = {
         ...fleetHQData,
         id,
@@ -17,3 +17,5 @@ export const fleetHQFactoryFunction = (id: number, fleetHQData: BaseCardType) =>
     }
     return fleetHQ
 }
+
+export default fleetHQFactoryFunction

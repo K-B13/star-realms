@@ -4,7 +4,7 @@ import { drawFunct } from "@/app/cardFunctions/drawFunct"
 import { BaseType } from "@/app/classes/base"
 import { BaseCardType } from "@/app/classes/card"
 
-export const portOfCallFactoryFunction = (id: number, portOfCallData: BaseCardType) => {
+export const portOfCallFactoryFunction = (id: string, portOfCallData: BaseCardType) => {
     const portOfCall: BaseType = {
         ...portOfCallData,
         id,

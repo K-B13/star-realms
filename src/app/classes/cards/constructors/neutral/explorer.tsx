@@ -10,16 +10,18 @@ export const explorerFactoryFunction = (id: number, explorerData: BaseCardType) 
         type: 'ship',
         mainFunctionality: {
             requirement: [''],
-            execute: (player: PlayerType) => {
+            execute: ({ player }) => {
                 addTradeFunct(player, 2)
             }
         },
         scrapFunctionality: {
             requirement: [''],
-            execute: (player: PlayerType) => {
+            execute: ({ player }) => {
                 addCombatFunct(player, 2)
             }
         }
     }
     return explorer
 }
+
+export default explorerFactoryFunction

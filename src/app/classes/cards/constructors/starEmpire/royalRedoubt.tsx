@@ -4,7 +4,7 @@ import { BaseType } from "@/app/classes/base"
 import { BaseCardType, CardType } from "@/app/classes/card"
 import { PlayerType } from "@/app/classes/player"
 
-export const royalRedoubtFactoryFunction = (id: number, royalRedoubtData: BaseCardType) => {
+const royalRedoubtFactoryFunction = (id: number, royalRedoubtData: BaseCardType) => {
     const royalRedoubt: BaseType = {
         ...royalRedoubtData,
         id,
@@ -27,3 +27,5 @@ export const royalRedoubtFactoryFunction = (id: number, royalRedoubtData: BaseCa
     }
     return royalRedoubt
 }
+
+export default royalRedoubtFactoryFunction
