@@ -1,8 +1,0 @@
-{
-    "name": "Port of Call",
-    "faction": "Trade Federation",
-    "cost": 6,
-    "trade": 3,
-    "mainDescription": "<img src='/images/coin.png' /> +3",
-    "scrapDescription": "Draw a card. You may destroy target base."
-}

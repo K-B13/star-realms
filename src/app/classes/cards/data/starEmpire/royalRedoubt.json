@@ -1,7 +1,0 @@
-{
-    "name": "Royal Redoubt",
-    "cost": 6,
-    "combat": 3,
-    "mainDescription": "<img src='/images/combat.png' /> +3",
-    "allyDescription": "Target opponent discards a card."
-}

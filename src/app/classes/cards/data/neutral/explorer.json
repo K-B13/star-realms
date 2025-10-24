@@ -1,8 +1,0 @@
-{
-    "name": "Explorer",
-    "faction": "Neutral",
-    "cost": 2,
-    "trade": 2,
-    "mainDescription": "<div><img src='/images/coin.png' /> +2</div>",
-    "allyDescription": "<div><img src='/images/combat.png' /> +2</div>"
-}

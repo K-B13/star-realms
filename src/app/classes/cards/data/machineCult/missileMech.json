@@ -1,8 +1,0 @@
-{
-    "name": "Missile Mech",
-    "cost": 6,
-    "combat": 6,
-    "mainDescription": "<img src='/images/combat.png' /> +6",
-    "allyDescription": "Draw a card.",
-    "secondaryDescription": "You may destroy target base"
-}

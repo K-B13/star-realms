@@ -1,8 +1,0 @@
-{
-    "name": "Mothership",
-    "cost": 7,
-    "combat": 6,
-    "mainDescription": "<img src='/images/combat.png' /> +6",
-    "allyDescription": "Draw a card.",
-    "secondaryDescription": "Draw a card."
-}

@@ -1,9 +1,0 @@
-{
-    "name": "Patrol Mech",
-    "cost": 4,
-    "combat": 5,
-    "trade": 3,
-    "mainDescription": "<img src='/images/coin.png' /> +3 or <img src='/images/combat.png' /> +5",
-    "allyDescription": "You may scrap a card in your hand or discard pile",
-    "extraDescription": "With the Blobs an ever present danger even the Cult's cargo carrying mechs bristle with firepower."
-}

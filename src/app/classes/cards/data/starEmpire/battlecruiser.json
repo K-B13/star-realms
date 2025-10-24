@@ -1,9 +1,0 @@
-{
-    "name": "Battlecruiser",
-    "cost": 6,
-    "combat": 5,
-    "mainDescription": "<img src='/images/combat.png' /> +5",
-    "allyDescription": "Target opponent discards a card.",
-    "scrapDescription": "Draw a card and you may destroy target base.",
-    "secondaryDescription": "Draw a card."
-}

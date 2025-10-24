@@ -1,7 +1,0 @@
-{
-    "name": "Recycling Stations",
-    "cost": 4,
-    "trade": 1,
-    "mainDescription": "<img src='/images/coin.png' /> +1 or",
-    "secondaryDescription": "discard up to 2 cards then draw that many cards."
-}

@@ -1,9 +1,0 @@
-{
-    "name": "Imperial Frigate",
-    "cost": 3,
-    "combat": 4,
-    "mainDescription": "<img src='/images/combat.png' /> +4",
-    "allyDescription": "<img src='/images/combat.png' /> +2",
-    "scrapDesription": "Draw a card.",
-    "secondaryDescription": "Target opponent discards a card."
-}

@@ -1,7 +1,0 @@
-{
-    "name": "Viper",
-    "faction": "Neutral",
-    "cost": 0,
-    "combat": 1,
-    "mainDescription": "<div><img src='/images/combat.png' /> +1</div>"
-}

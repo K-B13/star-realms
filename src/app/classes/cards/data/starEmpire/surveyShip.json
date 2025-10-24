@@ -1,8 +1,0 @@
-{
-    "name": "Survey Ship",
-    "cost": 3,
-    "trade": 1,
-    "mainDescription": "<img src='/images/coin.png' /> +1",
-    "scrapDescription": "Target opponent discards a card.",
-    "secondaryDescription": "Draw a card."
-}

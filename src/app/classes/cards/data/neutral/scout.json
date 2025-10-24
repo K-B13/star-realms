@@ -1,7 +1,0 @@
-{
-    "name": "Scout",
-    "faction": "Neutral",
-    "cost": 0,
-    "trade": 1,
-    "mainDescription": "<div><img src='/images/coin.png' /> +1</div>"
-}
