@@ -1,3 +1,4 @@
+import { baseCards } from "./baseDeck"
 import { GameState, PlayerState } from "./state"
 
 export const playerSetup = (playerName: string) => {
@@ -40,7 +41,17 @@ export const shuffle = <T,>(arr: T[]): T[] => {
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
-  };
+}
+
+const createTradeRow = () => {
+    const deck: string[] = []
+    baseCards.forEach(card => {
+        for (let i = 0; i < card.amount; i++) {
+            deck.push(card.cardName)
+        }
+    })
+    return deck
+}
 
 export const drawN = (deck: string[], discard: string[], n: number) => {
     const hand: string[] = [];
@@ -72,7 +83,7 @@ export const initialSetup = (playerNames: string[]) => {
         return player
     })
     const explorers = explorerDeck()
-    const tradeDeck: string[] = Array.from({ length: 15 }, () => 'EXPLORER');
+    const tradeDeck: string[] = shuffle(createTradeRow())
     const row: string[] = tradeDeck.splice(0, 5);
 
     const state: GameState = {
@@ -90,3 +101,4 @@ export const initialSetup = (playerNames: string[]) => {
 
     return state
 }
+

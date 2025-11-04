@@ -36,13 +36,30 @@ const append = (root: Event | Event[]) => {
         <div>
             <h1>Star Realms</h1>
             <h4>Active: {state.order[state.activeIndex]} - Phase: {state.turn.phase}</h4>
-
+            <div className="flex flex-col">
+                <p>Trade Row: {state.tradeDeck.length}</p>
+                <div className="flex flex-row">
+                    { state.row.map((card, index) => {
+                        const cardDef = cardRegistry[card];
+                        return (
+                            <div key={index} className="pr-1 pl-1">
+                                <p>{cardDef.name}</p>
+                                <p>Cost {cardDef.cost}</p>
+                                <button onClick={() => append([
+                                    { t: 'CardPurchased', player: state.order[state.activeIndex], card: card, source: 'row', to: 'discard', rowIndex: index },
+                                    { t: "TradeSpent", player: state.order[state.activeIndex], card: card, amount: cardDef.cost }
+                                    ])}>Buy</button>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
             { state.explorerDeck.length > 0 && <button
             onClick={() => append([
                 { t: 'CardPurchased', player: state.order[state.activeIndex], card: 'EXPLORER', source: 'explorer', to: 'discard' }, 
                 { t: "TradeSpent", player: state.order[state.activeIndex], card: 'EXPLORER', amount: 2 }
                 ])}
-            >Explorers Deck</button>}
+            >Explorers Deck - {state.explorerDeck.length}</button>}
             {state.order.map((pid: string, idx: number) => {
                 const player = state.players[pid];
                 console.log(player)
@@ -52,24 +69,30 @@ const append = (root: Event | Event[]) => {
                         {state.order[state.activeIndex] !== pid && state.players[state.order[state.activeIndex]].combat > 0 && <button onClick={() => append({ t: 'DamageDealt', from: state.order[state.activeIndex], to: pid, amount: state.players[state.order[state.activeIndex]].combat })}>Attack</button>}
                         <p>A/T/C: {player.authority}/{player.trade}/{player.combat}</p>
                         <p>Hand:</p><hr/>
+                        <div className="flex flex-row">
                         {player.hand && player.hand.length > 0 && player.hand.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <div key={index}>
+                            return <div className="pl-1 pr-1" key={index}>
                                     <p>{cardDef.name}</p>
                                     {state.order[state.activeIndex] === pid && <button onClick={() => append({ t: 'CardPlayed', player: state.order[state.activeIndex], handIndex: index })}>Play</button>}
                                 </div>
                             
                         })}
+                        </div>
                         <p>In Play:</p><hr/>
+                        <div className="flex flex-row">
                         {player.inPlay.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <p key={index}>{cardDef.name}</p>
+                            return <p className="pl-1 pr-1" key={index}>{cardDef.name}</p>
                         })}
+                        </div>
                         <p>Discard:</p><hr/>
+                        <div className="flex flex-row">
                         {player.discard.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <p key={index}>{cardDef.name}</p>
+                            return <p className="pl-1 pr-1" key={index}>{cardDef.name}</p>
                         })}
+                        </div>
                     </div>
                 )
             })}

@@ -65,7 +65,9 @@ const refillRule: Rule<'CardPurchased'> = {
     run: (state, ev, emit) => {
         if (ev.source !== 'row') return;
         if (ev.rowIndex === undefined) return;
-        if (state.tradeDeck.length === 0) return;
+        const filledInCard = cardRegistry[ ev.card ];
+            if (filledInCard.cost > state.players[ev.player].trade)  return;
+
         emit({ t: 'RowRefilled', rowIndex: ev.rowIndex })
     }
 }
