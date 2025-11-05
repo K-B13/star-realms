@@ -24,24 +24,40 @@ export const baseCards: BaseCard[] = [
     //     cardName: "TRADEESCORT",
     //     amount: 1
     // },
+    // {
+    //     cardName: "BLOBFIGHTER",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "TRADEPOD",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "RAM",
+    //     amount: 2
+    // },
+    // {
+    //     cardName: "BATTLEBLOB",
+    //     amount: 1
+    // },
+    // {
+    //     cardName: "MOTHERSHIP",
+    //     amount: 1
+    // },
     {
-        cardName: "BLOBFIGHTER",
+        cardName: "SURVEYSHIP",
         amount: 3
     },
     {
-        cardName: "TRADEPOD",
-        amount: 3
-    },
-    {
-        cardName: "RAM",
+        cardName: "CORVETTE",
         amount: 2
     },
     {
-        cardName: "BATTLEBLOB",
+        cardName: "BATTLECRUISER",
         amount: 1
     },
     {
-        cardName: "MOTHERSHIP",
+        cardName: "DREADNAUGHT",
         amount: 1
     }
 ]

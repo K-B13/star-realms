@@ -90,6 +90,12 @@ export const cardRegistry: Record<string, CardDef> = {
                     { kind: 'addTrade', amount: 2 }
                 ]
             },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addAuthority', amount: 4 }
+                ]
+            }
         ]
     },
     CUTTER: {
@@ -107,6 +113,12 @@ export const cardRegistry: Record<string, CardDef> = {
                     { kind: 'addAuthority', amount: 4 }
                 ]
             },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 4 }
+                ]
+            }
         ]
     },
     FREIGHTER: {
@@ -122,23 +134,7 @@ export const cardRegistry: Record<string, CardDef> = {
                 effects: [
                     { kind: 'addTrade', amount: 4 },
                 ]
-            },
-        ]
-    },
-    FLAGSHIP: {
-        id: 'FLAGSHIP',
-        name: 'Flag Ship',
-        cost: 6,
-        faction: 'Trade Federation',
-        type: 'ship',
-        abilities: [
-            {
-                trigger: 'onPlay',
-                effects: [
-                    { kind: 'addCombat', amount: 5 },
-                    { kind: 'drawCards', amount: 1 }
-                ]
-            },
+            }
         ]
     },
     TRADEESCORT: {
@@ -156,6 +152,34 @@ export const cardRegistry: Record<string, CardDef> = {
                     { kind: 'addCombat', amount: 4 }
                 ]
             },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    FLAGSHIP: {
+        id: 'FLAGSHIP',
+        name: 'Flag Ship',
+        cost: 6,
+        faction: 'Trade Federation',
+        type: 'ship',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 5 },
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addAuthority', amount: 5 }
+                ]
+            }
         ]
     },
     BLOBFIGHTER: {
@@ -172,6 +196,12 @@ export const cardRegistry: Record<string, CardDef> = {
                     { kind: 'addCombat', amount: 3 }
                 ]
             },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }
         ]
     },
     TRADEPOD: {
@@ -188,6 +218,12 @@ export const cardRegistry: Record<string, CardDef> = {
                     { kind: 'addTrade', amount: 3 }
                 ]
             },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            }
         ]
     },
     RAM: {
@@ -201,6 +237,12 @@ export const cardRegistry: Record<string, CardDef> = {
                 trigger: 'onPlay',
                 effects: [
                     { kind: 'addCombat', amount: 5 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
                 ]
             },
             {
@@ -225,6 +267,12 @@ export const cardRegistry: Record<string, CardDef> = {
                 ]
             },
             {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            },
+            {
                 trigger: 'onScrap',
                 effects: [
                     { kind: 'addCombat', amount: 4 }
@@ -245,79 +293,89 @@ export const cardRegistry: Record<string, CardDef> = {
                     { kind: 'addCombat', amount: 6 },
                     { kind: 'drawCards', amount: 1 }
                 ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
             }
         ]
     },
-    // SURVEYSHIP: {
-    //     id: 'SURVEYSHIP',
-    //     name: 'Survey Ship',
-    //     cost: 3,
-    //     faction: 'Star Empire',
-    //     type: 'ship',
-    //     abilities: [
-    //         {
-    //             trigger: 'onPlay',
-    //             effects: [
-    //                 { kind: 'addTrade', amount: 1 },
-    //                 { kind: 'drawCards', amount: 1 }
-    //             ]
-    //         }
-    //     ]
-    // },
-    // CORVETTE: {
-    //     id: 'CORVETTE',
-    //     name: 'Corvette',
-    //     cost: 2,
-    //     faction: 'Star Empire',
-    //     type: 'ship',
-    //     abilities: [
-    //         {
-    //             trigger: 'onPlay',
-    //             effects: [
-    //                 { kind: 'addCombat', amount: 1 },
-    //                 { kind: 'drawCards', amount: 1 }
-    //             ]
-    //         }
-    //     ]
-    // },
-    // BATTLECRUISER: {
-    //     id: 'BATTLECRUISER',
-    //     name: 'Battle Cruiser',
-    //     cost: 6,
-    //     faction: 'Star Empire',
-    //     type: 'ship',
-    //     abilities: [
-    //         {
-    //             trigger: 'onPlay',
-    //             effects: [
-    //                 { kind: 'addCombat', amount: 5 },
-    //                 { kind: 'drawCards', amount: 1 }
-    //             ]
-    //         }
+    SURVEYSHIP: {
+        id: 'SURVEYSHIP',
+        name: 'Survey Ship',
+        cost: 3,
+        faction: 'Star Empire',
+        type: 'ship',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addTrade', amount: 1 },
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    CORVETTE: {
+        id: 'CORVETTE',
+        name: 'Corvette',
+        cost: 2,
+        faction: 'Star Empire',
+        type: 'ship',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 1 },
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }, {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            }
+        ]
+    },
+    BATTLECRUISER: {
+        id: 'BATTLECRUISER',
+        name: 'Battle Cruiser',
+        cost: 6,
+        faction: 'Star Empire',
+        type: 'ship',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 5 },
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }
 
-    //     ]
-    // },
-    // DREADNAUGHT: {
-    //     id: 'DREADNAUGHT',
-    //     name: 'Dreadnought',
-    //     cost: 7,
-    //     faction: 'Star Empire',
-    //     type: 'ship',
-    //     abilities: [
-    //         {
-    //             trigger: 'onPlay',
-    //             effects: [
-    //                 { kind: 'addCombat', amount: 7 },
-    //                 { kind: 'drawCards', amount: 1 }
-    //             ]
-    //         },
-    //         {
-    //             trigger: 'onScrap',
-    //             effects: [
-    //                 { kind: 'addCombat', amount: 5 }
-    //             ]
-    //         }
-
-    //     ]
-    // }
+        ]
+    },
+    DREADNAUGHT: {
+        id: 'DREADNAUGHT',
+        name: 'Dreadnought',
+        cost: 7,
+        faction: 'Star Empire',
+        type: 'ship',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 7 },
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            },
+            {
+                trigger: 'onScrap',
+                effects: [
+                    { kind: 'addCombat', amount: 5 }
+                ]
+            }
+        ]
+    }
 }

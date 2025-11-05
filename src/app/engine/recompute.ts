@@ -41,9 +41,52 @@ const onPlayRule: Rule<'CardPlayed'> = {
                     data: effect.prompt.data
                   });
                   break;
-              }
+                }
             }
-          }
+        }
+    }
+}
+
+const allyRule: Rule<'CardPlayed'> = {
+    on: 'CardPlayed',
+    run: (state, ev, emit) => {
+        const justPlayed = state.players[ ev.player ].inPlay[state.players[ ev.player ].inPlay.length - 1];
+        const def = cardRegistry[ justPlayed ];
+        const faction = def.faction;
+        const factionCounter = state.players[ ev.player ].inPlay.reduce((acc, card) => {
+            const cardDef = cardRegistry[ card ];
+            if (cardDef.faction === faction) acc++;
+            return acc;
+        }, 0);
+        if (factionCounter <= 1) return;
+        for (const ability of def.abilities) {
+            if (ability.trigger !== 'onAlly') continue;
+            for (const effect of ability.effects) {
+              switch (effect.kind) {
+                case 'addTrade':
+                  emit({ t: 'TradeAdded', player: ev.player, amount: effect.amount });
+                  break;
+                case 'addCombat':
+                  emit({ t: 'CombatAdded', player: ev.player, amount: effect.amount });
+                  break;
+                case 'addAuthority':
+                  emit({ t: 'AuthorityAdded', player: ev.player, amount: effect.amount });
+                  break;
+                case 'drawCards':
+                  emit({ t: 'CardsDrawn', player: ev.player, count: effect.amount });
+                  break;
+                case 'prompt':
+                  emit({
+                    t: 'PromptShown',
+                    player: ev.player,
+                    kind: effect.prompt.kind,
+                    optional: effect.prompt.optional,
+                    data: effect.prompt.data
+                  });
+                  break;
+                }
+            }
+        }
     }
 }
 
@@ -93,7 +136,7 @@ const ensureDeckRule: Rule<'DrawOne'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule ] as Rule<Event['t']>[]
+const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule ] as Rule<Event['t']>[]
 
 function runRules(state: GameState, ev: Event): Event[] {
     const emitted: Event[] = [];
