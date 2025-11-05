@@ -1,7 +1,7 @@
 import { baseCards } from "./baseDeck"
 import { GameState, PlayerState } from "./state"
 
-export const playerSetup = (playerName: string) => {
+export const playerSetup: (playerName: string) => PlayerState = (playerName: string) => {
     return {
         id: playerName,
         authority: 50,
@@ -9,6 +9,7 @@ export const playerSetup = (playerName: string) => {
         hand: [],
         discard: [],
         inPlay: [],
+        acquireLocation: "discard",
         combat: 0,
         trade: 0
     }

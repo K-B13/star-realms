@@ -32,6 +32,9 @@ const onPlayRule: Rule<'CardPlayed'> = {
                 case 'drawCards':
                   emit({ t: 'CardsDrawn', player: ev.player, count: effect.amount });
                   break;
+                case 'nextAcquireTop':
+                  emit({ t: 'NextAcquireToTopSet', player: ev.player });
+                  break;
                 case 'prompt':
                   emit({
                     t: 'PromptShown',
@@ -75,6 +78,9 @@ const allyRule: Rule<'CardPlayed'> = {
                 case 'drawCards':
                   emit({ t: 'CardsDrawn', player: ev.player, count: effect.amount });
                   break;
+                case 'nextAcquireTop':
+                  emit({ t: 'NextAcquireToTopSet', player: ev.player });
+                  break;
                 case 'prompt':
                   emit({
                     t: 'PromptShown',
@@ -109,8 +115,7 @@ const refillRule: Rule<'CardPurchased'> = {
         if (ev.source !== 'row') return;
         if (ev.rowIndex === undefined) return;
         const filledInCard = cardRegistry[ ev.card ];
-            if (filledInCard.cost > state.players[ev.player].trade)  return;
-
+        if (filledInCard.cost > state.players[ev.player].trade)  return;
         emit({ t: 'RowRefilled', rowIndex: ev.rowIndex })
     }
 }
@@ -136,7 +141,16 @@ const ensureDeckRule: Rule<'DrawOne'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule ] as Rule<Event['t']>[]
+const onScrapRules: Rule<'CardScrapped'> = {
+    on: "CardScrapped",
+    run: (state, ev, emit) => {
+        if (ev.from === 'row') {
+            emit({ t: 'RowRefilled', rowIndex: ev.rowIndex })   
+        }
+    }
+}
+
+const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapRules ] as Rule<Event['t']>[]
 
 function runRules(state: GameState, ev: Event): Event[] {
     const emitted: Event[] = [];
@@ -178,8 +192,13 @@ export const applyEvent = (state: GameState, event: Event) => {
                 const cardAtSlot = state.row[event.rowIndex];
                 if (!cardAtSlot) return state;
                 
-                if (event.to === 'top') activePlayerCardPurchased.deck.unshift(cardAtSlot)
-                else activePlayerCardPurchased.discard.push(cardAtSlot)   
+                if (activePlayerCardPurchased.acquireLocation === 'top') {
+                    activePlayerCardPurchased.deck.unshift(cardAtSlot)
+                    activePlayerCardPurchased.acquireLocation = 'discard'
+                }
+                else {
+                    activePlayerCardPurchased.discard.push(cardAtSlot)
+                }
                 return state
             }
             if (event.source === 'explorer') {
@@ -201,6 +220,10 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.row[event.rowIndex] = newCard;
             return state;
         case 'CardScrapped':
+            if (event.from === 'row') {
+                const cardAtSlot = state.row[event.rowIndex];
+                state.scrap.push(cardAtSlot) 
+            }
             return state;
         case 'CardsDrawn':
             return state;
@@ -221,6 +244,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             activePlayer.hand = [];
             activePlayer.combat = 0;
             activePlayer.trade = 0;
+            activePlayer.acquireLocation = 'discard';
             state.players[event.player] = activePlayer;
             return state;
         case 'DamageDealt':
@@ -232,6 +256,10 @@ export const applyEvent = (state: GameState, event: Event) => {
             }
             target.authority = Math.max(0, target.authority - amount);
             attacker.combat -= amount;
+            return state;
+        case 'NextAcquireToTopSet':
+            const player = state.players[event.player];
+            player.acquireLocation = 'top';
             return state;
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;

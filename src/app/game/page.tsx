@@ -2,9 +2,11 @@
 import { useMemo, useState } from "react";
 import { replay, materialize } from "../engine/recompute";
 import { cardRegistry } from "../engine/cards";
-import { Event, Phase } from "../engine/events";
+import { Event } from "../engine/events";
 import { useEffect } from "react";
 import { initialSetup } from "../engine/initialSetup";
+import { getActivePrompt } from "../helperFunctions/activePromptFunction";
+import ScrapPromptOverlay from "../promptOverlays/scrapPromptOverlay";
 
 export default function Game() {
     const players = useMemo(() => ['A', 'B'], [])
@@ -12,25 +14,29 @@ export default function Game() {
     const [ turnEvents, setTurnEvents ] = useState<Event[]>([])
     const [ snapshot, setSnapshot ] = useState(() => initialSetup(players))
     const state = replay(snapshot, turnEvents)
+    const { prompt: activePrompt } = getActivePrompt(turnEvents)
+    // const promptOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapRow';
 
     useEffect(() => {
         setMounted(true)
     }, [])
 
-const append = (root: Event | Event[]) => {
-  setTurnEvents(prev => {
-    const base = replay(snapshot, prev);
+    const append = (root: Event | Event[]) => {
+      setTurnEvents(prev => {
+        const base = replay(snapshot, prev);
 
-    const roots = Array.isArray(root) ? root : [root];
-    const { events: expandedNew } = materialize(base, roots);
+        const roots = Array.isArray(root) ? root : [root];
+        const { events: expandedNew } = materialize(base, roots);
 
-    return [...prev, ...expandedNew];
-  });
-};
+        return [...prev, ...expandedNew];
+      });
+    };
 
     if (!mounted) {
         return <div>Loading...</div>
     };
+
+
 
     return (
         <div>
@@ -46,7 +52,7 @@ const append = (root: Event | Event[]) => {
                                 <p>{cardDef.name}</p>
                                 <p>Cost {cardDef.cost}</p>
                                 <button onClick={() => append([
-                                    { t: 'CardPurchased', player: state.order[state.activeIndex], card: card, source: 'row', to: 'discard', rowIndex: index },
+                                    { t: 'CardPurchased', player: state.order[state.activeIndex], card: card, source: 'row', rowIndex: index },
                                     { t: "TradeSpent", player: state.order[state.activeIndex], card: card, amount: cardDef.cost }
                                     ])}>Buy</button>
                             </div>
@@ -56,7 +62,7 @@ const append = (root: Event | Event[]) => {
             </div>
             { state.explorerDeck.length > 0 && <button
             onClick={() => append([
-                { t: 'CardPurchased', player: state.order[state.activeIndex], card: 'EXPLORER', source: 'explorer', to: 'discard' }, 
+                { t: 'CardPurchased', player: state.order[state.activeIndex], card: 'EXPLORER', source: 'explorer'}, 
                 { t: "TradeSpent", player: state.order[state.activeIndex], card: 'EXPLORER', amount: 2 }
                 ])}
             >Explorers Deck - {state.explorerDeck.length}</button>}
@@ -96,6 +102,14 @@ const append = (root: Event | Event[]) => {
                     </div>
                 )
             })}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapRow' && (state.row.length > 0) && (
+                <ScrapPromptOverlay 
+                    state={state}
+                    activePrompt={activePrompt}
+                    append={append}
+                    currentPlayer={state.order[state.activeIndex]}
+                />
+            )}
             <button onClick={() => {
                 const base = replay(snapshot, turnEvents);
                 const { state: endState } =

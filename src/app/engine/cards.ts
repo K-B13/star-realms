@@ -5,6 +5,7 @@ export type Effect =
 | { kind: 'addCombat', amount: number }
 | { kind: 'addAuthority', amount: number }
 | { kind: 'drawCards', amount: number }
+| { kind: 'nextAcquireTop' }
 | { kind: 'scrapSelf'}
 | { kind: 'prompt', prompt: { kind: string, optional?: boolean, data?: unknown }}
 
@@ -134,6 +135,12 @@ export const cardRegistry: Record<string, CardDef> = {
                 effects: [
                     { kind: 'addTrade', amount: 4 },
                 ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'nextAcquireTop' }
+                ]
             }
         ]
     },
@@ -216,6 +223,29 @@ export const cardRegistry: Record<string, CardDef> = {
                 trigger: 'onPlay',
                 effects: [
                     { kind: 'addTrade', amount: 3 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            }
+        ]
+    },
+    BATTLEPOD: {
+        id: 'BATTLEPOD',
+        name: 'Battle Pod',
+        cost: 2,
+        faction: 'Blob Faction',
+        type: 'ship',
+        description: "The loading and offloading process is efficient but disgusting",
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 4 },
+                    { kind: 'prompt', prompt: { kind: 'scrapRow', optional: true } }
                 ]
             },
             {

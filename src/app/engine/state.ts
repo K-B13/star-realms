@@ -8,6 +8,7 @@ export interface PlayerState {
     discard: string[];
     inPlay: string[];
     // bases: Array<{ cardId: string; damage: number }>;
+    acquireLocation: "top" | "discard";
     combat: number;
     trade: number;
 }
