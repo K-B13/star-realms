@@ -10,6 +10,7 @@ export const playerSetup: (playerName: string) => PlayerState = (playerName: str
         discard: [],
         inPlay: [],
         acquireLocation: "discard",
+        freeNextAcquire: false,
         combat: 0,
         trade: 0
     }

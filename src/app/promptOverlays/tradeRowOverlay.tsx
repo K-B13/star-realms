@@ -2,17 +2,15 @@ import { GameState } from "../engine/state";
 import { Event } from "../engine/events";
 import { cardRegistry } from "../engine/cards";
 
-interface ScrapPromptOverlayProps {
+interface RowChoiceOverlayProps {
     state: GameState;
     activePrompt: Event;
     append: (event: Event | Event[]) => void;
-    currentPlayer: string;
+    handleFunction: (idx: number, card: string, currentPlayer: string) => void;
 }
 
-export default function ScrapPromptOverlay({ state, activePrompt, append, currentPlayer }: ScrapPromptOverlayProps) {
-    const handleScrap = (idx: number, card: string) => {
-        append({ t: 'CardScrapped', player: currentPlayer, card, from: 'row', rowIndex: idx })
-    }
+export default function ScrapPromptOverlay({ state, activePrompt, append, handleFunction }: RowChoiceOverlayProps) {
+
 
     const handleSkip = () => {
         append({ t: 'PromptCancelled' })
@@ -32,7 +30,7 @@ export default function ScrapPromptOverlay({ state, activePrompt, append, curren
                   <button
                     key={idx}
                     disabled={empty}
-                    onClick={() => !empty && handleScrap(idx, card)}
+                    onClick={() => !empty && handleFunction(idx, card, state.order[state.activeIndex])}
                     className="border px-2 py-1 rounded disabled:opacity-50"
                     title={empty ? "Empty slot" : cardRegistry[card].name}
                   >

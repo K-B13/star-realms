@@ -6,7 +6,8 @@ import { Event } from "../engine/events";
 import { useEffect } from "react";
 import { initialSetup } from "../engine/initialSetup";
 import { getActivePrompt } from "../helperFunctions/activePromptFunction";
-import ScrapPromptOverlay from "../promptOverlays/scrapPromptOverlay";
+import ScrapPromptOverlay from "../promptOverlays/tradeRowOverlay";
+import OpponentDiscardOverlay from "../promptOverlays/opponentHandOverlay";
 
 export default function Game() {
     const players = useMemo(() => ['A', 'B'], [])
@@ -15,7 +16,6 @@ export default function Game() {
     const [ snapshot, setSnapshot ] = useState(() => initialSetup(players))
     const state = replay(snapshot, turnEvents)
     const { prompt: activePrompt } = getActivePrompt(turnEvents)
-    // const promptOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapRow';
 
     useEffect(() => {
         setMounted(true)
@@ -36,7 +36,18 @@ export default function Game() {
         return <div>Loading...</div>
     };
 
+    const handleScrap = (idx: number, card: string, currentPlayer: string) => {
+        append({ t: 'CardScrapped', player: currentPlayer, card, from: 'row', rowIndex: idx })
+    }
 
+    const handleFreeCard = (idx: number, card: string, currentPlayer: string) => {
+        append([
+            { t: 'NextAcquireFreeSet', player: currentPlayer },
+            { t: 'NextAcquireToTopSet', player: currentPlayer },
+            { t: 'CardPurchased', player: currentPlayer, card: card, source: 'row', rowIndex: idx },
+            { t: "TradeSpent", player: state.order[state.activeIndex], card: card, amount: cardRegistry[card].cost }
+        ])
+    }
 
     return (
         <div>
@@ -107,8 +118,24 @@ export default function Game() {
                     state={state}
                     activePrompt={activePrompt}
                     append={append}
-                    currentPlayer={state.order[state.activeIndex]}
+                    handleFunction={handleScrap}
                 />
+            )}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseRowForFree' && (state.row.length > 0) && (
+                <ScrapPromptOverlay 
+                    state={state}
+                    activePrompt={activePrompt}
+                    append={append}
+                    handleFunction={handleFreeCard}
+                />
+            )}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'opponentDiscard' && (
+              <OpponentDiscardOverlay
+                state={state}
+                activePrompt={activePrompt}
+                append={append}
+                currentPlayer={state.order[state.activeIndex]}
+              />
             )}
             <button onClick={() => {
                 const base = replay(snapshot, turnEvents);
@@ -118,12 +145,8 @@ export default function Game() {
                 setSnapshot(endState)
                 setTurnEvents([])
             }}>Next Turn</button>
-            
-            
-            <button onClick={() => append({ t: 'TradeAdded', player: state.order[state.activeIndex], amount: 1 })}>Add 1 Trade</button>
-            <button onClick={() => console.log(state)}>State</button>
             <br />
-            <button onClick={() => console.log(state.order[state.activeIndex], state.players[state.order[state.activeIndex]]?.combat)}>Prompt</button>
+            <button onClick={() => console.log(state)}>State</button>
         </div>
     )
 }

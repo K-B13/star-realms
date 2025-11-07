@@ -11,6 +11,7 @@ export interface PlayerState {
     acquireLocation: "top" | "discard";
     combat: number;
     trade: number;
+    freeNextAcquire: boolean;
 }
 
 export interface GameState {

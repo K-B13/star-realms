@@ -1,19 +1,24 @@
 import type { Event } from "../engine/events";
 
 export const getActivePrompt = (events: Event[]): { prompt?: Event, resolver?: (e: Event) => boolean } => {
-        const resolvesScrapRow = (e: Event) => 
-            e.t === "PromptCancelled" ||
-            (e.t === "CardScrapped" && e.from === "row")
-
+        const resolvers: Record<string, (e: Event) => boolean> = {
+            scrapRow: (e: Event) => e.t === "PromptCancelled" || (e.t === "CardScrapped" && e.from === "row"),
+            chooseRowForFree: (e: Event) => e.t === "PromptCancelled" || (e.t === "CardPurchased"),
+            // choosePlayer: (e: Event) => e.t === "PromptCancelled"  || (e.t === "TargetChosen"),
+            opponentDiscard: (e: Event) => e.t === "PromptCancelled" || (e.t === "CardDiscarded")
+        }
+        
         for (let i = events.length - 1; i >= 0; i--) {
             const ev = events[i]
             if (ev.t !== 'PromptShown') continue;
 
-            if (ev.kind === 'scrapRow') {
-                const resolved = events.slice(i + 1).some(resolvesScrapRow)
-                if (!resolved) {
-                    return { prompt: ev, resolver: resolvesScrapRow }
-                }
+            const kind = ev.kind as string | undefined
+            const resolver = kind ? resolvers[kind] : undefined
+            if (!resolver) continue;
+
+            const resolved = events.slice(i + 1).some(resolver);
+            if (!resolved) {
+              return { prompt: ev as Extract<Event, { t: "PromptShown" }>, resolver };
             }
         }
         return {}

@@ -7,6 +7,7 @@ export type Effect =
 | { kind: 'drawCards', amount: number }
 | { kind: 'nextAcquireTop' }
 | { kind: 'scrapSelf'}
+| { kind: 'nextAcquireFree' }
 | { kind: 'prompt', prompt: { kind: string, optional?: boolean, data?: unknown }}
 
 export interface Ability {
@@ -134,6 +135,29 @@ export const cardRegistry: Record<string, CardDef> = {
                 trigger: 'onPlay',
                 effects: [
                     { kind: 'addTrade', amount: 4 },
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'nextAcquireTop' }
+                ]
+            }
+        ]
+    },
+    COMMANDSHIP: {
+        id: 'COMMANDSHIP',
+        name: 'Command Ship',
+        cost: 8,
+        faction: 'Trade Federation',
+        type: 'ship',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addAuthority', amount: 4 },
+                    { kind: 'addCombat', amount: 5 },
+                    { kind: 'drawCards', amount: 2 }
                 ]
             },
             {
@@ -310,6 +334,30 @@ export const cardRegistry: Record<string, CardDef> = {
             }
         ]
     },
+    BLOBCARRIER: {
+        id: 'BLOBCARRIER',
+        name: 'Blob Carrier',
+        cost: 6,
+        faction: 'Blob Faction',
+        type: 'ship',
+        description: "Is that... a whale?",
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 7 },
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'nextAcquireFree' },
+                    { kind: 'nextAcquireTop' },
+                    { kind: 'prompt', prompt: { kind: 'chooseRowForFree', optional: false, data: { purpose: '' } } }
+                ]
+            }
+        ]
+    },
     MOTHERSHIP: {
         id: 'MOTHERSHIP',
         name: 'Mothership',
@@ -381,6 +429,12 @@ export const cardRegistry: Record<string, CardDef> = {
                 effects: [
                     { kind: 'addCombat', amount: 5 },
                     { kind: 'drawCards', amount: 1 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'opponentDiscard', optional: false } }
                 ]
             }
 

@@ -35,6 +35,9 @@ const onPlayRule: Rule<'CardPlayed'> = {
                 case 'nextAcquireTop':
                   emit({ t: 'NextAcquireToTopSet', player: ev.player });
                   break;
+                case 'nextAcquireFree':
+                  emit({ t: 'NextAcquireFreeSet', player: ev.player });
+                  break;
                 case 'prompt':
                   emit({
                     t: 'PromptShown',
@@ -81,6 +84,9 @@ const allyRule: Rule<'CardPlayed'> = {
                 case 'nextAcquireTop':
                   emit({ t: 'NextAcquireToTopSet', player: ev.player });
                   break;
+                case 'nextAcquireFree':
+                  emit({ t: 'NextAcquireFreeSet', player: ev.player });
+                  break;
                 case 'prompt':
                   emit({
                     t: 'PromptShown',
@@ -115,7 +121,8 @@ const refillRule: Rule<'CardPurchased'> = {
         if (ev.source !== 'row') return;
         if (ev.rowIndex === undefined) return;
         const filledInCard = cardRegistry[ ev.card ];
-        if (filledInCard.cost > state.players[ev.player].trade)  return;
+        if (filledInCard.cost > state.players[ev.player].trade && !state.players[ev.player].freeNextAcquire) return;
+        state.players[ev.player].freeNextAcquire = false;
         emit({ t: 'RowRefilled', rowIndex: ev.rowIndex })
     }
 }
@@ -146,6 +153,25 @@ const onScrapRules: Rule<'CardScrapped'> = {
     run: (state, ev, emit) => {
         if (ev.from === 'row') {
             emit({ t: 'RowRefilled', rowIndex: ev.rowIndex })   
+        }
+    }
+}
+
+const opponenetSelectedRules: Rule<'TargetChosen'> = {
+    on: 'TargetChosen',
+    run: (state, ev, emit) => {
+        switch (ev.purpose) {
+            case 'opponentDiscard':
+                emit({
+                    t: 'PromptShown',
+                    player: ev.player,
+                    kind: 'opponentDiscard',
+                    optional: false,
+                    data: { target: ev.target }
+                })
+                break;
+            default:
+                break;
         }
     }
 }
@@ -185,7 +211,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             return state;
         case 'CardPurchased':
             const filledInCard = cardRegistry[ event.card ];
-            if (filledInCard.cost > state.players[event.player].trade) { console.log('Not enough money'); return state };
+            if (filledInCard.cost > state.players[event.player].trade && !state.players[event.player].freeNextAcquire) { console.log('Not enough money'); return state };
             const activePlayerCardPurchased = state.players[event.player];
             if (event.source === 'row') {
                 if (event.rowIndex === null || event.rowIndex === undefined || event.rowIndex < 0 || event.rowIndex > state.row.length) return state
@@ -225,6 +251,13 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.scrap.push(cardAtSlot) 
             }
             return state;
+        case 'CardDiscarded':
+            const discardedPlayer = state.players[event.player];
+            const i = event.rowIndex;
+            if (i === null || i < 0 || i >= discardedPlayer.hand.length) return state;
+            const [ removed ] = discardedPlayer.hand.splice(i, 1)
+            discardedPlayer.discard.push(removed)
+            return state;
         case 'CardsDrawn':
             return state;
         case 'DrawOne':
@@ -245,6 +278,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             activePlayer.combat = 0;
             activePlayer.trade = 0;
             activePlayer.acquireLocation = 'discard';
+            activePlayer.freeNextAcquire = false;
             state.players[event.player] = activePlayer;
             return state;
         case 'DamageDealt':
@@ -260,6 +294,9 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'NextAcquireToTopSet':
             const player = state.players[event.player];
             player.acquireLocation = 'top';
+            return state;
+        case 'NextAcquireFreeSet':
+            state.players[event.player].freeNextAcquire = true;
             return state;
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;

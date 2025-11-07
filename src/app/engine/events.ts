@@ -11,13 +11,16 @@ export type Event =
   | { t: 'TradeSpent'; player: PID; card: string; amount: number }
   | { t: 'CardPurchased'; player: PID;  card: string; rowIndex?: number; source: 'row' | 'explorer' }
   | { t: 'RowRefilled'; rowIndex: number }
-  | { t: 'CardScrapped'; player: PID; card: string; from: Zone; rowIndex: number }
+  | { t: 'CardScrapped'; player: PID; from: Zone; rowIndex: number }
+  | { t: 'TargetChosen'; player: PID; target: string; purpose: string }
+  | { t: 'CardDiscarded'; player: PID; card: string; rowIndex: number }
   | { t: 'CardsDrawn'; player: PID; count: number }
   | { t: "DrawOne", player: PID, counter?: number }
   | { t: 'DeckShuffle'; player: PID, newDeck: string[] }
   | { t: 'DiscardInPlayAndHand'; player: PID }
   | { t: 'DamageDealt'; from: PID; to: PID; amount: number }
   | { t: 'NextAcquireToTopSet'; player: PID }
+  | { t: 'NextAcquireFreeSet'; player: PID }
   | { t: 'TurnAdvanced' }
   | { t: 'PhaseChanged'; from: Phase; to: Phase }
   | { t: 'PromptShown'; player: PID; kind: string; optional?: boolean; data?: unknown }
