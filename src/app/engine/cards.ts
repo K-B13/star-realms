@@ -123,6 +123,23 @@ export const cardRegistry: Record<string, CardDef> = {
             }
         ]
     },
+    EMBASSYYACHT: {
+        id: 'EMBASSYYACHT',
+        name: 'Embassy Yacht',
+        cost: 3,
+        faction: 'Trade Federation',
+        type: 'ship',
+        description: "War should always be a last resort. It's bad for the bottom line",
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addTrade', amount: 2 },
+                    { kind: 'addAuthority', amount: 3 }
+                ]
+            }
+        ]
+    },  
     FREIGHTER: {
         id: 'FREIGHTER',
         name: 'Freighter',
@@ -307,6 +324,21 @@ export const cardRegistry: Record<string, CardDef> = {
             }
         ]
     },
+    BLOBDESTROYER: {
+        id: 'BLOBDESTROYER',
+        name: 'Blob Destroyer',
+        cost: 4,
+        faction: 'Blob Faction',
+        type: 'ship',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 6 }
+                ]
+            }
+        ]
+    },
     BATTLEBLOB: {
         id: 'BATTLEBLOB',
         name: 'Battle Blob',
@@ -380,6 +412,54 @@ export const cardRegistry: Record<string, CardDef> = {
             }
         ]
     },
+    IMPERIALFIGHTER: {
+        id: 'IMPERIALFIGHTER',
+        name: 'Imperial Fighter',
+        cost: 1,
+        faction: 'Star Empire',
+        type: 'ship',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 2 },
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: false, data: { purpose: 'opponentDiscard' } } }
+                ]
+            }, {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            }
+        ]
+    },
+    IMPERIALFRIGATE: {
+        id: 'IMPERIALFRIGATE',
+        name: 'Imperial Frigate',
+        cost: 3,
+        faction: 'Star Empire',
+        type: 'ship',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 4 },
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: false, data: { purpose: 'opponentDiscard' } } }
+                ]
+            }, {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            },
+            {
+                trigger: 'onScrap',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
     SURVEYSHIP: {
         id: 'SURVEYSHIP',
         name: 'Survey Ship',
@@ -434,7 +514,7 @@ export const cardRegistry: Record<string, CardDef> = {
             {
                 trigger: 'onAlly',
                 effects: [
-                    { kind: 'prompt', prompt: { kind: 'opponentDiscard', optional: false } }
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: false, data: { purpose: 'opponentDiscard' } } }
                 ]
             }
 

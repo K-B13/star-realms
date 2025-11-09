@@ -1,5 +1,6 @@
 import { GameState } from "../engine/state";
 import { Event } from "../engine/events";
+import { Prompt } from "./opponentChoiceOverlay";
 
 interface OpponentHandChoiceOverlayProps {
     state: GameState;
@@ -14,7 +15,7 @@ export default function OpponentDiscardOverlay({ state, activePrompt, append, cu
     if (!isOpen) return null;
   
     // for now: only one opponent → pick the first PID that isn't current
-    const target = state.order.find((pid: string) => pid !== currentPlayer);
+    const target: string | undefined = (activePrompt as Prompt)?.data?.target;
     if (!target) return null;
   
     const handSize = state.players[target].hand.length;

@@ -176,7 +176,7 @@ const opponenetSelectedRules: Rule<'TargetChosen'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapRules ] as Rule<Event['t']>[]
+const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapRules, opponenetSelectedRules ] as Rule<Event['t']>[]
 
 function runRules(state: GameState, ev: Event): Event[] {
     const emitted: Event[] = [];

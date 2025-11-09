@@ -7,7 +7,8 @@ import { useEffect } from "react";
 import { initialSetup } from "../engine/initialSetup";
 import { getActivePrompt } from "../helperFunctions/activePromptFunction";
 import ScrapPromptOverlay from "../promptOverlays/tradeRowOverlay";
-import OpponentDiscardOverlay from "../promptOverlays/opponentHandOverlay";
+import OpponentDiscardOverlay from "../promptOverlays/opponentDiscardOverlay";
+import OpponentChoiceOverlay from "../promptOverlays/opponentChoiceOverlay";
 
 export default function Game() {
     const players = useMemo(() => ['A', 'B'], [])
@@ -36,8 +37,8 @@ export default function Game() {
         return <div>Loading...</div>
     };
 
-    const handleScrap = (idx: number, card: string, currentPlayer: string) => {
-        append({ t: 'CardScrapped', player: currentPlayer, card, from: 'row', rowIndex: idx })
+    const handleScrap = (idx: number, _: string, currentPlayer: string) => {
+        append({ t: 'CardScrapped', player: currentPlayer, from: 'row', rowIndex: idx })
     }
 
     const handleFreeCard = (idx: number, card: string, currentPlayer: string) => {
@@ -131,6 +132,14 @@ export default function Game() {
             )}
             {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'opponentDiscard' && (
               <OpponentDiscardOverlay
+                state={state}
+                activePrompt={activePrompt}
+                append={append}
+                currentPlayer={state.order[state.activeIndex]}
+              />
+            )}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'choosePlayer' && (
+              <OpponentChoiceOverlay
                 state={state}
                 activePrompt={activePrompt}
                 append={append}

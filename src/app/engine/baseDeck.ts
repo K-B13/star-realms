@@ -53,6 +53,14 @@ export const baseCards: BaseCard[] = [
     //     amount: 1
     // },
     {
+        cardName: "IMPERIALFIGHTER",
+        amount: 3
+    },
+    {
+        cardName: "IMPERIALFRIGATE",
+        amount: 3
+    },
+    {
         cardName: "SURVEYSHIP",
         amount: 3
     },
