@@ -4,6 +4,7 @@ export const getActivePrompt = (events: Event[]): { prompt?: Event, resolver?: (
         const resolvers: Record<string, (e: Event) => boolean> = {
             scrapRow: (e: Event) => e.t === "PromptCancelled" || (e.t === "CardScrapped" && e.from === "row"),
             chooseRowForFree: (e: Event) => e.t === "PromptCancelled" || (e.t === "CardPurchased"),
+            scrapSelf: (e: Event) => e.t === "PromptCancelled" || (e.t === "CardScrapped" && e.from === "inPlay"),
             choosePlayer: (e: Event) => e.t === "PromptCancelled"  || (e.t === "TargetChosen"),
             opponentDiscard: (e: Event) => e.t === "PromptCancelled" || (e.t === "CardDiscarded")
         }

@@ -52,28 +52,48 @@ export const baseCards: BaseCard[] = [
     //     cardName: "MOTHERSHIP",
     //     amount: 1
     // },
+    // {
+    //     cardName: "IMPERIALFIGHTER",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "IMPERIALFRIGATE",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "SURVEYSHIP",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "CORVETTE",
+    //     amount: 2
+    // },
+    // {
+    //     cardName: "BATTLECRUISER",
+    //     amount: 1
+    // },
+    // {
+    //     cardName: "DREADNAUGHT",
+    //     amount: 1
+    // },
     {
-        cardName: "IMPERIALFIGHTER",
+        cardName: "TRADEBOT",
         amount: 3
     },
     {
-        cardName: "IMPERIALFRIGATE",
+        cardName: "MISSILEBOT",
         amount: 3
     },
     {
-        cardName: "SURVEYSHIP",
+        cardName: "SUPPLYBOT",
         amount: 3
     },
     {
-        cardName: "CORVETTE",
-        amount: 2
-    },
-    {
-        cardName: "BATTLECRUISER",
+        cardName: "BATTLEMECH",
         amount: 1
     },
     {
-        cardName: "DREADNAUGHT",
+        cardName: "MISSILEMECH",
         amount: 1
     }
 ]

@@ -9,6 +9,7 @@ import { getActivePrompt } from "../helperFunctions/activePromptFunction";
 import ScrapPromptOverlay from "../promptOverlays/tradeRowOverlay";
 import OpponentDiscardOverlay from "../promptOverlays/opponentDiscardOverlay";
 import OpponentChoiceOverlay from "../promptOverlays/opponentChoiceOverlay";
+import ChooseToScrapOverlay from "../promptOverlays/chooseToScrapOverlay";
 
 export default function Game() {
     const players = useMemo(() => ['A', 'B'], [])
@@ -37,8 +38,8 @@ export default function Game() {
         return <div>Loading...</div>
     };
 
-    const handleScrap = (idx: number, _: string, currentPlayer: string) => {
-        append({ t: 'CardScrapped', player: currentPlayer, from: 'row', rowIndex: idx })
+    const handleScrap = (idx: number, card: string, currentPlayer: string) => {
+        append({ t: 'CardScrapped', player: currentPlayer, from: 'row', placementIndex: idx, card })
     }
 
     const handleFreeCard = (idx: number, card: string, currentPlayer: string) => {
@@ -92,7 +93,13 @@ export default function Game() {
                             const cardDef = cardRegistry[card];
                             return <div className="pl-1 pr-1" key={index}>
                                     <p>{cardDef.name}</p>
-                                    {state.order[state.activeIndex] === pid && <button onClick={() => append({ t: 'CardPlayed', player: state.order[state.activeIndex], handIndex: index })}>Play</button>}
+                                    <div className="flex flex-row">
+                                        {
+                                            cardDef.selfScrap &&
+                                            <button onClick={() => append({ t: 'CardScrapped', player: pid, from: 'hand', placementIndex: index, card: card })}>Scrap</button>
+                                        }
+                                        {state.order[state.activeIndex] === pid && <button onClick={() => append({ t: 'CardPlayed', player: state.order[state.activeIndex], handIndex: index })}>Play</button>}
+                                    </div>
                                 </div>
                             
                         })}
@@ -101,7 +108,13 @@ export default function Game() {
                         <div className="flex flex-row">
                         {player.inPlay.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <p className="pl-1 pr-1" key={index}>{cardDef.name}</p>
+                            return <div key={index}>
+                                <p className="pl-1 pr-1">{cardDef.name}</p>
+                                {
+                                    cardDef.selfScrap &&
+                                    <button onClick={() => append({ t: 'CardScrapped', player: pid, from: 'inPlay', placementIndex: index, card: card })}>Scrap</button>
+                                }
+                            </div>
                         })}
                         </div>
                         <p>Discard:</p><hr/>
@@ -140,6 +153,14 @@ export default function Game() {
             )}
             {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'choosePlayer' && (
               <OpponentChoiceOverlay
+                state={state}
+                activePrompt={activePrompt}
+                append={append}
+                currentPlayer={state.order[state.activeIndex]}
+              />
+            )}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapSelf' && (
+              <ChooseToScrapOverlay
                 state={state}
                 activePrompt={activePrompt}
                 append={append}

@@ -9,12 +9,10 @@ interface OpponentHandChoiceOverlayProps {
     currentPlayer: string;
 }
 
-// src/app/game/components/OpponentDiscardOverlay.tsx
 export default function OpponentDiscardOverlay({ state, activePrompt, append, currentPlayer }: OpponentHandChoiceOverlayProps ) {
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'opponentDiscard';
     if (!isOpen) return null;
   
-    // for now: only one opponent → pick the first PID that isn't current
     const target: string | undefined = (activePrompt as Prompt)?.data?.target;
     if (!target) return null;
   

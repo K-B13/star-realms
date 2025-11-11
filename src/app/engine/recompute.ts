@@ -49,6 +49,18 @@ const onPlayRule: Rule<'CardPlayed'> = {
                   break;
                 }
             }
+        if (def.selfScrap) {
+            emit({
+                t: "PromptShown",
+                player: ev.player,
+                kind: "scrapSelf",
+                optional: true,
+                data: {
+                    card: justPlayed,
+                    inPlayIndex: p.inPlay.length - 1
+                }
+            })
+        }
         }
     }
 }
@@ -102,6 +114,35 @@ const allyRule: Rule<'CardPlayed'> = {
     }
 }
 
+const onSelfScrapEffectsRule: Rule<'CardScrapped'> = {
+    on: 'CardScrapped',
+    run: (state, ev, emit) => {
+        const def = cardRegistry[ev.card!];
+        if (!def?.abilities) return;
+        console.log(ev.card)
+        for (const a of def.abilities) {
+            if (a.trigger !== 'onScrap') continue;
+            for (const e of a.effects) {
+                switch (e.kind) {
+                    case 'addTrade': emit({ t: 'TradeAdded', player: ev.player, amount: e.amount }); break;
+                    case 'addCombat': emit({ t: 'CombatAdded', player: ev.player, amount: e.amount }); break;
+                    case 'addAuthority': emit({ t: 'AuthorityAdded', player: ev.player, amount: e.amount }); break;
+                    case 'drawCards': emit({ t: 'CardsDrawn', player: ev.player, count: e.amount }); break;
+                    case 'nextAcquireTop': emit({ t: 'NextAcquireToTopSet', player: ev.player }); break;
+                    case 'nextAcquireFree': emit({ t: 'NextAcquireFreeSet', player: ev.player }); break;
+                    case 'prompt': emit({
+                        t: 'PromptShown',
+                        player: ev.player,
+                        kind: e.prompt.kind,
+                        optional: e.prompt.optional,
+                        data: e.prompt.data
+                    }); break;
+                }
+            }
+        }
+    }
+}
+
 const cleanupRule: Rule<'PhaseChanged'> = {
     on: 'PhaseChanged',
     run: (state, ev, emit) => {
@@ -148,16 +189,16 @@ const ensureDeckRule: Rule<'DrawOne'> = {
     }
 }
 
-const onScrapRules: Rule<'CardScrapped'> = {
+const onScrapTradeRowRules: Rule<'CardScrapped'> = {
     on: "CardScrapped",
     run: (state, ev, emit) => {
         if (ev.from === 'row') {
-            emit({ t: 'RowRefilled', rowIndex: ev.rowIndex })   
+            emit({ t: 'RowRefilled', rowIndex: ev.placementIndex })   
         }
     }
 }
 
-const opponenetSelectedRules: Rule<'TargetChosen'> = {
+const opponentSelectedRules: Rule<'TargetChosen'> = {
     on: 'TargetChosen',
     run: (state, ev, emit) => {
         switch (ev.purpose) {
@@ -176,7 +217,7 @@ const opponenetSelectedRules: Rule<'TargetChosen'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapRules, opponenetSelectedRules ] as Rule<Event['t']>[]
+const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules ] as Rule<Event['t']>[]
 
 function runRules(state: GameState, ev: Event): Event[] {
     const emitted: Event[] = [];
@@ -247,8 +288,29 @@ export const applyEvent = (state: GameState, event: Event) => {
             return state;
         case 'CardScrapped':
             if (event.from === 'row') {
-                const cardAtSlot = state.row[event.rowIndex];
+                const cardAtSlot = state.row[event.placementIndex];
                 state.scrap.push(cardAtSlot) 
+            } else if (event.from === 'hand') {
+                const p = state.players[event.player]
+                const i = event.placementIndex;
+                if (i < 0 || i >= p.hand.length) return state;
+                const [ removed ] = p.hand.splice(i, 1)
+                state.scrap.push(removed)
+                return state 
+            } else if (event.from === 'inPlay') {
+                const p = state.players[event.player]
+                const i = event.placementIndex;
+                if (i < 0 || i >= p.inPlay.length) return state;
+                const [ removed ] = p.inPlay.splice(i, 1)
+                state.scrap.push(removed) 
+                return state 
+            } else if (event.from === 'discard') {
+                const p = state.players[event.player]
+                const i = event.placementIndex;
+                if (i < 0 || i >= p.discard.length) return state;
+                const [ removed ] = p.discard.splice(i, 1)
+                state.scrap.push(removed)
+                return state 
             }
             return state;
         case 'CardDiscarded':

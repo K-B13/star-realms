@@ -15,6 +15,8 @@ export interface Prompt {
     data?: {
         purpose?: string;
         target?: string;
+        card?: string;
+        inPlayIndex?: number;
     };
 }
 
@@ -23,13 +25,10 @@ export default function OpponentChoiceOverlay({ state, activePrompt, append, cur
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'choosePlayer';
     if (!isOpen) return null;
 
-    // b) get purpose from prompt data
     const purpose = (activePrompt as Prompt)?.data?.purpose ?? 'opponentDiscard';
 
-    // c) list candidates (today it’s the one other player)
     const candidates = state.order.filter(pid => pid !== currentPlayer);
 
-    // d) clicking a player emits TargetChosen (NOT CardDiscarded)
     const pick = (pid: string) =>
       append({ t: 'TargetChosen', player: currentPlayer, target: pid, purpose } as Event);
 

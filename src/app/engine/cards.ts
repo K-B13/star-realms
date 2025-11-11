@@ -5,8 +5,8 @@ export type Effect =
 | { kind: 'addCombat', amount: number }
 | { kind: 'addAuthority', amount: number }
 | { kind: 'drawCards', amount: number }
+| { kind: 'scrapSelf' }
 | { kind: 'nextAcquireTop' }
-| { kind: 'scrapSelf'}
 | { kind: 'nextAcquireFree' }
 | { kind: 'prompt', prompt: { kind: string, optional?: boolean, data?: unknown }}
 
@@ -22,6 +22,7 @@ export interface CardDef {
     faction: Faction;
     description?: string;
     type: 'ship' | 'base'
+    selfScrap: boolean;
     abilities: Ability[];
 }
 
@@ -32,6 +33,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 0,
         faction: 'Neutral',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -47,6 +49,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 0,
         faction: 'Neutral',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -62,6 +65,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 2,
         faction: 'Neutral',
         type: 'ship',
+        selfScrap: true,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -73,7 +77,6 @@ export const cardRegistry: Record<string, CardDef> = {
                 trigger: 'onScrap',
                 effects: [
                     { kind: 'addCombat', amount: 2 },
-                    { kind: 'scrapSelf' }
                 ]
             }
         ]
@@ -84,6 +87,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 1,
         faction: 'Trade Federation',
         type: 'ship',
+        selfScrap: false,
         description: "Fast? This baby doesn't just haul cargo. She hauls...",
         abilities: [
             {
@@ -106,6 +110,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 2,
         faction: 'Trade Federation',
         type: 'ship',
+        selfScrap: false,
         description: "Built for cargo, armed for conflict. Versatility for an unpredictable universe.",
         abilities: [
             {
@@ -129,6 +134,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 3,
         faction: 'Trade Federation',
         type: 'ship',
+        selfScrap: false,
         description: "War should always be a last resort. It's bad for the bottom line",
         abilities: [
             {
@@ -146,6 +152,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 4,
         faction: 'Trade Federation',
         type: 'ship',
+        selfScrap: false,
         description: "This class of mammoth cargo ships is one of the keys to the federations vast trade-based wealth",
         abilities: [
             {
@@ -168,6 +175,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 8,
         faction: 'Trade Federation',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -191,6 +199,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 5,
         faction: 'Trade Federation',
         type: 'ship',
+        selfScrap: false,
         description: "This heavily-armoured Escort class was the Federation's first response to the Blob threat",
         abilities: [
             {
@@ -214,6 +223,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 6,
         faction: 'Trade Federation',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -236,6 +246,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 1,
         faction: 'Blob Faction',
         type: 'ship',
+        selfScrap: false,
         description: "Either kill it before it signals the hive or run. There are other choices but non you'll live through",
         abilities: [
             {
@@ -258,6 +269,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 2,
         faction: 'Blob Faction',
         type: 'ship',
+        selfScrap: false,
         description: "The loading and offloading process is efficient but disgusting",
         abilities: [
             {
@@ -280,6 +292,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 2,
         faction: 'Blob Faction',
         type: 'ship',
+        selfScrap: false,
         description: "The loading and offloading process is efficient but disgusting",
         abilities: [
             {
@@ -303,6 +316,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 3,
         faction: 'Blob Faction',
         type: 'ship',
+        selfScrap: true,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -330,6 +344,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 4,
         faction: 'Blob Faction',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -345,6 +360,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 6,
         faction: 'Blob Faction',
         type: 'ship',
+        selfScrap: true,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -372,6 +388,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 6,
         faction: 'Blob Faction',
         type: 'ship',
+        selfScrap: false,
         description: "Is that... a whale?",
         abilities: [
             {
@@ -396,6 +413,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 7,
         faction: 'Blob Faction',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -418,6 +436,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 1,
         faction: 'Star Empire',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -439,6 +458,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 3,
         faction: 'Star Empire',
         type: 'ship',
+        selfScrap: true,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -466,6 +486,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 3,
         faction: 'Star Empire',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -482,6 +503,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 2,
         faction: 'Star Empire',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -503,6 +525,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 6,
         faction: 'Star Empire',
         type: 'ship',
+        selfScrap: false,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -516,8 +539,13 @@ export const cardRegistry: Record<string, CardDef> = {
                 effects: [
                     { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: false, data: { purpose: 'opponentDiscard' } } }
                 ]
+            },
+            {
+                trigger: 'onScrap',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
             }
-
         ]
     },
     DREADNAUGHT: {
@@ -526,6 +554,7 @@ export const cardRegistry: Record<string, CardDef> = {
         cost: 7,
         faction: 'Star Empire',
         type: 'ship',
+        selfScrap: true,
         abilities: [
             {
                 trigger: 'onPlay',
@@ -538,6 +567,116 @@ export const cardRegistry: Record<string, CardDef> = {
                 trigger: 'onScrap',
                 effects: [
                     { kind: 'addCombat', amount: 5 }
+                ]
+            }
+        ]
+    },
+    TRADEBOT: {
+        id: 'TRADEBOT',
+        name: 'Trade Bot',
+        cost: 1,
+        faction: 'Machine Cult',
+        type: 'ship',
+        selfScrap: false,
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addTrade', amount: 1 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            }
+        ]
+    },
+    MISSILEBOT: {
+        id: 'MISSILEBOT',
+        name: 'Missile Bot',
+        cost: 2,
+        faction: 'Machine Cult',
+        type: 'ship',
+        selfScrap: false,
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            }
+        ]
+    },
+    SUPPLYBOT: {
+        id: 'SUPPLYBOT',
+        name: 'Supply Bot',
+        cost: 3,
+        faction: 'Machine Cult',
+        type: 'ship',
+        selfScrap: false,
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addTrade', amount: 2 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            }
+        ]
+    },
+    BATTLEMECH: {
+        id: 'BATTLEMECH',
+        name: 'Battle Mech',
+        cost: 5,
+        faction: 'Machine Cult',
+        type: 'ship',
+        selfScrap: false,
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 4 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    MISSILEMECH: {
+        id: 'MISSILEMECH',
+        name: 'Missile Mech',
+        cost: 6,
+        faction: 'Machine Cult',
+        type: 'ship',
+        selfScrap: false,
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 6 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
                 ]
             }
         ]

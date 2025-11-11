@@ -11,7 +11,7 @@ export type Event =
   | { t: 'TradeSpent'; player: PID; card: string; amount: number }
   | { t: 'CardPurchased'; player: PID;  card: string; rowIndex?: number; source: 'row' | 'explorer' }
   | { t: 'RowRefilled'; rowIndex: number }
-  | { t: 'CardScrapped'; player: PID; from: Zone; rowIndex: number }
+  | { t: 'CardScrapped'; player: PID; from: Zone; placementIndex: number, card: string }
   | { t: 'TargetChosen'; player: PID; target: string; purpose: string }
   | { t: 'CardDiscarded'; player: PID; card: string; rowIndex: number }
   | { t: 'CardsDrawn'; player: PID; count: number }
