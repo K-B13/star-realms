@@ -15,6 +15,12 @@ export interface Ability {
     effects: Effect[];
 }
 
+interface CardText {
+    play: string[];
+    ally?: string[];
+    scrap?: string[];
+}
+
 export interface CardDef {
     id: string;
     name: string;
@@ -23,6 +29,7 @@ export interface CardDef {
     description?: string;
     type: 'ship' | 'base'
     selfScrap: boolean;
+    text: CardText;
     abilities: Ability[];
 }
 
@@ -34,6 +41,9 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Neutral',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+1 Trade`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -50,6 +60,9 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Neutral',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+1 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -66,6 +79,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Neutral',
         type: 'ship',
         selfScrap: true,
+        text: {
+            play: [`+2 Trade`],
+            scrap: [`+2 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -89,6 +106,10 @@ export const cardRegistry: Record<string, CardDef> = {
         type: 'ship',
         selfScrap: false,
         description: "Fast? This baby doesn't just haul cargo. She hauls...",
+        text: {
+            play: [`+2 Trade`],
+            ally: [`+4 Authority`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -112,6 +133,10 @@ export const cardRegistry: Record<string, CardDef> = {
         type: 'ship',
         selfScrap: false,
         description: "Built for cargo, armed for conflict. Versatility for an unpredictable universe.",
+        text: {
+            play: [`+2 Trade`, `+4 Authority`],
+            ally: [`+4 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -136,6 +161,9 @@ export const cardRegistry: Record<string, CardDef> = {
         type: 'ship',
         selfScrap: false,
         description: "War should always be a last resort. It's bad for the bottom line",
+        text: {
+            play: [`+2 Trade`, `+3 Authority`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -154,6 +182,10 @@ export const cardRegistry: Record<string, CardDef> = {
         type: 'ship',
         selfScrap: false,
         description: "This class of mammoth cargo ships is one of the keys to the federations vast trade-based wealth",
+        text: {
+            play: [`+4 Trade`],
+            ally: [`Next card acquired from trade row goes to top of the deck`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -176,6 +208,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Trade Federation',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+4 Authority`, `+5 Combat`, `Draw 2 cards`],
+            ally: [`Next card acquired from trade row goes to top of the deck`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -201,6 +237,10 @@ export const cardRegistry: Record<string, CardDef> = {
         type: 'ship',
         selfScrap: false,
         description: "This heavily-armoured Escort class was the Federation's first response to the Blob threat",
+        text: {
+            play: [`+4 Authority`, `+4 Combat`],
+            ally: [`Draw 1 card`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -224,6 +264,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Trade Federation',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+5 Combat`, `Draw 1 card`],
+            ally: [`Add 5 authority`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -248,6 +292,10 @@ export const cardRegistry: Record<string, CardDef> = {
         type: 'ship',
         selfScrap: false,
         description: "Either kill it before it signals the hive or run. There are other choices but non you'll live through",
+        text: {
+            play: [`+3 Combat`],
+            ally: [`Draw 1 card`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -271,6 +319,10 @@ export const cardRegistry: Record<string, CardDef> = {
         type: 'ship',
         selfScrap: false,
         description: "The loading and offloading process is efficient but disgusting",
+        text: {
+            play: [`+3 Trade`],
+            ally: [`+2 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -294,6 +346,10 @@ export const cardRegistry: Record<string, CardDef> = {
         type: 'ship',
         selfScrap: false,
         description: "The loading and offloading process is efficient but disgusting",
+        text: {
+            play: [`+4 Combat`, `You may scrap a card in the trade row`],
+            ally: [`+2 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -317,6 +373,11 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Blob Faction',
         type: 'ship',
         selfScrap: true,
+        text: {
+            play: [`+5 Combat`],
+            ally: [`+2 Combat`],
+            scrap: [`+3 Trade`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -345,6 +406,9 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Blob Faction',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+6 Combat`],
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -361,6 +425,11 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Blob Faction',
         type: 'ship',
         selfScrap: true,
+        text: {
+            play: [`+8 Combat`],
+            ally: [`Draw 1 card`],
+            scrap: [`+4 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -390,6 +459,10 @@ export const cardRegistry: Record<string, CardDef> = {
         type: 'ship',
         selfScrap: false,
         description: "Is that... a whale?",
+        text: {
+            play: [`+7 Combat`],
+            ally: [`Next card acquired from trade row is free and goes to top of the deck`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -414,6 +487,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Blob Faction',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+6 Combat`, `Draw 1 card`],
+            ally: [`Draw 1 card`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -437,6 +514,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Star Empire',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+2 Combat`, `Choose a player to discard a card`],
+            ally: [`+2 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -459,6 +540,11 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Star Empire',
         type: 'ship',
         selfScrap: true,
+        text: {
+            play: [`+4 Combat`, `Choose a player to discard a card`],
+            ally: [`+2 Combat`],
+            scrap: [`Draw 1 card`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -487,6 +573,9 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Star Empire',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+1 Trade`, `Draw 1 card`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -504,6 +593,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Star Empire',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+1 Combat`, `Draw 1 card`],
+            ally: [`+2 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -526,6 +619,11 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Star Empire',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+5 Combat`, `Draw 1 card`],
+            ally: [`Choose a player to discard a card`],
+            scrap: [`Draw 1 card`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -555,6 +653,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Star Empire',
         type: 'ship',
         selfScrap: true,
+        text: {
+            play: [`+7 Combat`, `Draw 1 card`],
+            scrap: [`+5 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -578,6 +680,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Machine Cult',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+1 Trade`, `You may scrap a card in your hand or discard`],
+            ally: [`+2 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -601,6 +707,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Machine Cult',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+2 Combat`, `You may scrap a card in your hand or discard`],
+            ally: [`+2 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -624,6 +734,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Machine Cult',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+2 Trade`, `You may scrap a card in your hand or discard`],
+            ally: [`+2 Combat`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -647,6 +761,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Machine Cult',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+4 Combat`, `You may scrap a card in your hand or discard`],
+            ally: [`Draw 1 card`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',
@@ -670,6 +788,10 @@ export const cardRegistry: Record<string, CardDef> = {
         faction: 'Machine Cult',
         type: 'ship',
         selfScrap: false,
+        text: {
+            play: [`+6 Combat`],
+            ally: [`Draw 1 card`]
+        },
         abilities: [
             {
                 trigger: 'onPlay',

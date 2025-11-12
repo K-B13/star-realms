@@ -1,7 +1,7 @@
 
 export type Phase = 'MAIN'|'CLEANUP';
 export type PID = string;
-type Zone = 'row' | 'hand' | 'inPlay' | 'discard'
+export type Zone = 'row' | 'hand' | 'inPlay' | 'discard'
 
 export type Event =
   | { t: 'CardPlayed'; player: PID; handIndex: number }

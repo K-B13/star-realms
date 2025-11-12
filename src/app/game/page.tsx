@@ -11,6 +11,7 @@ import OpponentDiscardOverlay from "../promptOverlays/opponentDiscardOverlay";
 import OpponentChoiceOverlay from "../promptOverlays/opponentChoiceOverlay";
 import ChooseToScrapOverlay from "../promptOverlays/chooseToScrapOverlay";
 import ChooseOtherCardToScrapOverlay from "../promptOverlays/chooseOtherCardToScrapOverlay";
+import Card from "./reusableComponents/card";
 
 export default function Game() {
     const players = useMemo(() => ['A', 'B'], [])
@@ -62,9 +63,8 @@ export default function Game() {
                     { state.row.map((card, index) => {
                         const cardDef = cardRegistry[card];
                         return (
-                            <div key={index} className="pr-1 pl-1">
-                                <p>{cardDef.name}</p>
-                                <p>Cost {cardDef.cost}</p>
+                            <div key={index} className="pr-1 pl-1 border-solid border-2">
+                                <Card card={cardDef} isInTradeRow={true}/>
                                 <button onClick={() => append([
                                     { t: 'CardPurchased', player: state.order[state.activeIndex], card: card, source: 'row', rowIndex: index },
                                     { t: "TradeSpent", player: state.order[state.activeIndex], card: card, amount: cardDef.cost }
@@ -92,8 +92,8 @@ export default function Game() {
                         <div className="flex flex-row">
                         {player.hand && player.hand.length > 0 && player.hand.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <div className="pl-1 pr-1" key={index}>
-                                    <p>{cardDef.name}</p>
+                            return <div className="pl-1 pr-1 border-solid border-2" key={index}>
+                                    <Card card={cardDef} isInTradeRow={false}/>
                                     <div className="flex flex-row">
                                         {
                                             cardDef.selfScrap &&
@@ -109,8 +109,8 @@ export default function Game() {
                         <div className="flex flex-row">
                         {player.inPlay.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <div key={index}>
-                                <p className="pl-1 pr-1">{cardDef.name}</p>
+                            return <div className="pl-1 pr-1 border-solid border-2" key={index}>
+                                <Card card={cardDef} isInTradeRow={false}/>
                                 {
                                     cardDef.selfScrap &&
                                     <button onClick={() => append({ t: 'CardScrapped', player: pid, from: 'inPlay', placementIndex: index, card: card })}>Scrap</button>
@@ -122,7 +122,9 @@ export default function Game() {
                         <div className="flex flex-row">
                         {player.discard.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <p className="pl-1 pr-1" key={index}>{cardDef.name}</p>
+                            return <div className="pl-1 pr-1 border-solid border-2" key={index}>
+                                <Card card={cardDef} isInTradeRow={false}/>
+                            </div>
                         })}
                         </div>
                     </div>
