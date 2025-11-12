@@ -582,7 +582,8 @@ export const cardRegistry: Record<string, CardDef> = {
             {
                 trigger: 'onPlay',
                 effects: [
-                    { kind: 'addTrade', amount: 1 }
+                    { kind: 'addTrade', amount: 1 },
+                    { kind: 'prompt', prompt: { kind: 'chooseOtherCardToScrap', optional: true } }
                 ]
             },
             {
@@ -604,7 +605,8 @@ export const cardRegistry: Record<string, CardDef> = {
             {
                 trigger: 'onPlay',
                 effects: [
-                    { kind: 'addCombat', amount: 2 }
+                    { kind: 'addCombat', amount: 2 },
+                    { kind: 'prompt', prompt: { kind: 'chooseOtherCardToScrap', optional: true } }
                 ]
             },
             {
@@ -626,7 +628,8 @@ export const cardRegistry: Record<string, CardDef> = {
             {
                 trigger: 'onPlay',
                 effects: [
-                    { kind: 'addTrade', amount: 2 }
+                    { kind: 'addTrade', amount: 2 },
+                    { kind: 'prompt', prompt: { kind: 'chooseOtherCardToScrap', optional: true } }
                 ]
             },
             {
@@ -648,7 +651,8 @@ export const cardRegistry: Record<string, CardDef> = {
             {
                 trigger: 'onPlay',
                 effects: [
-                    { kind: 'addCombat', amount: 4 }
+                    { kind: 'addCombat', amount: 4 },
+                    { kind: 'prompt', prompt: { kind: 'chooseOtherCardToScrap', optional: true } }
                 ]
             },
             {

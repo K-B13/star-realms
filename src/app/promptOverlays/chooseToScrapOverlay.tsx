@@ -3,7 +3,7 @@ import { Event } from "../engine/events";
 import { Prompt } from "./opponentChoiceOverlay";
 import { cardRegistry } from "../engine/cards";
 
-interface OpponentHandChoiceOverlayProps {
+interface ChooseToScrapOverlayProps {
     state: GameState;
     activePrompt: Event;
     append: (event: Event | Event[]) => void;
@@ -11,7 +11,7 @@ interface OpponentHandChoiceOverlayProps {
 }
 
 
-export default function ChooseToScrapOverlay({ state, activePrompt, append, currentPlayer }: OpponentHandChoiceOverlayProps ) {
+export default function ChooseToScrapOverlay({ state, activePrompt, append, currentPlayer }: ChooseToScrapOverlayProps ) {
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapSelf';
     if (!isOpen) return null;
 
