@@ -754,6 +754,39 @@ export const cardRegistry: Record<string, CardDef> = {
             }
         ]
     },
+    PATROLMECH: {
+        id: 'PATROLMECH',
+        name: 'Patrol Mech',
+        cost: 4,
+        faction: 'Machine Cult',
+        type: 'ship',
+        selfScrap: false,
+        description: "With the Blobs an ever present danger even the Cult's  cargo carrying mechs bristle with firepower",
+        text: {
+            play: [`+3 Trade or +5 Combat`,],
+            ally: [`You may scrap a card in your hand or discard`]
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'chooseAbility', optional: false, data: { options:
+                        [
+                            { t: 'TradeAdded', amount: 3, label: '+3 Trade' },
+                            { t: 'CombatAdded', amount: 5, label: '+5 Combat' }
+                        ],
+                        card: 'PATROLMECH'
+                    }} }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'chooseOtherCardToScrap', optional: true } }
+                ]
+            }
+        ]
+    },
     BATTLEMECH: {
         id: 'BATTLEMECH',
         name: 'Battle Mech',

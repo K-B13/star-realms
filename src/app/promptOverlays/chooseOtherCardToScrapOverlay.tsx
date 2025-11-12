@@ -26,14 +26,14 @@ export default function ChooseOtherCardToScrapOverlay({ state, activePrompt, app
   
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white p-4 rounded shadow-md max-w-lg w-full">
+        <div className="bg-blue-500 p-4 rounded shadow-md max-w-lg w-full">
           <h3 className="text-lg font-semibold mb-3">Choose a card you want to scrap</h3>
           <div className="flex gap-2 flex-wrap mb-4">
             <div className="flex flex-row">
                 {currentPlayerDetails.inPlay.map((card, idx) => {
                   if (idx === currentPlayerDetails.inPlay.length - 1) return;
                   return (
-                    <button key={idx} onClick={() => ScrapChosenCard(idx, card, 'inPlay')} className="px-3 py-1 bg-gray-300 rounded">{cardRegistry[card].name}</button>
+                    <button key={idx} onClick={() => ScrapChosenCard(idx, card, 'inPlay')} className="px-3 py-1 bg-blue-500 rounded">{cardRegistry[card].name}</button>
                   )
                 })}
             </div>

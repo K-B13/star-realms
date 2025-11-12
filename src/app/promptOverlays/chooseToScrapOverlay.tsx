@@ -11,7 +11,7 @@ interface ChooseToScrapOverlayProps {
 }
 
 
-export default function ChooseToScrapOverlay({ state, activePrompt, append, currentPlayer }: ChooseToScrapOverlayProps ) {
+export default function ChooseToScrapOverlay({ state, activePrompt, append, currentPlayer }: ChooseToScrapOverlayProps) {
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapSelf';
     if (!isOpen) return null;
 

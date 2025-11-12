@@ -12,6 +12,7 @@ import OpponentChoiceOverlay from "../promptOverlays/opponentChoiceOverlay";
 import ChooseToScrapOverlay from "../promptOverlays/chooseToScrapOverlay";
 import ChooseOtherCardToScrapOverlay from "../promptOverlays/chooseOtherCardToScrapOverlay";
 import Card from "./reusableComponents/card";
+import ChooseAbilityOverlay from "../promptOverlays/chooseAbilityOverlay";
 
 export default function Game() {
     const players = useMemo(() => ['A', 'B'], [])
@@ -172,6 +173,14 @@ export default function Game() {
             )}
             {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseOtherCardToScrap' && (
               <ChooseOtherCardToScrapOverlay
+                state={state}
+                activePrompt={activePrompt}
+                append={append}
+                currentPlayer={state.order[state.activeIndex]}
+              />
+            )}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseAbility' && (
+              <ChooseAbilityOverlay
                 state={state}
                 activePrompt={activePrompt}
                 append={append}

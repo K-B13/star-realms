@@ -8,6 +8,12 @@ interface OpponentChoiceOverlayProps {
     currentPlayer: string;
 }
 
+type Options = {
+    t: string;
+    label: string;
+    amount: number;
+}
+
 export interface Prompt {
     t: 'PromptShown';
     kind: string;
@@ -17,10 +23,10 @@ export interface Prompt {
         target?: string;
         card?: string;
         inPlayIndex?: number;
+        options?: Options[];
     };
 }
 
-// src/app/game/components/OpponentDiscardOverlay.tsx
 export default function OpponentChoiceOverlay({ state, activePrompt, append, currentPlayer }: OpponentChoiceOverlayProps ) {
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'choosePlayer';
     if (!isOpen) return null;

@@ -1,5 +1,4 @@
 import { CardDef } from "@/app/engine/cards";
-import { Event, Zone } from "@/app/engine/events";
 
 export default function Card({ 
     card,
