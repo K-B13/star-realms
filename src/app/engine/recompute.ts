@@ -397,6 +397,7 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'FactionTagAdded': {
             const player = state.players[event.player];
             player.factionTags ??= {};
+            if (event.faction === 'Machine Cult') return state;
             player.factionTags[event.faction] = (player.factionTags[event.faction] ?? 0) + event.amount;
             return state;
         }
