@@ -787,6 +787,26 @@ export const cardRegistry: Record<string, CardDef> = {
             }
         ]
     },
+    STEALTHNEEDLE: {
+        id: 'STEALTHNEEDLE',
+        name: 'Stealth Needle',
+        cost: 4,
+        faction: 'Machine Cult',
+        type: 'ship',
+        selfScrap: false,
+        description: "The Needle's ability to mimic other ships represents the pinnacle of Cult technology.",
+        text: {
+            play: [`Copy another ship you have played this turn.`, 'Needle ship has that ship\'s faction as well as Machine Cult'],
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'chooseInPlayShip', optional: true } }
+                ]
+            }
+        ]
+    },
     BATTLEMECH: {
         id: 'BATTLEMECH',
         name: 'Battle Mech',

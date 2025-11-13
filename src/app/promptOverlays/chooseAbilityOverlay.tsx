@@ -30,7 +30,7 @@ export default function ChooseAbilityOverlay({ state, activePrompt, append, curr
         return (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-blue p-4 rounded shadow-md max-w-lg w-full">
-              <h3 className="text-lg font-semibold mb-3">Do you also want to scrap {card.name}</h3>
+              <h3 className="text-lg font-semibold mb-3">Choose an ability</h3>
               <div className="flex gap-2 flex-wrap mb-4">
                 {
                     (activePrompt as Prompt).data!.options!.map((option, idx) => {

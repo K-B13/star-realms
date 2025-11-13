@@ -13,6 +13,15 @@ import ChooseToScrapOverlay from "../promptOverlays/chooseToScrapOverlay";
 import ChooseOtherCardToScrapOverlay from "../promptOverlays/chooseOtherCardToScrapOverlay";
 import Card from "./reusableComponents/card";
 import ChooseAbilityOverlay from "../promptOverlays/chooseAbilityOverlay";
+import ChooseCardToCopyOverlay from "../promptOverlays/chooseCardToCopyOverlay";
+
+export const factionColor = {
+    "Trade Federation": "bg-blue-500",
+    "Blob Faction": "bg-green-500",
+    "Machine Cult": "bg-red-500",
+    "Star Empire": "bg-yellow-500",
+    "Neutral": "bg-gray-500",
+}
 
 export default function Game() {
     const players = useMemo(() => ['A', 'B'], [])
@@ -64,7 +73,7 @@ export default function Game() {
                     { state.row.map((card, index) => {
                         const cardDef = cardRegistry[card];
                         return (
-                            <div key={index} className="pr-1 pl-1 border-solid border-2">
+                            <div key={index} className={`${factionColor[cardDef.faction]} pr-1 pl-1 border-solid border-2`}>
                                 <Card card={cardDef} isInTradeRow={true}/>
                                 <button onClick={() => append([
                                     { t: 'CardPurchased', player: state.order[state.activeIndex], card: card, source: 'row', rowIndex: index },
@@ -75,12 +84,17 @@ export default function Game() {
                     })}
                 </div>
             </div>
-            { state.explorerDeck.length > 0 && <button
-            onClick={() => append([
-                { t: 'CardPurchased', player: state.order[state.activeIndex], card: 'EXPLORER', source: 'explorer'}, 
-                { t: "TradeSpent", player: state.order[state.activeIndex], card: 'EXPLORER', amount: 2 }
-                ])}
-            >Explorers Deck - {state.explorerDeck.length}</button>}
+            { state.explorerDeck.length > 0 && 
+            <div className={`flex flex-col items-center ${factionColor['Neutral']}`}>
+                <Card card={cardRegistry['EXPLORER']} isInTradeRow={false}/>
+                <button
+                onClick={() => append([
+                    { t: 'CardPurchased', player: state.order[state.activeIndex], card: 'EXPLORER', source: 'explorer'}, 
+                    { t: "TradeSpent", player: state.order[state.activeIndex], card: 'EXPLORER', amount: 2 }
+                    ])}>
+                    Get an Explorer - {state.explorerDeck.length} Left
+                </button>
+            </div>}
             {state.order.map((pid: string, idx: number) => {
                 const player = state.players[pid];
                 console.log(player)
@@ -90,10 +104,10 @@ export default function Game() {
                         {state.order[state.activeIndex] !== pid && state.players[state.order[state.activeIndex]].combat > 0 && <button onClick={() => append({ t: 'DamageDealt', from: state.order[state.activeIndex], to: pid, amount: state.players[state.order[state.activeIndex]].combat })}>Attack</button>}
                         <p>A/T/C: {player.authority}/{player.trade}/{player.combat}</p>
                         <p>Hand:</p><hr/>
-                        <div className="flex flex-row">
+                        <div className="flex flex-row justify-center">
                         {player.hand && player.hand.length > 0 && player.hand.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <div className="pl-1 pr-1 border-solid border-2" key={index}>
+                            return <div className={`${factionColor[cardDef.faction]} ml-1 mr-1 pl-1 pr-1 border-solid border-2`} key={index}>
                                     <Card card={cardDef} isInTradeRow={false}/>
                                     <div className="flex flex-row">
                                         {
@@ -110,7 +124,7 @@ export default function Game() {
                         <div className="flex flex-row">
                         {player.inPlay.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <div className="pl-1 pr-1 border-solid border-2" key={index}>
+                            return <div className={`${factionColor[cardDef.faction]} pl-1 pr-1 border-solid border-2`} key={index}>
                                 <Card card={cardDef} isInTradeRow={false}/>
                                 {
                                     cardDef.selfScrap &&
@@ -123,7 +137,7 @@ export default function Game() {
                         <div className="flex flex-row">
                         {player.discard.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <div className="pl-1 pr-1 border-solid border-2" key={index}>
+                            return <div className={`${factionColor[cardDef.faction]} pl-1 pr-1 border-solid border-2`} key={index}>
                                 <Card card={cardDef} isInTradeRow={false}/>
                             </div>
                         })}
@@ -181,6 +195,14 @@ export default function Game() {
             )}
             {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseAbility' && (
               <ChooseAbilityOverlay
+                state={state}
+                activePrompt={activePrompt}
+                append={append}
+                currentPlayer={state.order[state.activeIndex]}
+              />
+            )}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseInPlayShip' && (
+              <ChooseCardToCopyOverlay
                 state={state}
                 activePrompt={activePrompt}
                 append={append}

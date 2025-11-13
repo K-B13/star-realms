@@ -12,6 +12,7 @@ export interface PlayerState {
     combat: number;
     trade: number;
     freeNextAcquire: boolean;
+    factionTags: Record<string, number>;
 }
 
 export interface GameState {

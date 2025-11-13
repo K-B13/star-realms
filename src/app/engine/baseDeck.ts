@@ -93,6 +93,10 @@ export const baseCards: BaseCard[] = [
         amount: 2
     },
     {
+        cardName: "STEALTHNEEDLE",
+        amount: 3
+    },
+    {
         cardName: "BATTLEMECH",
         amount: 1
     },

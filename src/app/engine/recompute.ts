@@ -71,11 +71,12 @@ const allyRule: Rule<'CardPlayed'> = {
         const justPlayed = state.players[ ev.player ].inPlay[state.players[ ev.player ].inPlay.length - 1];
         const def = cardRegistry[ justPlayed ];
         const faction = def.faction;
+        const factionCounterStartingPoint = state.players[ev.player].factionTags[faction] ?? 0
         const factionCounter = state.players[ ev.player ].inPlay.reduce((acc, card) => {
             const cardDef = cardRegistry[ card ];
             if (cardDef.faction === faction) acc++;
             return acc;
-        }, 0);
+        }, factionCounterStartingPoint);
         if (factionCounter <= 1) return;
         for (const ability of def.abilities) {
             if (ability.trigger !== 'onAlly') continue;
@@ -111,6 +112,38 @@ const allyRule: Rule<'CardPlayed'> = {
                 }
             }
         }
+    }
+}
+
+const applyCopyRule: Rule<'TargetCardChosen'> = {
+    on: 'TargetCardChosen',
+    run: (state, ev, emit) => {
+        if (ev.source !== 'copyShip') return;
+
+        const p = state.players[ev.player];
+        const targetId = p.inPlay[ev.inPlayIndex];
+        if (!targetId) return;
+
+        if (targetId === 'STEALTHNEEDLE') return;
+
+        const targetDef = cardRegistry[targetId];
+        if (!targetDef) return;
+
+        for (const a of targetDef.abilities ?? []) {
+            if (a.trigger !== 'onPlay') continue;
+            for (const e of a.effects ?? []) {
+              switch (e.kind) {
+                case 'addTrade':     emit({ t:'TradeAdded',     player: ev.player, amount: e.amount }); break;
+                case 'addCombat':    emit({ t:'CombatAdded',    player: ev.player, amount: e.amount }); break;
+                case 'addAuthority': emit({ t:'AuthorityAdded', player: ev.player, amount: e.amount }); break;
+                case 'drawCards':    emit({ t:'CardsDrawn',     player: ev.player, count:  e.amount }); break;
+                case 'nextAcquireTop':  emit({ t:'NextAcquireToTopSet',  player: ev.player }); break;
+                case 'nextAcquireFree': emit({ t:'NextAcquireFreeSet',   player: ev.player }); break;
+                case 'prompt': emit({ t:'PromptShown', player: ev.player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
+              }
+            }
+        }
+        emit({ t: "FactionTagAdded", player: ev.player, faction: targetDef.faction, amount: 1 })
     }
 }
 
@@ -217,7 +250,7 @@ const opponentSelectedRules: Rule<'TargetChosen'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules ] as Rule<Event['t']>[]
+const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules ] as Rule<Event['t']>[]
 
 function runRules(state: GameState, ev: Event): Event[] {
     const emitted: Event[] = [];
@@ -342,6 +375,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             activePlayer.acquireLocation = 'discard';
             activePlayer.freeNextAcquire = false;
             state.players[event.player] = activePlayer;
+            activePlayer.factionTags = {};
             return state;
         case 'DamageDealt':
             const attacker = state.players[ event.from ];
@@ -360,6 +394,12 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'NextAcquireFreeSet':
             state.players[event.player].freeNextAcquire = true;
             return state;
+        case 'FactionTagAdded': {
+            const player = state.players[event.player];
+            player.factionTags ??= {};
+            player.factionTags[event.faction] = (player.factionTags[event.faction] ?? 0) + event.amount;
+            return state;
+        }
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;
             return state;

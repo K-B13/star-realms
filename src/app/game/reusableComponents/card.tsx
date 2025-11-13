@@ -7,11 +7,11 @@ export default function Card({
     card: CardDef,
     isInTradeRow: boolean
 }) {
-    // Some cards need to know the cost when rendered like in trade row.
+
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col ">
             <div>
-                {isInTradeRow && <p>{card.cost}</p>}
+                {isInTradeRow && <p>Cost: {card.cost}</p>}
                 <p>{card.name}</p>
                 {
                     card.text.play.map((desc, id) => {

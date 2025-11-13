@@ -21,6 +21,8 @@ export type Event =
   | { t: 'DamageDealt'; from: PID; to: PID; amount: number }
   | { t: 'NextAcquireToTopSet'; player: PID }
   | { t: 'NextAcquireFreeSet'; player: PID }
+  | { t: 'TargetCardChosen'; player: PID; source: 'copyShip'; inPlayIndex: number }
+  | { t: 'FactionTagAdded'; player: PID; faction: string; amount: number }  
   | { t: 'TurnAdvanced' }
   | { t: 'PhaseChanged'; from: Phase; to: Phase }
   | { t: 'PromptShown'; player: PID; kind: string; optional?: boolean; data?: unknown }
