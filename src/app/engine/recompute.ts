@@ -196,7 +196,6 @@ const refillRule: Rule<'CardPurchased'> = {
         if (ev.rowIndex === undefined) return;
         const filledInCard = cardRegistry[ ev.card ];
         if (filledInCard.cost > state.players[ev.player].trade && !state.players[ev.player].freeNextAcquire) return;
-        state.players[ev.player].freeNextAcquire = false;
         emit({ t: 'RowRefilled', rowIndex: ev.rowIndex })
     }
 }
@@ -279,8 +278,12 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.players[ event.player ].authority += event.amount;
             return state;
         case 'TradeSpent':
-            if (cardRegistry[event.card].cost > state.players[event.player].trade) return state
-            const currentPlayer = state.players[ event.player ];
+            const currentPlayer = state.players[event.player]
+            if (currentPlayer.freeNextAcquire) {
+                currentPlayer.freeNextAcquire = false;
+                return state
+            }
+            if (cardRegistry[event.card].cost > currentPlayer.trade) return state
             currentPlayer.trade = Math.max(0, currentPlayer.trade - event.amount);
             return state;
         case 'CardPurchased':
