@@ -20,11 +20,10 @@ export default function ChooseCardToCopyOverlay({ state, activePrompt, append }:
     if (!isOpen) return null;
 
     const p = state.order[state.activeIndex];
-    const inPlay = state.players[p].inPlay;
+    const playedThisTurn = state.turn.playedThisTurn;
     
     const choose = (idx: number) => {
       append({ t:'TargetCardChosen', player: p, source: 'copyShip', inPlayIndex: idx });
-      append({ t:'PromptCancelled' });
     };
     const skip = () =>
         append({ t: 'PromptCancelled' });  
@@ -36,9 +35,9 @@ export default function ChooseCardToCopyOverlay({ state, activePrompt, append }:
                     <h3 className="text-lg font-semibold mb-3">Choose a card to copy</h3>
                     <div className="flex gap-2 flex-wrap mb-4">
                       {
-                      inPlay.map((card, idx) => {
+                      playedThisTurn.map((card, idx) => {
                         const cardDef = cardRegistry[card];
-                        if (idx === inPlay.length - 1)
+                        if (idx === playedThisTurn.length - 1)
                             return <button key={idx} onClick={skip}>Skip</button>
                         return <div className={`${factionColor[cardDef.faction]} pl-1 pr-1 border-solid border-2`} key={idx}>
                             <Card card={cardDef} isInTradeRow={false}/>

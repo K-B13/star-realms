@@ -16,6 +16,18 @@ const onPlayRule: Rule<'CardPlayed'> = {
         const p = state.players[ ev.player ];
         const justPlayed = p.inPlay[p.inPlay.length - 1];
         const def = cardRegistry[ justPlayed ];
+        if (def.selfScrap) {
+            emit({
+                t: "PromptShown",
+                player: ev.player,
+                kind: "scrapSelf",
+                optional: true,
+                data: {
+                    card: justPlayed,
+                    inPlayIndex: p.inPlay.length - 1
+                }
+            })
+        }
         for (const ability of def.abilities) {
             if (ability.trigger !== 'onPlay') continue;
             for (const effect of ability.effects) {
@@ -49,18 +61,6 @@ const onPlayRule: Rule<'CardPlayed'> = {
                   break;
                 }
             }
-        if (def.selfScrap) {
-            emit({
-                t: "PromptShown",
-                player: ev.player,
-                kind: "scrapSelf",
-                optional: true,
-                data: {
-                    card: justPlayed,
-                    inPlayIndex: p.inPlay.length - 1
-                }
-            })
-        }
         }
     }
 }
@@ -121,7 +121,7 @@ const applyCopyRule: Rule<'TargetCardChosen'> = {
         if (ev.source !== 'copyShip') return;
 
         const p = state.players[ev.player];
-        const targetId = p.inPlay[ev.inPlayIndex];
+        const targetId = state.turn.playedThisTurn[ev.inPlayIndex];
         if (!targetId) return;
 
         if (targetId === 'STEALTHNEEDLE') return;
@@ -144,6 +144,31 @@ const applyCopyRule: Rule<'TargetCardChosen'> = {
             }
         }
         emit({ t: "FactionTagAdded", player: ev.player, faction: targetDef.faction, amount: 1 })
+
+        const faction = targetDef.faction
+        const factionCounterStartingPoint = state.players[ev.player].factionTags[faction] ?? 0
+        const factionCounter = p.inPlay.reduce((acc, card) => {
+            const cardDef = cardRegistry[card]
+            if (cardDef.faction === faction) acc++;
+            return acc;
+        }, factionCounterStartingPoint)
+
+        if (factionCounter >= 1) {
+            for (const a of targetDef.abilities ?? []) {
+                if (a.trigger !== 'onAlly') continue;
+                for (const e of a.effects ?? []) {
+                  switch (e.kind) {
+                    case 'addTrade':     emit({ t:'TradeAdded',     player: ev.player, amount: e.amount }); break;
+                    case 'addCombat':    emit({ t:'CombatAdded',    player: ev.player, amount: e.amount }); break;
+                    case 'addAuthority': emit({ t:'AuthorityAdded', player: ev.player, amount: e.amount }); break;
+                    case 'drawCards':    emit({ t:'CardsDrawn',     player: ev.player, count:  e.amount }); break;
+                    case 'nextAcquireTop':  emit({ t:'NextAcquireToTopSet',  player: ev.player }); break;
+                    case 'nextAcquireFree': emit({ t:'NextAcquireFreeSet',   player: ev.player }); break;
+                    case 'prompt': emit({ t:'PromptShown', player: ev.player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
+                  }
+                }
+            }
+        }
     }
 }
 
@@ -267,6 +292,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             const card = p.hand[event.handIndex];
             removeOne(p.hand, event.handIndex);
             p.inPlay.push(card);
+            state.turn.playedThisTurn.push(card);
             return state;
         case 'TradeAdded':
             state.players[ event.player ].trade += event.amount;
@@ -379,6 +405,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             activePlayer.freeNextAcquire = false;
             state.players[event.player] = activePlayer;
             activePlayer.factionTags = {};
+            state.turn.playedThisTurn = [];
             return state;
         case 'DamageDealt':
             const attacker = state.players[ event.from ];
@@ -404,6 +431,18 @@ export const applyEvent = (state: GameState, event: Event) => {
             player.factionTags[event.faction] = (player.factionTags[event.faction] ?? 0) + event.amount;
             return state;
         }
+        case 'BasePlayed':
+            const basePlayedPlayer = state.players[event.player];
+            const def = cardRegistry[event.card];
+            if (def.type === 'ship') return state;
+            basePlayedPlayer.bases.push({
+                id: event.card,
+                shield: def.shield,
+                defence: def.defence,
+                damage: 0
+            });
+            
+            return state;
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;
             return state;
