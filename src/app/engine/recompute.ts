@@ -1,7 +1,7 @@
 import { initialSetup, shuffle } from "./initialSetup";
 import type { GameState } from "./state";
 import type { Event, PID } from "./events";
-import { CardDef, cardRegistry, Effect } from "./cards";
+import { BaseDef, CardDef, cardRegistry, Effect } from "./cards";
 
 type Emit = (event: Event) => void;
 
@@ -445,6 +445,19 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'BaseActivated':
             const playerWithBase = state.players[event.player];
             playerWithBase.bases[event.baseIndex].activatedThisTurn = true;
+            return state;
+        case 'BaseDamaged':
+            const playerWithBaseToBeDamaged = state.players[event.player];
+            const baseDef = cardRegistry[playerWithBaseToBeDamaged.bases[event.baseIndex].id] as BaseDef
+            const currentShieldHealth = baseDef.defence - playerWithBaseToBeDamaged.bases[event.baseIndex].damage
+            if (currentShieldHealth > event.amount) {
+                playerWithBaseToBeDamaged.bases[event.baseIndex].damage += event.amount;
+                state.players[state.order[state.activeIndex]].combat -= event.amount;
+                return state;
+            }
+            state.players[state.order[state.activeIndex]].combat -= currentShieldHealth;
+            const [ baseRemoved ] = playerWithBaseToBeDamaged.bases.splice(event.baseIndex, 1);
+            state.players[event.player].discard.push(baseRemoved.id);
             return state;
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;

@@ -14,6 +14,9 @@ import ChooseOtherCardToScrapOverlay from "../promptOverlays/chooseOtherCardToSc
 import Card from "./reusableComponents/card";
 import ChooseAbilityOverlay from "../promptOverlays/chooseAbilityOverlay";
 import ChooseCardToCopyOverlay from "../promptOverlays/chooseCardToCopyOverlay";
+import { icons } from "./iconIndex";
+import IconComponent from "./reusableComponents/iconComponent";
+import { BaseInstance } from "../engine/state";
 
 export const factionColor = {
     "Trade Federation": "bg-blue-500",
@@ -67,6 +70,10 @@ export default function Game() {
         return card.type === 'base'
     }
 
+    const hasOutpost = (bases: BaseInstance[]) => {
+        return bases.some(base => base.shield === 'outpost')
+    }
+
     return (
         <div>
             <h1>Star Realms</h1>
@@ -104,7 +111,7 @@ export default function Game() {
                 return (
                     <div key={idx}>
                         <h5>{player.id}</h5> 
-                        {state.order[state.activeIndex] !== pid && state.players[state.order[state.activeIndex]].combat > 0 && <button onClick={() => append({ t: 'DamageDealt', from: state.order[state.activeIndex], to: pid, amount: state.players[state.order[state.activeIndex]].combat })}>Attack</button>}
+                        {state.order[state.activeIndex] !== pid && state.players[state.order[state.activeIndex]].combat > 0 && !hasOutpost(state.players[pid].bases) && <button onClick={() => append({ t: 'DamageDealt', from: state.order[state.activeIndex], to: pid, amount: state.players[state.order[state.activeIndex]].combat })}>Attack</button>}
                         <p>A/T/C: {player.authority}/{player.trade}/{player.combat}</p>
                         <p>Hand:</p><hr/>
                         <div className="flex flex-row justify-center">
@@ -137,7 +144,11 @@ export default function Game() {
                                     return <div className={`${factionColor[cardDef.faction]} pl-1 pr-1 border-solid border-2`} key={index}>
                                         <Card card={cardDef} isInTradeRow={false}/>
                                         {
-                                            cardDef.selfScrap &&
+                                            cardDef.type === 'base' && 
+                                            <div>Defence: { cardDef.shield === 'outpost' ? <IconComponent img={icons.outpost} amount={cardDef.defence - card.damage} /> : <IconComponent img={icons.regularBase} amount={cardDef.defence - card.damage} /> }</div>
+                                        }
+                                        {
+                                            cardDef.selfScrap && state.order[state.activeIndex] === pid &&
                                             <button onClick={() => append({ t: 'CardScrapped', player: pid, from: 'bases', placementIndex: index, card: card.id })}>Scrap</button>
                                         }
                                         {state.order[state.activeIndex] === pid && !card.activatedThisTurn && (
@@ -145,6 +156,7 @@ export default function Game() {
                                                 Use
                                             </button>
                                         )}
+                                        {state.order[state.activeIndex] !== pid && state.players[state.order[state.activeIndex]].combat > 0 && <button onClick={() => append({ t: 'BaseDamaged', player: pid, baseIndex: index, amount: state.players[state.order[state.activeIndex]].combat })}>Attack</button>}
                                     </div>
                                 })
                             }
