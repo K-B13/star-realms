@@ -110,7 +110,8 @@ export default function Game() {
                 const player = state.players[pid];
                 return (
                     <div key={idx}>
-                        <h5>{player.id}</h5> 
+                        <h5>{player.id}</h5> If you have 2 or more bases
+                        in play, draw 2 cards
                         {state.order[state.activeIndex] !== pid && state.players[state.order[state.activeIndex]].combat > 0 && !hasOutpost(state.players[pid].bases) && <button onClick={() => append({ t: 'DamageDealt', from: state.order[state.activeIndex], to: pid, amount: state.players[state.order[state.activeIndex]].combat })}>Attack</button>}
                         <p>A/T/C: {player.authority}/{player.trade}/{player.combat}</p>
                         <p>Hand:</p><hr/>

@@ -250,7 +250,16 @@ const baseUpkeepResetRule: Rule<'TurnAdvanced'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule ] as Rule<Event['t']>[]
+const twoOrMoreBasesInPlayRule: Rule<'TwoOrMoreBasesInPlay'> = {
+    on: 'TwoOrMoreBasesInPlay',
+    run: (state, _ev, emit) => {
+        if (state.players[state.order[state.activeIndex]].bases.length >= 2) {
+            emit({ t: 'CardsDrawn', player: state.order[state.activeIndex], count: 2 })
+        }
+    }
+}
+
+const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule, twoOrMoreBasesInPlayRule ] as Rule<Event['t']>[]
 
 const emitEffects = (e: Effect, player: PID, emit: Emit) => {
     switch (e.kind) {
@@ -259,7 +268,8 @@ const emitEffects = (e: Effect, player: PID, emit: Emit) => {
         case 'addAuthority':   emit({ t:'AuthorityAdded', player, amount: e.amount }); break;
         case 'drawCards':      emit({ t:'CardsDrawn',     player, count:  e.amount }); break;
         case 'nextAcquireTop': emit({ t:'NextAcquireToTopSet',  player }); break;
-        case 'nextAcquireFree':emit({ t:'NextAcquireFreeSet',   player }); break;
+        case 'nextAcquireFree': emit({ t:'NextAcquireFreeSet',   player }); break;
+        case 'multiBaseCondition': emit({ t: 'TwoOrMoreBasesInPlay', player, amount: e.amount }); break;
         case 'prompt':         emit({ t:'PromptShown', player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
       }
 }
@@ -458,6 +468,8 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.players[state.order[state.activeIndex]].combat -= currentShieldHealth;
             const [ baseRemoved ] = playerWithBaseToBeDamaged.bases.splice(event.baseIndex, 1);
             state.players[event.player].discard.push(baseRemoved.id);
+            return state;
+        case 'TwoOrMoreBasesInPlay':
             return state;
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;

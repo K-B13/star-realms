@@ -28,6 +28,7 @@ export type Event =
   | { t: 'BaseDestroyed'; player: PID; baseIndex: number }
   | { t: 'TurnStarted'; player: PID }
   | { t: 'BaseActivated'; player: PID; baseIndex: number }
+  | { t: 'TwoOrMoreBasesInPlay'; player: PID, amount: number }
   | { t: 'TurnAdvanced' }
   | { t: 'PhaseChanged'; from: Phase; to: Phase }
   | { t: 'PromptShown'; player: PID; kind: string; optional?: boolean; data?: unknown }

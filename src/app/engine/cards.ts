@@ -1,5 +1,5 @@
 export type Faction = 'Trade Federation' | 'Blob Faction' | 'Machine Cult' | 'Star Empire' | 'Neutral'
-export type Trigger = 'onPlay' | 'onScrap' | 'onAlly' | 'onUpkeep'
+export type Trigger = 'onPlay' | 'onScrap' | 'onAlly'
 export type Effect = 
 | { kind: 'addTrade', amount: number }
 | { kind: 'addCombat', amount: number }
@@ -8,6 +8,7 @@ export type Effect =
 | { kind: 'scrapSelf' }
 | { kind: 'nextAcquireTop' }
 | { kind: 'nextAcquireFree' }
+| { kind: 'multiBaseCondition', amount: number }
 | { kind: 'prompt', prompt: { kind: string, optional?: boolean, data?: unknown }}
 
 export interface Ability {
@@ -172,7 +173,8 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         selfScrap: false,
         description: "War should always be a last resort. It's bad for the bottom line",
         text: {
-            play: [`+2 Trade`, `+3 Authority`]
+            play: [`+2 Trade`, `+3 Authority`],
+            ally: ['If you have 2 or more bases in play, draw 2 cards']
         },
         abilities: [
             {
@@ -180,6 +182,12 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
                 effects: [
                     { kind: 'addTrade', amount: 2 },
                     { kind: 'addAuthority', amount: 3 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'multiBaseCondition', amount: 2 }
                 ]
             }
         ]
