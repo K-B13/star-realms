@@ -136,6 +136,10 @@ export default function Game() {
                                     const cardDef = cardRegistry[card.id];
                                     return <div className={`${factionColor[cardDef.faction]} pl-1 pr-1 border-solid border-2`} key={index}>
                                         <Card card={cardDef} isInTradeRow={false}/>
+                                        {
+                                            cardDef.selfScrap &&
+                                            <button onClick={() => append({ t: 'CardScrapped', player: pid, from: 'bases', placementIndex: index, card: card.id })}>Scrap</button>
+                                        }
                                         {state.order[state.activeIndex] === pid && !card.activatedThisTurn && (
                                             <button onClick={() => append({ t: 'BaseActivated', player: pid, baseIndex: index })}>
                                                 Use

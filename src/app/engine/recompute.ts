@@ -363,6 +363,13 @@ export const applyEvent = (state: GameState, event: Event) => {
                 const [ removed ] = p.discard.splice(i, 1)
                 state.scrap.push(removed)
                 return state 
+            } else if (event.from === 'bases') {
+                const p = state.players[event.player]
+                const i = event.placementIndex
+                if (i < 0 || i >= p.bases.length) return state;
+                const [ removed ] = p.bases.splice(i, 1)
+                state.scrap.push(removed.id)
+                return state
             }
             return state;
         case 'CardDiscarded':
