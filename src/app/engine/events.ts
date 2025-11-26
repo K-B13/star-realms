@@ -22,7 +22,12 @@ export type Event =
   | { t: 'NextAcquireToTopSet'; player: PID }
   | { t: 'NextAcquireFreeSet'; player: PID }
   | { t: 'TargetCardChosen'; player: PID; source: 'copyShip'; inPlayIndex: number }
-  | { t: 'FactionTagAdded'; player: PID; faction: string; amount: number }  
+  | { t: 'FactionTagAdded'; player: PID; faction: string; amount: number }
+  | { t: 'BasePlayed'; player: PID; card: string; handIndex: number }  
+  | { t: 'BaseDamaged'; player: PID; baseIndex: number; amount: number }
+  | { t: 'BaseDestroyed'; player: PID; baseIndex: number }
+  | { t: 'TurnStarted'; player: PID }
+  | { t: 'BaseActivated'; player: PID; baseIndex: number }
   | { t: 'TurnAdvanced' }
   | { t: 'PhaseChanged'; from: Phase; to: Phase }
   | { t: 'PromptShown'; player: PID; kind: string; optional?: boolean; data?: unknown }

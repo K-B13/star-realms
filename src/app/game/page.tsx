@@ -1,7 +1,7 @@
 'use client'
 import { useMemo, useState } from "react";
 import { replay, materialize } from "../engine/recompute";
-import { cardRegistry } from "../engine/cards";
+import { CardDef, cardRegistry } from "../engine/cards";
 import { Event } from "../engine/events";
 import { useEffect } from "react";
 import { initialSetup } from "../engine/initialSetup";
@@ -63,6 +63,10 @@ export default function Game() {
         ])
     }
 
+    const isBase = (card: CardDef) => {
+        return card.type === 'base'
+    }
+
     return (
         <div>
             <h1>Star Realms</h1>
@@ -73,7 +77,7 @@ export default function Game() {
                     { state.row.map((card, index) => {
                         const cardDef = cardRegistry[card];
                         return (
-                            <div key={index} className={`${factionColor[cardDef.faction]} pr-1 pl-1 border-solid border-2`}>
+                            <div key={index} className={`${factionColor[cardDef.faction]} ${isBase(cardDef) ? 'border-gray-900' : ''} pr-1 pl-1 border-2`}>
                                 <Card card={cardDef} isInTradeRow={true}/>
                                 <button onClick={() => append([
                                     { t: 'CardPurchased', player: state.order[state.activeIndex], card: card, source: 'row', rowIndex: index },
@@ -97,7 +101,6 @@ export default function Game() {
             </div>}
             {state.order.map((pid: string, idx: number) => {
                 const player = state.players[pid];
-                console.log(player)
                 return (
                     <div key={idx}>
                         <h5>{player.id}</h5> 
@@ -114,11 +117,33 @@ export default function Game() {
                                             cardDef.selfScrap &&
                                             <button onClick={() => append({ t: 'CardScrapped', player: pid, from: 'hand', placementIndex: index, card: card })}>Scrap</button>
                                         }
-                                        {state.order[state.activeIndex] === pid && <button onClick={() => append({ t: 'CardPlayed', player: state.order[state.activeIndex], handIndex: index })}>Play</button>}
+                                        {state.order[state.activeIndex] === pid && <button onClick={() => {
+                                            if (cardDef.type === 'base') {
+                                                append({ t: 'BasePlayed', player: state.order[state.activeIndex], handIndex: index, card })
+                                            } else {
+                                                append({ t: 'CardPlayed', player: state.order[state.activeIndex], handIndex: index })
+                                            }
+                                            }}>Play</button>}
                                     </div>
                                 </div>
                             
                         })}
+                        </div>
+                        <p>Bases:</p>
+                        <div className="flex flex-row">
+                            {
+                                player.bases.map((card, index) => {
+                                    const cardDef = cardRegistry[card.id];
+                                    return <div className={`${factionColor[cardDef.faction]} pl-1 pr-1 border-solid border-2`} key={index}>
+                                        <Card card={cardDef} isInTradeRow={false}/>
+                                        {state.order[state.activeIndex] === pid && !card.activatedThisTurn && (
+                                            <button onClick={() => append({ t: 'BaseActivated', player: pid, baseIndex: index })}>
+                                                Use
+                                            </button>
+                                        )}
+                                    </div>
+                                })
+                            }
                         </div>
                         <p>In Play:</p><hr/>
                         <div className="flex flex-row">

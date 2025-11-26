@@ -1,7 +1,7 @@
 import { initialSetup, shuffle } from "./initialSetup";
 import type { GameState } from "./state";
-import type { Event } from "./events";
-import { cardRegistry } from "./cards";
+import type { Event, PID } from "./events";
+import { CardDef, cardRegistry, Effect } from "./cards";
 
 type Emit = (event: Event) => void;
 
@@ -31,85 +31,51 @@ const onPlayRule: Rule<'CardPlayed'> = {
         for (const ability of def.abilities) {
             if (ability.trigger !== 'onPlay') continue;
             for (const effect of ability.effects) {
-              switch (effect.kind) {
-                case 'addTrade':
-                  emit({ t: 'TradeAdded', player: ev.player, amount: effect.amount });
-                  break;
-                case 'addCombat':
-                  emit({ t: 'CombatAdded', player: ev.player, amount: effect.amount });
-                  break;
-                case 'addAuthority':
-                  emit({ t: 'AuthorityAdded', player: ev.player, amount: effect.amount });
-                  break;
-                case 'drawCards':
-                  emit({ t: 'CardsDrawn', player: ev.player, count: effect.amount });
-                  break;
-                case 'nextAcquireTop':
-                  emit({ t: 'NextAcquireToTopSet', player: ev.player });
-                  break;
-                case 'nextAcquireFree':
-                  emit({ t: 'NextAcquireFreeSet', player: ev.player });
-                  break;
-                case 'prompt':
-                  emit({
-                    t: 'PromptShown',
-                    player: ev.player,
-                    kind: effect.prompt.kind,
-                    optional: effect.prompt.optional,
-                    data: effect.prompt.data
-                  });
-                  break;
-                }
+                emitEffects(effect, ev.player, emit)
             }
         }
     }
 }
 
-const allyRule: Rule<'CardPlayed'> = {
+const onBasePlayRule: Rule<'BasePlayed'> = {
+    on: 'BasePlayed',
+    run: (state, ev, emit) => {
+        const def = cardRegistry[ ev.card];
+        for (const ability of def.abilities) {
+            if (ability.trigger !== 'onPlay') continue;
+            for (const effect of ability.effects) {
+                emitEffects(effect, ev.player, emit)
+            }
+        }
+    }
+}
+
+const onAllyRule: Rule<'CardPlayed'> = {
     on: 'CardPlayed',
     run: (state, ev, emit) => {
         const justPlayed = state.players[ ev.player ].inPlay[state.players[ ev.player ].inPlay.length - 1];
         const def = cardRegistry[ justPlayed ];
-        const faction = def.faction;
-        const factionCounterStartingPoint = state.players[ev.player].factionTags[faction] ?? 0
-        const factionCounter = state.players[ ev.player ].inPlay.reduce((acc, card) => {
-            const cardDef = cardRegistry[ card ];
-            if (cardDef.faction === faction) acc++;
-            return acc;
-        }, factionCounterStartingPoint);
+        const factionCounter = factionCalculator(def, state, ev.player);
         if (factionCounter <= 1) return;
         for (const ability of def.abilities) {
             if (ability.trigger !== 'onAlly') continue;
             for (const effect of ability.effects) {
-              switch (effect.kind) {
-                case 'addTrade':
-                  emit({ t: 'TradeAdded', player: ev.player, amount: effect.amount });
-                  break;
-                case 'addCombat':
-                  emit({ t: 'CombatAdded', player: ev.player, amount: effect.amount });
-                  break;
-                case 'addAuthority':
-                  emit({ t: 'AuthorityAdded', player: ev.player, amount: effect.amount });
-                  break;
-                case 'drawCards':
-                  emit({ t: 'CardsDrawn', player: ev.player, count: effect.amount });
-                  break;
-                case 'nextAcquireTop':
-                  emit({ t: 'NextAcquireToTopSet', player: ev.player });
-                  break;
-                case 'nextAcquireFree':
-                  emit({ t: 'NextAcquireFreeSet', player: ev.player });
-                  break;
-                case 'prompt':
-                  emit({
-                    t: 'PromptShown',
-                    player: ev.player,
-                    kind: effect.prompt.kind,
-                    optional: effect.prompt.optional,
-                    data: effect.prompt.data
-                  });
-                  break;
-                }
+                emitEffects(effect, ev.player, emit)
+            }
+        }
+    }
+}
+
+const onBaseAllyRule: Rule<'BasePlayed'> = {
+    on: 'BasePlayed',
+    run: (state, ev, emit) => {
+        const def = cardRegistry[ ev.card ];
+        const factionCounter = factionCalculator(def, state, ev.player);
+        if (factionCounter <= 1) return;
+        for (const ability of def.abilities) {
+            if (ability.trigger !== 'onAlly') continue;
+            for (const effect of ability.effects) {
+                emitEffects(effect, ev.player, emit)
             }
         }
     }
@@ -120,7 +86,6 @@ const applyCopyRule: Rule<'TargetCardChosen'> = {
     run: (state, ev, emit) => {
         if (ev.source !== 'copyShip') return;
 
-        const p = state.players[ev.player];
         const targetId = state.turn.playedThisTurn[ev.inPlayIndex];
         if (!targetId) return;
 
@@ -132,44 +97,40 @@ const applyCopyRule: Rule<'TargetCardChosen'> = {
         for (const a of targetDef.abilities ?? []) {
             if (a.trigger !== 'onPlay') continue;
             for (const e of a.effects ?? []) {
-              switch (e.kind) {
-                case 'addTrade':     emit({ t:'TradeAdded',     player: ev.player, amount: e.amount }); break;
-                case 'addCombat':    emit({ t:'CombatAdded',    player: ev.player, amount: e.amount }); break;
-                case 'addAuthority': emit({ t:'AuthorityAdded', player: ev.player, amount: e.amount }); break;
-                case 'drawCards':    emit({ t:'CardsDrawn',     player: ev.player, count:  e.amount }); break;
-                case 'nextAcquireTop':  emit({ t:'NextAcquireToTopSet',  player: ev.player }); break;
-                case 'nextAcquireFree': emit({ t:'NextAcquireFreeSet',   player: ev.player }); break;
-                case 'prompt': emit({ t:'PromptShown', player: ev.player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
-              }
+                emitEffects(e, ev.player, emit)
             }
         }
         emit({ t: "FactionTagAdded", player: ev.player, faction: targetDef.faction, amount: 1 })
 
-        const faction = targetDef.faction
-        const factionCounterStartingPoint = state.players[ev.player].factionTags[faction] ?? 0
-        const factionCounter = p.inPlay.reduce((acc, card) => {
-            const cardDef = cardRegistry[card]
-            if (cardDef.faction === faction) acc++;
-            return acc;
-        }, factionCounterStartingPoint)
+        const factionCounter = factionCalculator(targetDef, state, ev.player);
 
         if (factionCounter >= 1) {
             for (const a of targetDef.abilities ?? []) {
                 if (a.trigger !== 'onAlly') continue;
                 for (const e of a.effects ?? []) {
-                  switch (e.kind) {
-                    case 'addTrade':     emit({ t:'TradeAdded',     player: ev.player, amount: e.amount }); break;
-                    case 'addCombat':    emit({ t:'CombatAdded',    player: ev.player, amount: e.amount }); break;
-                    case 'addAuthority': emit({ t:'AuthorityAdded', player: ev.player, amount: e.amount }); break;
-                    case 'drawCards':    emit({ t:'CardsDrawn',     player: ev.player, count:  e.amount }); break;
-                    case 'nextAcquireTop':  emit({ t:'NextAcquireToTopSet',  player: ev.player }); break;
-                    case 'nextAcquireFree': emit({ t:'NextAcquireFreeSet',   player: ev.player }); break;
-                    case 'prompt': emit({ t:'PromptShown', player: ev.player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
-                  }
+                    emitEffects(e, ev.player, emit)
                 }
             }
         }
     }
+}
+
+const factionCalculator = (def: CardDef, state: GameState, player: PID) => {
+    const faction = def.faction;
+    const tags = state.players[player].factionTags[faction] ?? 0
+    const shipsCounter = state.players[player].inPlay.reduce((acc, card) => {
+        const cardDef = cardRegistry[ card ];
+        if (cardDef.faction === faction) acc++;
+        return acc;
+    }, 0);
+    const basesCounter = state.players[player].bases.reduce((acc, card) => {
+        const cardDef = cardRegistry[ card.id ];
+        if (cardDef.faction === faction) acc++;
+        return acc;
+    }, 0);
+
+    const factionCounter = tags + shipsCounter + basesCounter;
+    return factionCounter;
 }
 
 const onSelfScrapEffectsRule: Rule<'CardScrapped'> = {
@@ -181,21 +142,7 @@ const onSelfScrapEffectsRule: Rule<'CardScrapped'> = {
         for (const a of def.abilities) {
             if (a.trigger !== 'onScrap') continue;
             for (const e of a.effects) {
-                switch (e.kind) {
-                    case 'addTrade': emit({ t: 'TradeAdded', player: ev.player, amount: e.amount }); break;
-                    case 'addCombat': emit({ t: 'CombatAdded', player: ev.player, amount: e.amount }); break;
-                    case 'addAuthority': emit({ t: 'AuthorityAdded', player: ev.player, amount: e.amount }); break;
-                    case 'drawCards': emit({ t: 'CardsDrawn', player: ev.player, count: e.amount }); break;
-                    case 'nextAcquireTop': emit({ t: 'NextAcquireToTopSet', player: ev.player }); break;
-                    case 'nextAcquireFree': emit({ t: 'NextAcquireFreeSet', player: ev.player }); break;
-                    case 'prompt': emit({
-                        t: 'PromptShown',
-                        player: ev.player,
-                        kind: e.prompt.kind,
-                        optional: e.prompt.optional,
-                        data: e.prompt.data
-                    }); break;
-                }
+                emitEffects(e, ev.player, emit)
             }
         }
     }
@@ -274,7 +221,48 @@ const opponentSelectedRules: Rule<'TargetChosen'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, allyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules ] as Rule<Event['t']>[]
+const onBaseUpkeepRule: Rule<'BaseActivated'> = {
+    on: 'BaseActivated',
+    run: (state, ev, emit) => {
+        const p = state.players[ev.player];
+        const base = p.bases[ev.baseIndex];
+        if (!base) return;
+        const def = cardRegistry[base.id];
+        for (const ability of def.abilities ?? []) {
+            if (ability.trigger !== 'onPlay') continue
+            for (const effect of ability.effects ?? []) {
+                emitEffects(effect, ev.player, emit)
+            }
+        }
+    }
+}
+
+const baseUpkeepResetRule: Rule<'TurnAdvanced'> = {
+    on: 'TurnAdvanced',
+    run: (state, _ev, emit) => {
+        const nextPlayerIndex = (state.activeIndex + 1) % state.order.length;
+        
+        const upcomingActivePlayer = state.order[nextPlayerIndex];
+        const upcomingPlayerState = state.players[upcomingActivePlayer];
+        upcomingPlayerState.bases.forEach(base => {
+            base.activatedThisTurn = false;
+        })
+    }
+}
+
+const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule ] as Rule<Event['t']>[]
+
+const emitEffects = (e: Effect, player: PID, emit: Emit) => {
+    switch (e.kind) {
+        case 'addTrade':       emit({ t:'TradeAdded',     player, amount: e.amount }); break;
+        case 'addCombat':      emit({ t:'CombatAdded',    player, amount: e.amount }); break;
+        case 'addAuthority':   emit({ t:'AuthorityAdded', player, amount: e.amount }); break;
+        case 'drawCards':      emit({ t:'CardsDrawn',     player, count:  e.amount }); break;
+        case 'nextAcquireTop': emit({ t:'NextAcquireToTopSet',  player }); break;
+        case 'nextAcquireFree':emit({ t:'NextAcquireFreeSet',   player }); break;
+        case 'prompt':         emit({ t:'PromptShown', player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
+      }
+}
 
 function runRules(state: GameState, ev: Event): Event[] {
     const emitted: Event[] = [];
@@ -290,6 +278,8 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'CardPlayed':
             const p = state.players[event.player];
             const card = p.hand[event.handIndex];
+            const cardPlayedDef = cardRegistry[card]
+            if (!cardPlayedDef || cardPlayedDef.type !== 'ship') return state;
             removeOne(p.hand, event.handIndex);
             p.inPlay.push(card);
             state.turn.playedThisTurn.push(card);
@@ -434,14 +424,20 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'BasePlayed':
             const basePlayedPlayer = state.players[event.player];
             const def = cardRegistry[event.card];
+            removeOne(basePlayedPlayer.hand, event.handIndex);
             if (def.type === 'ship') return state;
             basePlayedPlayer.bases.push({
                 id: event.card,
                 shield: def.shield,
                 defence: def.defence,
-                damage: 0
+                damage: 0,
+                activatedThisTurn: true,
             });
             
+            return state;
+        case 'BaseActivated':
+            const playerWithBase = state.players[event.player];
+            playerWithBase.bases[event.baseIndex].activatedThisTurn = true;
             return state;
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;

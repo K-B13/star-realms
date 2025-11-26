@@ -13,7 +13,8 @@ export const playerSetup: (playerName: string) => PlayerState = (playerName: str
         freeNextAcquire: false,
         factionTags: {},
         combat: 0,
-        trade: 0
+        trade: 0,
+        bases: [],
     }
 }
 

@@ -1,4 +1,10 @@
-import { CardDef } from "./cards";
+export interface BaseInstance {
+    id: string;
+    shield: 'outpost' | 'normal';
+    defence: number;
+    damage: number;
+    activatedThisTurn: boolean;
+}
 
 export interface PlayerState {
     id: string;
@@ -7,7 +13,7 @@ export interface PlayerState {
     hand: string[];
     discard: string[];
     inPlay: string[];
-    // bases: Array<{ cardId: string; damage: number }>;
+    bases: BaseInstance[];
     acquireLocation: "top" | "discard";
     combat: number;
     trade: number;

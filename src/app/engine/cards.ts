@@ -1,5 +1,5 @@
 export type Faction = 'Trade Federation' | 'Blob Faction' | 'Machine Cult' | 'Star Empire' | 'Neutral'
-export type Trigger = 'onPlay' | 'onScrap' | 'onAlly'
+export type Trigger = 'onPlay' | 'onScrap' | 'onAlly' | 'onUpkeep'
 export type Effect = 
 | { kind: 'addTrade', amount: number }
 | { kind: 'addCombat', amount: number }
@@ -27,13 +27,23 @@ export interface CardDef {
     cost: number;
     faction: Faction;
     description?: string;
-    type: 'ship' | 'base'
     selfScrap: boolean;
     text: CardText;
     abilities: Ability[];
+    type: 'ship' | 'base';
 }
 
-export const cardRegistry: Record<string, CardDef> = {
+export interface BaseDef extends CardDef {
+    shield: 'outpost' | 'normal';
+    defence: number;
+    type: 'base';
+}
+
+export interface ShipDef extends CardDef {
+    type: 'ship';
+}
+
+export const cardRegistry: Record<string, ShipDef | BaseDef> = {
     SCOUT: {
         id: 'SCOUT',
         name: 'Scout',
@@ -280,6 +290,165 @@ export const cardRegistry: Record<string, CardDef> = {
                 trigger: 'onAlly',
                 effects: [
                     { kind: 'addAuthority', amount: 5 }
+                ]
+            }
+        ]
+    },
+    TRADINGPOST: {
+        id: 'TRADINGPOST',
+        name: 'Trading Post',
+        cost: 3,
+        faction: 'Trade Federation',
+        type: 'base',
+        selfScrap: true,
+        text: {
+            play: [`+1 Trade or +1 Authority per turn`],
+            scrap: [`+3 Combat`]
+        },
+        defence: 4,
+        shield: 'outpost',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'chooseAbility', optional: false, data: { options:
+                        [
+                            { t: 'AuthorityAdded', amount: 1, label: '+1 Authority' },
+                            { t: 'TradeAdded', amount: 1, label: '+1 Trade' }
+                        ],
+                        card: 'TRADINGPOST'
+                    }} }
+                ]
+            },
+            {
+                trigger: 'onScrap',
+                effects: [
+                    { kind: 'addCombat', amount: 3 }
+                ]
+            }
+        ]
+    },
+    BARTERWORLD: {
+        id: 'BARTERWORLD',
+        name: 'Barter World',
+        cost: 4,
+        faction: 'Trade Federation',
+        type: 'base',
+        selfScrap: true,
+        text: {
+            play: [`+2 Trade or +2 Authority per turn`],
+            scrap: [`+5 Combat`]
+        },
+        defence: 4,
+        shield: 'normal',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'chooseAbility', optional: false, data: { options:
+                        [
+                            { t: 'AuthorityAdded', amount: 2, label: '+2 Authority' },
+                            { t: 'TradeAdded', amount: 2, label: '+2 Trade' }
+                        ],
+                        card: 'BARTERWORLD'
+                    }} }
+                ]
+            },
+            {
+                trigger: 'onScrap',
+                effects: [
+                    { kind: 'addCombat', amount: 5 }
+                ]
+            }
+        ]
+    },
+    DEFENCECENTRE: {
+        id: 'DEFENCECENTRE',
+        name: 'Defence Centre',
+        cost: 5,
+        faction: 'Trade Federation',
+        type: 'base',
+        selfScrap: false,
+        text: {
+            play: [`+2 Combat or +3 Authority per turn`],
+            ally: [`+2 Combat`]
+        },
+        defence: 5,
+        shield: 'outpost',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'chooseAbility', optional: false, data: { options:
+                        [
+                            { t: 'AuthorityAdded', amount: 3, label: '+3 Authority' },
+                            { t: 'CombatAdded', amount: 2, label: '+2 Combat' }
+                        ],
+                        card: 'DEFENCECENTRE'
+                    }} }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            }
+        ]
+    },
+    CENTRALOFFICE: {
+        id: 'CENTRALOFFICE',
+        name: 'Central Office',
+        cost: 7,
+        faction: 'Trade Federation',
+        type: 'base',
+        selfScrap: false,
+        text: {
+            play: [`+2 Trade and \nNext card acquired from trade row goes to top of the deck`],
+            ally: [`Draw 1 card`]
+        },
+        defence: 6,
+        shield: 'normal',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addTrade', amount: 2 },
+                    { kind: 'nextAcquireTop' },
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    PORTOFCALL: {
+        id: 'PORTOFCALL',
+        name: 'Port of Call',
+        cost: 6,
+        faction: 'Trade Federation',
+        type: 'base',
+        selfScrap: true,
+        text: {
+            play: [`+3 Trade`],
+            scrap: [`Draw 1 card`]
+        },
+        defence: 6,
+        shield: 'outpost',
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addTrade', amount: 3 },
+                ]
+            },
+            {
+                trigger: 'onScrap',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
                 ]
             }
         ]
@@ -549,8 +718,8 @@ export const cardRegistry: Record<string, CardDef> = {
             {
                 trigger: 'onPlay',
                 effects: [
-                    { kind: 'addCombat', amount: 4 },
-                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: false, data: { purpose: 'opponentDiscard' } } }
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: false, data: { purpose: 'opponentDiscard' } } },
+                    { kind: 'addCombat', amount: 4 }
                 ]
             }, {
                 trigger: 'onAlly',

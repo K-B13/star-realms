@@ -4,26 +4,46 @@ type BaseCard = {
 }
 
 export const baseCards: BaseCard[] = [
-    // {
-    //     cardName: "FEDERATIONSHUTTLE",
-    //     amount: 3
-    // },
-    // {
-    //     cardName: "CUTTER",
-    //     amount: 3
-    // },
-    // {
-    //     cardName: "FREIGHTER",
-    //     amount: 2
-    // },
-    // {
-    //     cardName: "FLAGSHIP",
-    //     amount: 1
-    // },
-    // {
-    //     cardName: "TRADEESCORT",
-    //     amount: 1
-    // },
+    {
+        cardName: "FEDERATIONSHUTTLE",
+        amount: 3
+    },
+    {
+        cardName: "CUTTER",
+        amount: 3
+    },
+    {
+        cardName: "FREIGHTER",
+        amount: 2
+    },
+    {
+        cardName: "FLAGSHIP",
+        amount: 1
+    },
+    {
+        cardName: "TRADEESCORT",
+        amount: 1
+    },
+    {
+        cardName: "TRADINGPOST",
+        amount: 2
+    },
+    {
+        cardName: "BARTERWORLD",
+        amount: 2
+    },
+    {
+        cardName: "DEFENCECENTRE",
+        amount: 1
+    },
+    {
+        cardName: "CENTRALOFFICE",
+        amount: 1
+    },
+    {
+        cardName: "PORTOFCALL",
+        amount: 1
+    },
     // {
     //     cardName: "BLOBFIGHTER",
     //     amount: 3
@@ -76,32 +96,32 @@ export const baseCards: BaseCard[] = [
     //     cardName: "DREADNAUGHT",
     //     amount: 1
     // },
-    {
-        cardName: "TRADEBOT",
-        amount: 3
-    },
-    {
-        cardName: "MISSILEBOT",
-        amount: 3
-    },
-    {
-        cardName: "SUPPLYBOT",
-        amount: 3
-    },
-    {
-        cardName: "PATROLMECH",
-        amount: 2
-    },
-    {
-        cardName: "STEALTHNEEDLE",
-        amount: 3
-    },
-    {
-        cardName: "BATTLEMECH",
-        amount: 1
-    },
-    {
-        cardName: "MISSILEMECH",
-        amount: 1
-    }
+    // {
+    //     cardName: "TRADEBOT",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "MISSILEBOT",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "SUPPLYBOT",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "PATROLMECH",
+    //     amount: 2
+    // },
+    // {
+    //     cardName: "STEALTHNEEDLE",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "BATTLEMECH",
+    //     amount: 1
+    // },
+    // {
+    //     cardName: "MISSILEMECH",
+    //     amount: 1
+    // }
 ]
