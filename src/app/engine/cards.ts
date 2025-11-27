@@ -584,14 +584,23 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         faction: 'Blob Faction',
         type: 'ship',
         selfScrap: false,
+        description: "When this monstrous ship shows up on a colony's sensors they know the end is near.",
         text: {
             play: [`+6 Combat`],
+            ally: ['You may destroy target base', 'and/or scrap a card in the trade row']
         },
         abilities: [
             {
                 trigger: 'onPlay',
                 effects: [
                     { kind: 'addCombat', amount: 6 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: true, data: { purpose: 'destroyOpponentBase' } } },
+                    { kind: 'prompt', prompt: { kind: 'scrapRow', optional: true } }
                 ]
             }
         ]
@@ -681,6 +690,87 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
                 trigger: 'onAlly',
                 effects: [
                     { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    BLOBWHEEL: {
+        id: 'BLOBWHEEL',
+        name: 'Blob Wheel',
+        cost: 3,
+        faction: 'Blob Faction',
+        type: 'base',
+        selfScrap: true,
+        shield: 'normal',
+        defence: 5,
+        text: {
+            play: [`+1 Combat`],
+            scrap: [`+3 Trade`]
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 1 },
+                ]
+            }, {
+                trigger: 'onScrap',
+                effects: [
+                    { kind: 'addTrade', amount: 3 }
+                ]
+            }
+        ]
+    },
+    THEHIVE: {
+        id: 'THEHIVE',
+        name: 'The Hive',
+        cost: 5,
+        faction: 'Blob Faction',
+        type: 'base',
+        selfScrap: false,
+        shield: 'normal',
+        defence: 5,
+        text: {
+            play: [`+3 Combat`],
+            ally: [`Draw 1 card`]
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 3 },
+                ]
+            }, {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    BLOBWORLD: {
+        id: 'BLOBWORLD',
+        name: 'Blob World',
+        cost: 8,
+        faction: 'Blob Faction',
+        type: 'base',
+        selfScrap: false,
+        shield: 'normal',
+        defence: 7,
+        text: {
+            play: [`+5 Combat`, `or draw a card for each Blob Faction card played this turn`],
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'chooseAbility', optional: false, data: { options:
+                        [
+                            { t: 'DrawPerFactionCard', card: 'BLOBWORLD' },
+                            { t: 'CombatAdded', amount: 5, label: '+5 Combat' }
+                        ],
+                        card: 'BLOBWORLD'
+                    }} }
                 ]
             }
         ]
@@ -800,7 +890,7 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         text: {
             play: [`+5 Combat`, `Draw 1 card`],
             ally: [`Choose a player to discard a card`],
-            scrap: [`Draw 1 card`]
+            scrap: [`Draw 1 card`, `And you may destroy a target base`]
         },
         abilities: [
             {
@@ -819,7 +909,8 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
             {
                 trigger: 'onScrap',
                 effects: [
-                    { kind: 'drawCards', amount: 1 }
+                    { kind: 'drawCards', amount: 1 },
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: true, data: { purpose: 'destroyOpponentBase' } } }
                 ]
             }
         ]
@@ -851,6 +942,140 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
             }
         ]
     },
+    SPACESTATION: {
+        id: 'SPACESTATION',
+        name: 'Space Station',
+        cost: 4,
+        faction: 'Machine Cult',
+        type: 'base',
+        selfScrap: false,
+        shield: 'outpost',
+        defence: 4,
+        text: {
+            play: [`+2 Combat`],
+            ally: [`+2 Combat`],
+            scrap: [`+4 Trade`]
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 2 }
+                ]
+            },
+            {
+                trigger: 'onScrap',
+                effects: [
+                    { kind: 'addTrade', amount: 4 }
+                ]
+            }
+        ]
+    },
+    // RECYCLINGSTATION: {
+    //     id: 'RECYCLINGSTATION',
+    //     name: 'Recycling Station',
+    //     cost: 4,
+    //     faction: 'Machine Cult',
+    //     type: 'base',
+    //     selfScrap: false,
+    //     shield: 'outpost',
+    //     defence: 4,
+    //     text: {
+    //         play: [`+1 Trade`],
+    //     },
+    //     abilities: [
+    //         {
+    //             trigger: 'onPlay',
+    //             effects: [
+    //                 { kind: 'addTrade', amount: 1 }
+    //             ]
+    //         }
+    //     ]
+    // },
+    WARWORLD: {
+        id: 'WARWORLD',
+        name: 'War World',
+        cost: 5,
+        faction: 'Machine Cult',
+        type: 'base',
+        selfScrap: false,
+        shield: 'outpost',
+        defence: 4,
+        text: {
+            play: [`+3 Combat`],
+            ally: [`+4 Combat`]
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 3 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'addCombat', amount: 4 }
+                ]
+            }
+        ]
+    },
+    ROYALREDOUBT: {
+        id: 'ROYALREDOUBT',
+        name: 'Royal Redoubt',
+        cost: 6,
+        faction: 'Machine Cult',
+        type: 'base',
+        selfScrap: false,
+        shield: 'outpost',
+        defence: 6,
+        text: {
+            play: [`+3 Combat`],
+            ally: [`Choose a player to discard`]
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addCombat', amount: 3 }
+                ]
+            },
+            {
+                trigger: 'onAlly',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: false, data: { purpose: 'opponentDiscard' } } },
+                ]
+            }
+        ]
+    },
+    // FLEETHQ: {
+    //     id: 'FLEETHQ',
+    //     name: 'Fleet HQ',
+    //     cost: 8,
+    //     faction: 'Machine Cult',
+    //     type: 'base',
+    //     selfScrap: false,
+    //     shield: 'normal',
+    //     description: `When an imperial fleet goes into battle it's usually coordinated from afar by one of these mobile command centers`,
+    //     defence: 8,
+    //     text: {
+    //         play: [`Gain combat for every ship played`],
+    //     },
+    //     abilities: [
+    //         {
+    //             trigger: 'onPlay',
+    //             effects: [
+                    
+    //             ]
+    //         },
+    //     ]
+    // },
     TRADEBOT: {
         id: 'TRADEBOT',
         name: 'Trade Bot',
@@ -928,6 +1153,29 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
                 trigger: 'onAlly',
                 effects: [
                     { kind: 'addCombat', amount: 2 }
+                ]
+            }
+        ]
+    },
+    BATTLESTATION: {
+        id: 'BATTLESTATION',
+        name: 'Battle Station',
+        cost: 3,
+        faction: 'Machine Cult',
+        type: 'base',
+        selfScrap: true,
+        shield: 'outpost',
+        description: "A Battle Station fusion core can double as a devastating weapon... once",
+        defence: 5,
+        text: {
+            play: [],
+            scrap: [`+5 Combat`]
+        },
+        abilities: [
+            {
+                trigger: 'onScrap',
+                effects: [
+                    { kind: 'addCombat', amount: 5 }
                 ]
             }
         ]
@@ -1020,20 +1268,65 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         type: 'ship',
         selfScrap: false,
         text: {
-            play: [`+6 Combat`],
+            play: [`+6 Combat`, `May destroy a target base`],
             ally: [`Draw 1 card`]
         },
         abilities: [
             {
                 trigger: 'onPlay',
                 effects: [
-                    { kind: 'addCombat', amount: 6 }
+                    { kind: 'addCombat', amount: 6 },
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: true, data: { purpose: 'destroyOpponentBase' } } }
                 ]
             },
             {
                 trigger: 'onAlly',
                 effects: [
                     { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    MACHINEBASE: {
+        id: 'MACHINEBASE',
+        name: 'Machine Base',
+        cost: 7,
+        faction: 'Machine Cult',
+        type: 'base',
+        selfScrap: false,
+        defence: 6,
+        shield: 'outpost',
+        description: 'This high-tech city is like a beehive it looks chaotic but vital work is being done efficiently at a frenetic pace',
+        text: {
+            play: [`Draw 1 card`],
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    JUNKYARD: {
+        id: 'JUNKYARD',
+        name: 'Junkyard',
+        cost: 6,
+        faction: 'Machine Cult',
+        type: 'base',
+        selfScrap: false,
+        defence: 5,
+        shield: 'outpost',
+        description: "The Machine Cult's first commandment. Thou shalt not wast tech",
+        text: {
+            play: [`You may scrap a card in your hand or discard`],
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'chooseOtherCardToScrap', optional: true } }
                 ]
             }
         ]

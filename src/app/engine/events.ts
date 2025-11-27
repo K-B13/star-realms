@@ -1,3 +1,4 @@
+import { Faction } from "./cards";
 
 export type Phase = 'MAIN'|'CLEANUP';
 export type PID = string;
@@ -29,7 +30,8 @@ export type Event =
   | { t: 'BaseChosenToDestroy'; player: PID; targetPlayer: PID; baseIndex: number }
   | { t: 'TurnStarted'; player: PID }
   | { t: 'BaseActivated'; player: PID; baseIndex: number }
-  | { t: 'TwoOrMoreBasesInPlay'; player: PID, amount: number }
+  | { t: 'TwoOrMoreBasesInPlay'; player: PID; amount: number }
+  | { t: 'DrawPerFactionCard'; card: string }
   | { t: 'TurnAdvanced' }
   | { t: 'PhaseChanged'; from: Phase; to: Phase }
   | { t: 'PromptShown'; player: PID; kind: string; optional?: boolean; data?: unknown }

@@ -1,4 +1,6 @@
 import { CardDef } from "@/app/engine/cards";
+import IconComponent from "./iconComponent";
+import { icons } from "../iconIndex";
 
 export default function Card({ 
     card,
@@ -11,7 +13,7 @@ export default function Card({
     return (
         <div className="flex flex-col ">
             <div>
-                {isInTradeRow && <p>Cost: {card.cost}</p>}
+                {isInTradeRow && <div className="flex flex-row justify-end"> <p>{card.cost}</p> <IconComponent img={icons.coin} amount={1} /> </div>}
                 <p>{card.name}</p>
                 {
                     card.text.play.map((desc, id) => {

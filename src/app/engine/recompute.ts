@@ -268,7 +268,17 @@ const twoOrMoreBasesInPlayRule: Rule<'TwoOrMoreBasesInPlay'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule, twoOrMoreBasesInPlayRule ] as Rule<Event['t']>[]
+const drawPerFactionCardRule: Rule<'DrawPerFactionCard'> = {
+    on: 'DrawPerFactionCard',
+    run: (state, ev, emit) => {
+        const factionCounter = factionCalculator(cardRegistry[ev.card], state, state.order[state.activeIndex]);
+        if (factionCounter >= 1) {
+            emit({ t: 'CardsDrawn', player: state.order[state.activeIndex], count: factionCounter })
+        }
+    }
+}
+
+const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule, twoOrMoreBasesInPlayRule, drawPerFactionCardRule ] as Rule<Event['t']>[]
 
 const emitEffects = (e: Effect, player: PID, emit: Emit) => {
     switch (e.kind) {
@@ -485,6 +495,8 @@ export const applyEvent = (state: GameState, event: Event) => {
             targetPlayerState.discard.push(destroyedBase.id);
             return state;
         case 'TwoOrMoreBasesInPlay':
+            return state;
+        case 'DrawPerFactionCard':
             return state;
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;
