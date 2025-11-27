@@ -17,6 +17,7 @@ import ChooseCardToCopyOverlay from "../promptOverlays/chooseCardToCopyOverlay";
 import { icons } from "./iconIndex";
 import IconComponent from "./reusableComponents/iconComponent";
 import { BaseInstance } from "../engine/state";
+import ChooseOpponentBaseOverlay from "../promptOverlays/chooseOpponentBaseOverlay";
 
 export const factionColor = {
     "Trade Federation": "bg-blue-500",
@@ -110,8 +111,7 @@ export default function Game() {
                 const player = state.players[pid];
                 return (
                     <div key={idx}>
-                        <h5>{player.id}</h5> If you have 2 or more bases
-                        in play, draw 2 cards
+                        <h5>{player.id}</h5>
                         {state.order[state.activeIndex] !== pid && state.players[state.order[state.activeIndex]].combat > 0 && !hasOutpost(state.players[pid].bases) && <button onClick={() => append({ t: 'DamageDealt', from: state.order[state.activeIndex], to: pid, amount: state.players[state.order[state.activeIndex]].combat })}>Attack</button>}
                         <p>A/T/C: {player.authority}/{player.trade}/{player.combat}</p>
                         <p>Hand:</p><hr/>
@@ -245,6 +245,14 @@ export default function Game() {
             )}
             {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseInPlayShip' && (
               <ChooseCardToCopyOverlay
+                state={state}
+                activePrompt={activePrompt}
+                append={append}
+                currentPlayer={state.order[state.activeIndex]}
+              />
+            )}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseOpponentBase' && (
+              <ChooseOpponentBaseOverlay
                 state={state}
                 activePrompt={activePrompt}
                 append={append}

@@ -215,6 +215,15 @@ const opponentSelectedRules: Rule<'TargetChosen'> = {
                     data: { target: ev.target }
                 })
                 break;
+            case 'destroyOpponentBase':
+                emit({
+                    t: 'PromptShown',
+                    player: ev.player,
+                    kind: 'chooseOpponentBase',
+                    optional: true,
+                    data: { target: ev.target }
+                })
+                break;
             default:
                 break;
         }
@@ -468,6 +477,12 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.players[state.order[state.activeIndex]].combat -= currentShieldHealth;
             const [ baseRemoved ] = playerWithBaseToBeDamaged.bases.splice(event.baseIndex, 1);
             state.players[event.player].discard.push(baseRemoved.id);
+            return state;
+        case 'BaseChosenToDestroy':
+            const targetPlayerState = state.players[event.targetPlayer];
+            if (event.baseIndex < 0 || event.baseIndex >= targetPlayerState.bases.length) return state;
+            const [ destroyedBase ] = targetPlayerState.bases.splice(event.baseIndex, 1);
+            targetPlayerState.discard.push(destroyedBase.id);
             return state;
         case 'TwoOrMoreBasesInPlay':
             return state;

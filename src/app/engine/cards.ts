@@ -228,7 +228,7 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         selfScrap: false,
         text: {
             play: [`+4 Authority`, `+5 Combat`, `Draw 2 cards`],
-            ally: [`Next card acquired from trade row goes to top of the deck`]
+            ally: [`May destroy a target base`]
         },
         abilities: [
             {
@@ -242,7 +242,7 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
             {
                 trigger: 'onAlly',
                 effects: [
-                    { kind: 'nextAcquireTop' }
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: true, data: { purpose: 'destroyOpponentBase' } } }
                 ]
             }
         ]
@@ -442,7 +442,7 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         selfScrap: true,
         text: {
             play: [`+3 Trade`],
-            scrap: [`Draw 1 card`]
+            scrap: [`Draw 1 card`, `May destroy a target base`]
         },
         defence: 6,
         shield: 'outpost',
@@ -456,7 +456,8 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
             {
                 trigger: 'onScrap',
                 effects: [
-                    { kind: 'drawCards', amount: 1 }
+                    { kind: 'drawCards', amount: 1 },
+                    { kind: 'prompt', prompt: { kind: 'choosePlayer', optional: true, data: { purpose: 'destroyOpponentBase' } } }
                 ]
             }
         ]

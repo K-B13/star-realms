@@ -26,6 +26,7 @@ export type Event =
   | { t: 'BasePlayed'; player: PID; card: string; handIndex: number }  
   | { t: 'BaseDamaged'; player: PID; baseIndex: number; amount: number }
   | { t: 'BaseDestroyed'; player: PID; baseIndex: number }
+  | { t: 'BaseChosenToDestroy'; player: PID; targetPlayer: PID; baseIndex: number }
   | { t: 'TurnStarted'; player: PID }
   | { t: 'BaseActivated'; player: PID; baseIndex: number }
   | { t: 'TwoOrMoreBasesInPlay'; player: PID, amount: number }

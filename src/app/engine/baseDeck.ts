@@ -21,6 +21,10 @@ export const baseCards: BaseCard[] = [
         amount: 2
     },
     {
+        cardName: "COMMANDSHIP",
+        amount: 1
+    },
+    {
         cardName: "FLAGSHIP",
         amount: 1
     },
