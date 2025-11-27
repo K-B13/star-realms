@@ -10,19 +10,13 @@ interface ChooseAbilityOverlayProps {
     currentPlayer: string;
 }
 
-type AbilitiesAllowed = 'TradeAdded' | 'CombatAdded' | 'AuthorityAdded';
-
 export default function ChooseAbilityOverlay({ state, activePrompt, append, currentPlayer }: ChooseAbilityOverlayProps) {
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseAbility';
         if (!isOpen) return null;
-    
-        const cardId = (activePrompt as Prompt).data!.card as string;
-        const card = cardRegistry[cardId];
-        
       
-        const chooseAbility = (ability: { t: AbilitiesAllowed, amount: number }) => {
-            return append({ t: ability.t, player: currentPlayer, amount: ability.amount });
-        };
+        const chooseAbility = (option: Record<string, (string | number)>) => {
+          return append({ ...option, player: currentPlayer } as Event);
+      };
       
         const skip = () =>
           append({ t: 'PromptCancelled' });
@@ -35,7 +29,7 @@ export default function ChooseAbilityOverlay({ state, activePrompt, append, curr
                 {
                     (activePrompt as Prompt).data!.options!.map((option, idx) => {
                         return (
-                            <button key={idx} onClick={() => chooseAbility({ t: option.t as AbilitiesAllowed, amount: option.amount })} className="border px-3 py-2 rounded">
+                            <button key={idx} onClick={() => chooseAbility(option)} className="border px-3 py-2 rounded">
                                 {option.label}
                             </button>
                         )

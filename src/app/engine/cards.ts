@@ -9,6 +9,7 @@ export type Effect =
 | { kind: 'nextAcquireTop' }
 | { kind: 'nextAcquireFree' }
 | { kind: 'multiBaseCondition', amount: number }
+| { kind: 'scrapAndDraw', maxCards: number }
 | { kind: 'prompt', prompt: { kind: string, optional?: boolean, data?: unknown }}
 
 export interface Ability {
@@ -946,7 +947,7 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         id: 'SPACESTATION',
         name: 'Space Station',
         cost: 4,
-        faction: 'Machine Cult',
+        faction: 'Star Empire',
         type: 'base',
         selfScrap: false,
         shield: 'outpost',
@@ -977,32 +978,38 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
             }
         ]
     },
-    // RECYCLINGSTATION: {
-    //     id: 'RECYCLINGSTATION',
-    //     name: 'Recycling Station',
-    //     cost: 4,
-    //     faction: 'Machine Cult',
-    //     type: 'base',
-    //     selfScrap: false,
-    //     shield: 'outpost',
-    //     defence: 4,
-    //     text: {
-    //         play: [`+1 Trade`],
-    //     },
-    //     abilities: [
-    //         {
-    //             trigger: 'onPlay',
-    //             effects: [
-    //                 { kind: 'addTrade', amount: 1 }
-    //             ]
-    //         }
-    //     ]
-    // },
+    RECYCLINGSTATION: {
+        id: 'RECYCLINGSTATION',
+        name: 'Recycling Station',
+        cost: 4,
+        faction: 'Star Empire',
+        type: 'base',
+        selfScrap: false,
+        shield: 'outpost',
+        defence: 4,
+        text: {
+            play: [`+1 Trade`, 'or discard up to 2, then draw that many'],
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'prompt', prompt: { kind: 'chooseAbility', 
+                        optional: true, data: { options: [
+                            { t: 'TradeAdded', player: '', amount: 1, label: '+1 Trade' },
+                            { t: 'DiscardOrScrapAndDrawChosen', player: '', maxCards: 2, action: 'discard', label: 'Discard up to 2, then draw that many' }
+                        ],
+                        card: 'RECYCLINGSTATION' 
+                    } } }
+                ]
+            }
+        ]
+    },
     WARWORLD: {
         id: 'WARWORLD',
         name: 'War World',
         cost: 5,
-        faction: 'Machine Cult',
+        faction: 'Star Empire',
         type: 'base',
         selfScrap: false,
         shield: 'outpost',
@@ -1030,7 +1037,7 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         id: 'ROYALREDOUBT',
         name: 'Royal Redoubt',
         cost: 6,
-        faction: 'Machine Cult',
+        faction: 'Star Empire',
         type: 'base',
         selfScrap: false,
         shield: 'outpost',
@@ -1058,7 +1065,7 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
     //     id: 'FLEETHQ',
     //     name: 'Fleet HQ',
     //     cost: 8,
-    //     faction: 'Machine Cult',
+    //     faction: 'Star Empire',
     //     type: 'base',
     //     selfScrap: false,
     //     shield: 'normal',
@@ -1283,6 +1290,28 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
                 trigger: 'onAlly',
                 effects: [
                     { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    BRAINWORLD: {
+        id: 'BRAINWORLD',
+        name: 'Brain World',
+        cost: 8,
+        faction: 'Machine Cult',
+        type: 'base',
+        selfScrap: false,
+        defence: 6,
+        shield: 'outpost',
+        description: "The Machine Cult build these supercomputing space station to run every aspect of their society. Now they worship them as gods",
+        text: {
+            play: [`Scrap up to 2, then draw that many`],
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'scrapAndDraw', maxCards: 2 }
                 ]
             }
         ]

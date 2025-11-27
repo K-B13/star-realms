@@ -18,6 +18,7 @@ import { icons } from "./iconIndex";
 import IconComponent from "./reusableComponents/iconComponent";
 import { BaseInstance } from "../engine/state";
 import ChooseOpponentBaseOverlay from "../promptOverlays/chooseOpponentBaseOverlay";
+import DiscardAndDrawOverlay from "../promptOverlays/discardAndDrawOverlay";
 
 export const factionColor = {
     "Trade Federation": "bg-blue-500",
@@ -253,6 +254,14 @@ export default function Game() {
             )}
             {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseOpponentBase' && (
               <ChooseOpponentBaseOverlay
+                state={state}
+                activePrompt={activePrompt}
+                append={append}
+                currentPlayer={state.order[state.activeIndex]}
+              />
+            )}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'discardOrScrapAndDraw' && (
+              <DiscardAndDrawOverlay
                 state={state}
                 activePrompt={activePrompt}
                 append={append}

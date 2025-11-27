@@ -4,54 +4,54 @@ type BaseCard = {
 }
 
 export const baseCards: BaseCard[] = [
-    {
-        cardName: "FEDERATIONSHUTTLE",
-        amount: 3
-    },
-    {
-        cardName: "CUTTER",
-        amount: 3
-    },
-    {
-        cardName: "EMBASSYYACHT",
-        amount: 2
-    },
-    {
-        cardName: "FREIGHTER",
-        amount: 2
-    },
-    {
-        cardName: "COMMANDSHIP",
-        amount: 1
-    },
-    {
-        cardName: "FLAGSHIP",
-        amount: 1
-    },
-    {
-        cardName: "TRADEESCORT",
-        amount: 1
-    },
-    {
-        cardName: "TRADINGPOST",
-        amount: 2
-    },
-    {
-        cardName: "BARTERWORLD",
-        amount: 2
-    },
-    {
-        cardName: "DEFENCECENTRE",
-        amount: 1
-    },
-    {
-        cardName: "CENTRALOFFICE",
-        amount: 1
-    },
-    {
-        cardName: "PORTOFCALL",
-        amount: 1
-    },
+    // {
+    //     cardName: "FEDERATIONSHUTTLE",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "CUTTER",
+    //     amount: 3
+    // },
+    // {
+    //     cardName: "EMBASSYYACHT",
+    //     amount: 2
+    // },
+    // {
+    //     cardName: "FREIGHTER",
+    //     amount: 2
+    // },
+    // {
+    //     cardName: "COMMANDSHIP",
+    //     amount: 1
+    // },
+    // {
+    //     cardName: "FLAGSHIP",
+    //     amount: 1
+    // },
+    // {
+    //     cardName: "TRADEESCORT",
+    //     amount: 1
+    // },
+    // {
+    //     cardName: "TRADINGPOST",
+    //     amount: 2
+    // },
+    // {
+    //     cardName: "BARTERWORLD",
+    //     amount: 2
+    // },
+    // {
+    //     cardName: "DEFENCECENTRE",
+    //     amount: 1
+    // },
+    // {
+    //     cardName: "CENTRALOFFICE",
+    //     amount: 1
+    // },
+    // {
+    //     cardName: "PORTOFCALL",
+    //     amount: 1
+    // },
     // {
     //     cardName: "BLOBFIGHTER",
     //     amount: 3
@@ -91,31 +91,47 @@ export const baseCards: BaseCard[] = [
     // {
     //     cardName: "BLOBWORLD",
     //     amount: 1
-    // }
-    // {
-    //     cardName: "IMPERIALFIGHTER",
-    //     amount: 3
     // },
-    // {
-    //     cardName: "IMPERIALFRIGATE",
-    //     amount: 3
-    // },
-    // {
-    //     cardName: "SURVEYSHIP",
-    //     amount: 3
-    // },
-    // {
-    //     cardName: "CORVETTE",
-    //     amount: 2
-    // },
-    // {
-    //     cardName: "BATTLECRUISER",
-    //     amount: 1
-    // },
-    // {
-    //     cardName: "DREADNAUGHT",
-    //     amount: 1
-    // },
+    {
+        cardName: "IMPERIALFIGHTER",
+        amount: 3
+    },
+    {
+        cardName: "IMPERIALFRIGATE",
+        amount: 3
+    },
+    {
+        cardName: "SURVEYSHIP",
+        amount: 3
+    },
+    {
+        cardName: "CORVETTE",
+        amount: 2
+    },
+    {
+        cardName: "BATTLECRUISER",
+        amount: 1
+    },
+    {
+        cardName: "DREADNAUGHT",
+        amount: 1
+    },
+    {
+        cardName: "SPACESTATION",
+        amount: 2
+    },
+    {
+        cardName: "RECYCLINGSTATION",
+        amount: 2
+    },
+    {
+        cardName: "WARWORLD",
+        amount: 1
+    },
+    {
+        cardName: "ROYALREDOUBT",
+        amount: 1
+    },
     // {
     //     cardName: "TRADEBOT",
     //     amount: 3

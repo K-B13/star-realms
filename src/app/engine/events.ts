@@ -32,6 +32,8 @@ export type Event =
   | { t: 'BaseActivated'; player: PID; baseIndex: number }
   | { t: 'TwoOrMoreBasesInPlay'; player: PID; amount: number }
   | { t: 'DrawPerFactionCard'; card: string }
+  | { t: 'DiscardOrScrapAndDrawChosen'; player: PID; maxCards: number; action: 'discard' | 'scrap'  }
+  | { t: 'CardsDiscardedOrScrappedForDraw'; player: PID; discardedIndices: number[]; action: 'discard' | 'scrap' }
   | { t: 'TurnAdvanced' }
   | { t: 'PhaseChanged'; from: Phase; to: Phase }
   | { t: 'PromptShown'; player: PID; kind: string; optional?: boolean; data?: unknown }

@@ -278,7 +278,32 @@ const drawPerFactionCardRule: Rule<'DrawPerFactionCard'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule, twoOrMoreBasesInPlayRule, drawPerFactionCardRule ] as Rule<Event['t']>[]
+const discardOrScrapAndDrawChosenRule: Rule<'DiscardOrScrapAndDrawChosen'> = {
+    on: 'DiscardOrScrapAndDrawChosen',
+    run: (state, ev, emit) => {
+        emit({ t: 'PromptShown', player: ev.player, kind: 'discardOrScrapAndDraw', optional: true, data: { maxCards: ev.maxCards, action: ev.action } });
+    }
+}
+
+const discardOrScrapAndDrawRule: Rule<'CardsDiscardedOrScrappedForDraw'> = {
+    on: 'CardsDiscardedOrScrappedForDraw',
+    run: (state, ev, emit) => {
+        const sortedIndices = [...ev.discardedIndices].sort((a, b) => b - a);
+        for (const idx of sortedIndices) {
+            if (ev.action === 'scrap') {
+                emit({ t: 'CardScrapped', player: ev.player, from: 'hand', placementIndex: idx, card: state.players[ev.player].hand[idx] });
+            } else {
+                emit({ t: 'CardDiscarded', player: ev.player, card: state.players[ev.player].hand[idx], rowIndex: idx });
+            }
+        }
+
+        if (ev.discardedIndices.length > 0) {
+            emit({ t: 'CardsDrawn', player: ev.player, count: ev.discardedIndices.length });
+        }
+    }
+}
+
+const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule, twoOrMoreBasesInPlayRule, drawPerFactionCardRule, discardOrScrapAndDrawChosenRule, discardOrScrapAndDrawRule ] as Rule<Event['t']>[]
 
 const emitEffects = (e: Effect, player: PID, emit: Emit) => {
     switch (e.kind) {
@@ -289,6 +314,7 @@ const emitEffects = (e: Effect, player: PID, emit: Emit) => {
         case 'nextAcquireTop': emit({ t:'NextAcquireToTopSet',  player }); break;
         case 'nextAcquireFree': emit({ t:'NextAcquireFreeSet',   player }); break;
         case 'multiBaseCondition': emit({ t: 'TwoOrMoreBasesInPlay', player, amount: e.amount }); break;
+        case 'scrapAndDraw': emit({ t: 'DiscardOrScrapAndDrawChosen', player, maxCards: e.maxCards, action: 'scrap' }); break;
         case 'prompt':         emit({ t:'PromptShown', player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
       }
 }
@@ -497,6 +523,10 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'TwoOrMoreBasesInPlay':
             return state;
         case 'DrawPerFactionCard':
+            return state;
+        case 'DiscardOrScrapAndDrawChosen':
+            return state;
+        case 'CardsDiscardedOrScrappedForDraw':
             return state;
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;

@@ -24,6 +24,8 @@ export interface Prompt {
         card?: string;
         inPlayIndex?: number;
         options?: Options[];
+        maxCards?: number;
+        action?: 'discard' | 'scrap';
     };
 }
 
