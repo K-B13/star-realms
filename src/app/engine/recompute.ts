@@ -315,6 +315,12 @@ const emitEffects = (e: Effect, player: PID, emit: Emit) => {
         case 'nextAcquireFree': emit({ t:'NextAcquireFreeSet',   player }); break;
         case 'multiBaseCondition': emit({ t: 'TwoOrMoreBasesInPlay', player, amount: e.amount }); break;
         case 'scrapAndDraw': emit({ t: 'DiscardOrScrapAndDrawChosen', player, maxCards: e.maxCards, action: 'scrap' }); break;
+        case 'addAllFactionTags': {
+            emit({ t: "FactionTagAdded", player, faction: 'Trade Federation', amount: 1 })
+            emit({ t: "FactionTagAdded", player, faction: 'Blob Faction', amount: 1 })
+            emit({ t: "FactionTagAdded", player, faction: 'Star Empire', amount: 1 })
+            break;
+        }
         case 'prompt':         emit({ t:'PromptShown', player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
       }
 }

@@ -10,6 +10,7 @@ export type Effect =
 | { kind: 'nextAcquireFree' }
 | { kind: 'multiBaseCondition', amount: number }
 | { kind: 'scrapAndDraw', maxCards: number }
+| { kind: 'addAllFactionTags' }
 | { kind: 'prompt', prompt: { kind: string, optional?: boolean, data?: unknown }}
 
 export interface Ability {
@@ -1290,6 +1291,28 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
                 trigger: 'onAlly',
                 effects: [
                     { kind: 'drawCards', amount: 1 }
+                ]
+            }
+        ]
+    },
+    MECHWORLD: {
+        id: 'MECHWORLD',
+        name: 'Mech World',
+        cost: 5,
+        faction: 'Machine Cult',
+        type: 'base',
+        selfScrap: false,
+        defence: 6,
+        shield: 'outpost',
+        description: "This man-made planet is a galactic center for open source tech.",
+        text: {
+            play: [`Counts as an ally for all factions`],
+        },
+        abilities: [
+            {
+                trigger: 'onPlay',
+                effects: [
+                    { kind: 'addAllFactionTags' }
                 ]
             }
         ]
