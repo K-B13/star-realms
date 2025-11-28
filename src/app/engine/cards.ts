@@ -950,7 +950,7 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         cost: 4,
         faction: 'Star Empire',
         type: 'base',
-        selfScrap: false,
+        selfScrap: true,
         shield: 'outpost',
         defence: 4,
         text: {
@@ -1062,28 +1062,21 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
             }
         ]
     },
-    // FLEETHQ: {
-    //     id: 'FLEETHQ',
-    //     name: 'Fleet HQ',
-    //     cost: 8,
-    //     faction: 'Star Empire',
-    //     type: 'base',
-    //     selfScrap: false,
-    //     shield: 'normal',
-    //     description: `When an imperial fleet goes into battle it's usually coordinated from afar by one of these mobile command centers`,
-    //     defence: 8,
-    //     text: {
-    //         play: [`Gain combat for every ship played`],
-    //     },
-    //     abilities: [
-    //         {
-    //             trigger: 'onPlay',
-    //             effects: [
-                    
-    //             ]
-    //         },
-    //     ]
-    // },
+    FLEETHQ: {
+        id: 'FLEETHQ',
+        name: 'Fleet HQ',
+        cost: 8,
+        faction: 'Star Empire',
+        type: 'base',
+        selfScrap: false,
+        shield: 'normal',
+        description: `When an imperial fleet goes into battle it's usually coordinated from afar by one of these mobile command centers`,
+        defence: 8,
+        text: {
+            play: [`Gain combat for every ship played`],
+        },
+        abilities: []
+    },
     TRADEBOT: {
         id: 'TRADEBOT',
         name: 'Trade Bot',

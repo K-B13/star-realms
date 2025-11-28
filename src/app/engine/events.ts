@@ -34,6 +34,7 @@ export type Event =
   | { t: 'DrawPerFactionCard'; card: string }
   | { t: 'DiscardOrScrapAndDrawChosen'; player: PID; maxCards: number; action: 'discard' | 'scrap'  }
   | { t: 'CardsDiscardedOrScrappedForDraw'; player: PID; discardedIndices: number[]; action: 'discard' | 'scrap' }
+  | { t: 'ShipPlayed'; player: PID; card: string }
   | { t: 'TurnAdvanced' }
   | { t: 'PhaseChanged'; from: Phase; to: Phase }
   | { t: 'PromptShown'; player: PID; kind: string; optional?: boolean; data?: unknown }

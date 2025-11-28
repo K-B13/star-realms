@@ -76,6 +76,10 @@ export default function Game() {
         return bases.some(base => base.shield === 'outpost')
     }
 
+    const hasBasePower = (card: CardDef) => {
+        return card.abilities.some(ability => ability.trigger === 'onPlay')
+    }
+
     return (
         <div>
             <h1>Star Realms</h1>
@@ -88,6 +92,12 @@ export default function Game() {
                         return (
                             <div key={index} className={`${factionColor[cardDef.faction]} ${isBase(cardDef) ? 'border-gray-900' : ''} pr-1 pl-1 border-2`}>
                                 <Card card={cardDef} isInTradeRow={true}/>
+                                    {
+                                        cardDef.type === 'base' &&
+                                        <div>
+                                            <IconComponent img={ cardDef.shield === 'outpost' ? icons.outpost : icons.regularBase } amount={cardDef.defence}/>
+                                        </div>
+                                    }
                                 <button onClick={() => append([
                                     { t: 'CardPurchased', player: state.order[state.activeIndex], card: card, source: 'row', rowIndex: index },
                                     { t: "TradeSpent", player: state.order[state.activeIndex], card: card, amount: cardDef.cost }
@@ -147,16 +157,17 @@ export default function Game() {
                                         <Card card={cardDef} isInTradeRow={false}/>
                                         {
                                             cardDef.type === 'base' && 
-                                            <div>Defence: { cardDef.shield === 'outpost' ? <IconComponent img={icons.outpost} amount={cardDef.defence - card.damage} /> : <IconComponent img={icons.regularBase} amount={cardDef.defence - card.damage} /> }</div>
+                                            <div>Defence: { <IconComponent img={cardDef.shield === 'outpost' ? icons.outpost : icons.regularBase} amount={cardDef.defence - card.damage} /> }</div>
                                         }
                                         {
                                             cardDef.selfScrap && state.order[state.activeIndex] === pid &&
                                             <button onClick={() => append({ t: 'CardScrapped', player: pid, from: 'bases', placementIndex: index, card: card.id })}>Scrap</button>
                                         }
-                                        {state.order[state.activeIndex] === pid && !card.activatedThisTurn && (
-                                            <button onClick={() => append({ t: 'BaseActivated', player: pid, baseIndex: index })}>
-                                                Use
-                                            </button>
+                                        {
+                                            state.order[state.activeIndex] === pid && !card.activatedThisTurn && hasBasePower(cardDef) && (
+                                                <button onClick={() => append({ t: 'BaseActivated', player: pid, baseIndex: index })}>
+                                                    Use
+                                                </button>
                                         )}
                                         {state.order[state.activeIndex] !== pid && state.players[state.order[state.activeIndex]].combat > 0 && <button onClick={() => append({ t: 'BaseDamaged', player: pid, baseIndex: index, amount: state.players[state.order[state.activeIndex]].combat })}>Attack</button>}
                                     </div>

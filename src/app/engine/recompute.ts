@@ -16,6 +16,14 @@ const onPlayRule: Rule<'CardPlayed'> = {
         const p = state.players[ ev.player ];
         const justPlayed = p.inPlay[p.inPlay.length - 1];
         const def = cardRegistry[ justPlayed ];
+
+        if (def.type === 'ship') {
+            emit({
+                t: "ShipPlayed",
+                player: ev.player,
+                card: justPlayed
+            })
+        }
         if (def.selfScrap) {
             emit({
                 t: "PromptShown",
@@ -303,7 +311,18 @@ const discardOrScrapAndDrawRule: Rule<'CardsDiscardedOrScrappedForDraw'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule, twoOrMoreBasesInPlayRule, drawPerFactionCardRule, discardOrScrapAndDrawChosenRule, discardOrScrapAndDrawRule ] as Rule<Event['t']>[]
+const fleetHQRule: Rule<'ShipPlayed'> = {
+    on: 'ShipPlayed',
+    run: (state, ev, emit) => {
+        const hasFleetHQ = state.players[ev.player].bases.some(base => base.id === 'FLEETHQ')
+
+        if (hasFleetHQ) {
+            emit({ t: 'CombatAdded', player: ev.player, amount: 1 });
+        }
+    }
+}
+
+const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule, twoOrMoreBasesInPlayRule, drawPerFactionCardRule, discardOrScrapAndDrawChosenRule, discardOrScrapAndDrawRule, fleetHQRule ] as Rule<Event['t']>[]
 
 const emitEffects = (e: Effect, player: PID, emit: Emit) => {
     switch (e.kind) {
@@ -533,6 +552,8 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'DiscardOrScrapAndDrawChosen':
             return state;
         case 'CardsDiscardedOrScrappedForDraw':
+            return state;
+        case 'ShipPlayed':
             return state;
         case 'TurnAdvanced':
             state.activeIndex = (state.activeIndex + 1) % state.order.length;
