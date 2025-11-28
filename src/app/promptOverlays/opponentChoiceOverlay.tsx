@@ -26,6 +26,7 @@ export interface Prompt {
         options?: Options[];
         maxCards?: number;
         action?: 'discard' | 'scrap';
+        zones?: ('inPlay' | 'discard' | 'hand')[];
     };
 }
 

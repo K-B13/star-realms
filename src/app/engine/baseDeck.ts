@@ -92,72 +92,92 @@ export const baseCards: BaseCard[] = [
     //     cardName: "BLOBWORLD",
     //     amount: 1
     // },
-    {
-        cardName: "IMPERIALFIGHTER",
-        amount: 3
-    },
-    {
-        cardName: "IMPERIALFRIGATE",
-        amount: 3
-    },
-    {
-        cardName: "SURVEYSHIP",
-        amount: 3
-    },
-    {
-        cardName: "CORVETTE",
-        amount: 2
-    },
-    {
-        cardName: "BATTLECRUISER",
-        amount: 1
-    },
-    {
-        cardName: "DREADNAUGHT",
-        amount: 1
-    },
-    {
-        cardName: "SPACESTATION",
-        amount: 2
-    },
-    {
-        cardName: "RECYCLINGSTATION",
-        amount: 2
-    },
-    {
-        cardName: "WARWORLD",
-        amount: 1
-    },
-    {
-        cardName: "ROYALREDOUBT",
-        amount: 1
-    },
     // {
-    //     cardName: "TRADEBOT",
+    //     cardName: "IMPERIALFIGHTER",
     //     amount: 3
     // },
     // {
-    //     cardName: "MISSILEBOT",
+    //     cardName: "IMPERIALFRIGATE",
     //     amount: 3
     // },
     // {
-    //     cardName: "SUPPLYBOT",
+    //     cardName: "SURVEYSHIP",
     //     amount: 3
     // },
     // {
-    //     cardName: "PATROLMECH",
+    //     cardName: "CORVETTE",
     //     amount: 2
     // },
     // {
-    //     cardName: "STEALTHNEEDLE",
-    //     amount: 3
-    // },
-    // {
-    //     cardName: "BATTLEMECH",
+    //     cardName: "BATTLECRUISER",
     //     amount: 1
     // },
     // {
-    //     cardName: "MISSILEMECH",
+    //     cardName: "DREADNAUGHT",
     //     amount: 1
-    // }
+    // },
+    // {
+    //     cardName: "SPACESTATION",
+    //     amount: 2
+    // },
+    // {
+    //     cardName: "RECYCLINGSTATION",
+    //     amount: 2
+    // },
+    // {
+    //     cardName: "WARWORLD",
+    //     amount: 1
+    // },
+    // {
+    //     cardName: "ROYALREDOUBT",
+    //     amount: 1
+    // },
+    {
+        cardName: "TRADEBOT",
+        amount: 3
+    },
+    {
+        cardName: "MISSILEBOT",
+        amount: 3
+    },
+    {
+        cardName: "SUPPLYBOT",
+        amount: 3
+    },
+    {
+        cardName: "BATTLESTATION",
+        amount: 2
+    },
+    {
+        cardName: "PATROLMECH",
+        amount: 2
+    },
+    {
+        cardName: "STEALTHNEEDLE",
+        amount: 1
+    },
+    {
+        cardName: "BATTLEMECH",
+        amount: 1
+    },
+    {
+        cardName: "MISSILEMECH",
+        amount: 1
+    },
+    {
+        cardName: "MECHWORLD",
+        amount: 1
+    },
+    {
+        cardName: "BRAINWORLD",
+        amount: 1
+    },
+    {
+        cardName: "MACHINEBASE",
+        amount: 1
+    },
+    {
+        cardName: "JUNKYARD",
+        amount: 1
+    }
 ]

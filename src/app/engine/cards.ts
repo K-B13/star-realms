@@ -1350,13 +1350,14 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         shield: 'outpost',
         description: 'This high-tech city is like a beehive it looks chaotic but vital work is being done efficiently at a frenetic pace',
         text: {
-            play: [`Draw 1 card`],
+            play: [`Draw 1 card`, `Then scrap a card`],
         },
         abilities: [
             {
                 trigger: 'onPlay',
                 effects: [
-                    { kind: 'drawCards', amount: 1 }
+                    { kind: 'drawCards', amount: 1 },
+                    { kind: 'prompt', prompt: { kind: 'chooseOtherCardToScrap', optional: false, data: { zones: ['hand'] } } }
                 ]
             }
         ]
