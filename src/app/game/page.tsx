@@ -20,7 +20,7 @@ import { BaseInstance } from "../engine/state";
 import ChooseOpponentBaseOverlay from "../promptOverlays/chooseOpponentBaseOverlay";
 import DiscardAndDrawOverlay from "../promptOverlays/discardAndDrawOverlay";
 import { useSearchParams } from "next/navigation";
-import { Player } from "../lobby/playersContainer";
+import { Player } from "../lobby/page";
 
 export const factionColor = {
     "Trade Federation": "bg-blue-500",
@@ -128,27 +128,28 @@ export default function Game() {
             </div>}
             {state.order.map((pid: string, idx: number) => {
                 const player = state.players[pid];
+                const currentPlayer = state.order[state.activeIndex]
                 return (
                     <div key={idx}>
                         <h5>{player.id}</h5>
-                        {state.order[state.activeIndex] !== pid && state.players[state.order[state.activeIndex]].combat > 0 && !hasOutpost(state.players[pid].bases) && <button onClick={() => append({ t: 'DamageDealt', from: state.order[state.activeIndex], to: pid, amount: state.players[state.order[state.activeIndex]].combat })}>Attack</button>}
+                        {currentPlayer !== pid && state.players[currentPlayer].combat > 0 && !hasOutpost(state.players[pid].bases) && <button onClick={() => append({ t: 'DamageDealt', from: currentPlayer, to: pid, amount: state.players[currentPlayer].combat })}>Attack</button>}
                         <p>A/T/C: {player.authority}/{player.trade}/{player.combat}</p>
                         <p>Hand:</p><hr/>
                         <div className="flex flex-row justify-center">
-                        {player.hand && player.hand.length > 0 && player.hand.map((card, index) => {
+                        { player.hand && player.hand.length > 0 && player.hand.map((card, index) => {
                             const cardDef = cardRegistry[card];
-                            return <div className={`${factionColor[cardDef.faction]} ml-1 mr-1 pl-1 pr-1 border-solid border-2`} key={index}>
-                                    <Card card={cardDef} isInTradeRow={false}/>
+                            return <div className={`${state.order[state.activeIndex] !== pid ? 'bg-gray-900' : factionColor[cardDef.faction]} ml-1 mr-1 pl-1 pr-1 border-solid border-2`} key={index}>
+                                    {currentPlayer === pid ? <Card card={cardDef} isInTradeRow={false}/> : <p>Star <br/>Realms</p>}
                                     <div className="flex flex-row">
                                         {
                                             cardDef.selfScrap &&
                                             <button onClick={() => append({ t: 'CardScrapped', player: pid, from: 'hand', placementIndex: index, card: card })}>Scrap</button>
                                         }
-                                        {state.order[state.activeIndex] === pid && <button onClick={() => {
+                                        {currentPlayer === pid && <button onClick={() => {
                                             if (cardDef.type === 'base') {
-                                                append({ t: 'BasePlayed', player: state.order[state.activeIndex], handIndex: index, card })
+                                                append({ t: 'BasePlayed', player: currentPlayer, handIndex: index, card })
                                             } else {
-                                                append({ t: 'CardPlayed', player: state.order[state.activeIndex], handIndex: index })
+                                                append({ t: 'CardPlayed', player: currentPlayer, handIndex: index })
                                             }
                                             }}>Play</button>}
                                     </div>
