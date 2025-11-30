@@ -46,7 +46,7 @@ export default function PlayersContainer({
 
             {players.length > 1 && (
                 <Link 
-                    href={`/game?players=${encodeURIComponent(JSON.stringify(players))}`}
+                    href={`/new-game?players=${encodeURIComponent(JSON.stringify(players))}`}
                     className="border-4 border-yellow-500 rounded-2xl px-6 py-3 text-2xl font-bold text-center text-yellow-300 hover:bg-yellow-900/30 transition-colors block shadow-lg shadow-yellow-500/20"
                 >
                     Start
