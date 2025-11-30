@@ -19,6 +19,8 @@ import IconComponent from "./reusableComponents/iconComponent";
 import { BaseInstance } from "../engine/state";
 import ChooseOpponentBaseOverlay from "../promptOverlays/chooseOpponentBaseOverlay";
 import DiscardAndDrawOverlay from "../promptOverlays/discardAndDrawOverlay";
+import { useSearchParams } from "next/navigation";
+import { Player } from "../lobby/playersContainer";
 
 export const factionColor = {
     "Trade Federation": "bg-blue-500",
@@ -29,10 +31,16 @@ export const factionColor = {
 }
 
 export default function Game() {
-    const players = useMemo(() => ['A', 'B'], [])
+
+    const searchParams = useSearchParams()
+    const playerParams = searchParams.get('players')
+    const players = useMemo(() => {
+        const lobbyPlayers = playerParams ? JSON.parse(decodeURIComponent(playerParams)) : []
+        return lobbyPlayers ? lobbyPlayers.map((p: Player) => p.name) : ['A', 'B']
+    }, [playerParams])
     const [ mounted, setMounted ] = useState(false);
     const [ turnEvents, setTurnEvents ] = useState<Event[]>([])
-    const [ snapshot, setSnapshot ] = useState(() => initialSetup(players))
+    const [ snapshot, setSnapshot ] = useState(() => initialSetup(players.length > 0 ? players : ['A', 'B']))
     const state = replay(snapshot, turnEvents)
     const { prompt: activePrompt } = getActivePrompt(turnEvents)
 
@@ -174,20 +182,7 @@ export default function Game() {
                                 })
                             }
                         </div>
-                        <p>In Play:</p><hr/>
-                        <div className="flex flex-row">
-                        {player.inPlay.map((card, index) => {
-                            const cardDef = cardRegistry[card];
-                            return <div className={`${factionColor[cardDef.faction]} pl-1 pr-1 border-solid border-2`} key={index}>
-                                <Card card={cardDef} isInTradeRow={false}/>
-                                {
-                                    cardDef.selfScrap &&
-                                    <button onClick={() => append({ t: 'CardScrapped', player: pid, from: 'inPlay', placementIndex: index, card: card })}>Scrap</button>
-                                }
-                            </div>
-                        })}
-                        </div>
-                        <p>Discard:</p><hr/>
+                        {/* <p>Discard:</p><hr/>
                         <div className="flex flex-row">
                         {player.discard.map((card, index) => {
                             const cardDef = cardRegistry[card];
@@ -195,7 +190,7 @@ export default function Game() {
                                 <Card card={cardDef} isInTradeRow={false}/>
                             </div>
                         })}
-                        </div>
+                        </div> */}
                     </div>
                 )
             })}
