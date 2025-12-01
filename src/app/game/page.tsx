@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 import { replay, materialize } from "../engine/recompute";
 import { CardDef, cardRegistry } from "../engine/cards";
 import { Event } from "../engine/events";
-import { useEffect } from "react";
 import { initialSetup } from "../engine/initialSetup";
 import { getActivePrompt } from "../helperFunctions/activePromptFunction";
 import ScrapPromptOverlay from "../promptOverlays/tradeRowOverlay";
@@ -38,15 +37,10 @@ export default function Game() {
         const lobbyPlayers = playerParams ? JSON.parse(decodeURIComponent(playerParams)) : []
         return lobbyPlayers ? lobbyPlayers.map((p: Player) => p.name) : ['A', 'B']
     }, [playerParams])
-    const [ mounted, setMounted ] = useState(false);
     const [ turnEvents, setTurnEvents ] = useState<Event[]>([])
     const [ snapshot, setSnapshot ] = useState(() => initialSetup(players.length > 0 ? players : ['A', 'B']))
     const state = replay(snapshot, turnEvents)
     const { prompt: activePrompt } = getActivePrompt(turnEvents)
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
 
     const append = (root: Event | Event[]) => {
       setTurnEvents(prev => {
@@ -57,10 +51,6 @@ export default function Game() {
 
         return [...prev, ...expandedNew];
       });
-    };
-
-    if (!mounted) {
-        return <div>Loading...</div>
     };
 
     const handleScrap = (idx: number, card: string, currentPlayer: string) => {

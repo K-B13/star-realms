@@ -1,7 +1,8 @@
 import { GameState } from "../engine/state";
 import { Event } from "../engine/events";
-import { cardRegistry } from "../engine/cards";
+import { cardRegistry, Faction } from "../engine/cards";
 import { Prompt } from "./opponentChoiceOverlay";
+import Card from "../game/reusableComponents/card";
 
 interface ChooseOtherCardToScrapOverlayProps {
     state: GameState;
@@ -11,6 +12,14 @@ interface ChooseOtherCardToScrapOverlayProps {
 }
 
 type From = 'inPlay' | 'hand' | 'discard';
+
+const factionColors: Record<Faction, { border: string, bg: string }> = {
+    "Trade Federation": { border: "border-blue-400", bg: "bg-blue-900/40" },
+    "Blob Faction": { border: "border-green-400", bg: "bg-green-900/40" },
+    "Machine Cult": { border: "border-red-400", bg: "bg-red-900/40" },
+    "Star Empire": { border: "border-yellow-400", bg: "bg-yellow-900/40" },
+    "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40" },
+};
 
 export default function ChooseOtherCardToScrapOverlay({ state, activePrompt, append, currentPlayer }: ChooseOtherCardToScrapOverlayProps ) {
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseOtherCardToScrap';
@@ -33,41 +42,98 @@ export default function ChooseOtherCardToScrapOverlay({ state, activePrompt, app
       append({ t: 'PromptCancelled' });
   
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-blue-500 p-4 rounded shadow-md max-w-lg w-full">
-          <h3 className="text-lg font-semibold mb-3">
-            {optional ? 'Choose a card to scrap' : 'You must scrap a card'}
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-3 border-purple-500 rounded-xl shadow-2xl shadow-purple-500/30 p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+          <h3 className="text-xl font-bold mb-4 text-purple-300 text-center">
+            {optional ? 'Scrap a Card' : 'You Must Scrap a Card'}
           </h3>
-          <div className="flex gap-2 flex-wrap mb-4">
-            { showInPlay && <div className="flex flex-row">
-                {currentPlayerDetails.inPlay.map((card, idx) => {
-                  if (idx === currentPlayerDetails.inPlay.length - 1) return;
-                  return (
-                    <button key={idx} onClick={() => ScrapChosenCard(idx, card, 'inPlay')} className="px-3 py-1 bg-blue-500 rounded">
-                      {cardRegistry[card].name}
-                    </button>
-                  )
-                })}
+          <p className="text-gray-300 text-sm mb-6 text-center">Choose a card from your zones to scrap</p>
+          <div className="flex flex-col gap-4 mb-4">
+            { showInPlay && currentPlayerDetails.inPlay.length > 1 && (
+              <div>
+                <p className="text-cyan-300 text-sm font-semibold mb-3">Played This Turn:</p>
+                <div className="flex gap-3 flex-wrap">
+                  {currentPlayerDetails.inPlay.map((card, idx) => {
+                    if (idx === currentPlayerDetails.inPlay.length - 1) return null;
+                    const cardDef = cardRegistry[card];
+                    const colors = factionColors[cardDef.faction];
+                    return (
+                      <div 
+                        key={idx} 
+                        onClick={() => ScrapChosenCard(idx, card, 'inPlay')} 
+                        className={`border-3 ${colors.border} rounded-xl ${colors.bg} p-3 w-48 h-64 cursor-pointer hover:brightness-125 transition-all shadow-lg hover:shadow-xl flex flex-col`}
+                      >
+                        <div className="flex-1 overflow-y-auto text-sm">
+                          <Card card={cardDef} isInTradeRow={false} />
+                        </div>
+                        <button className="mt-2 w-full border-2 border-red-500 bg-red-900/40 hover:bg-red-800/60 text-red-200 px-3 py-2 rounded-lg font-semibold transition-all">
+                          🗑 Scrap
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            }
-            { showDiscard && <div className="flex flex-row">
-                {currentPlayerDetails.discard.map((card, idx) => (
-                    <button key={idx} onClick={() => ScrapChosenCard(idx, card, 'discard')} className="px-3 py-1 bg-gray-300 rounded">
-                      {cardRegistry[card].name}
-                    </button>
-                ))}
+            )}
+            { showDiscard && currentPlayerDetails.discard.length > 0 && (
+              <div>
+                <p className="text-emerald-300 text-sm font-semibold mb-3">Discard:</p>
+                <div className="flex gap-3 flex-wrap">
+                  {currentPlayerDetails.discard.map((card, idx) => {
+                    const cardDef = cardRegistry[card];
+                    const colors = factionColors[cardDef.faction];
+                    return (
+                      <div 
+                        key={idx} 
+                        onClick={() => ScrapChosenCard(idx, card, 'discard')} 
+                        className={`border-3 ${colors.border} rounded-xl ${colors.bg} p-3 w-48 h-64 cursor-pointer hover:brightness-125 transition-all shadow-lg hover:shadow-xl flex flex-col`}
+                      >
+                        <div className="flex-1 overflow-y-auto text-sm">
+                          <Card card={cardDef} isInTradeRow={false} />
+                        </div>
+                        <button className="mt-2 w-full border-2 border-red-500 bg-red-900/40 hover:bg-red-800/60 text-red-200 px-3 py-2 rounded-lg font-semibold transition-all">
+                          🗑 Scrap
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            }
-            { showHand && <div className="flex flex-row">
-                {currentPlayerDetails.hand.map((card, idx) => (
-                    <button key={idx} onClick={() => ScrapChosenCard(idx, card, 'hand')} className="px-3 py-1 bg-gray-300 rounded">
-                      {cardRegistry[card].name}
-                    </button>
-                ))}
+            )}
+            { showHand && currentPlayerDetails.hand.length > 0 && (
+              <div>
+                <p className="text-yellow-300 text-sm font-semibold mb-3">Hand:</p>
+                <div className="flex gap-3 flex-wrap">
+                  {currentPlayerDetails.hand.map((card, idx) => {
+                    const cardDef = cardRegistry[card];
+                    const colors = factionColors[cardDef.faction];
+                    return (
+                      <div 
+                        key={idx} 
+                        onClick={() => ScrapChosenCard(idx, card, 'hand')} 
+                        className={`border-3 ${colors.border} rounded-xl ${colors.bg} p-3 w-48 h-64 cursor-pointer hover:brightness-125 transition-all shadow-lg hover:shadow-xl flex flex-col`}
+                      >
+                        <div className="flex-1 overflow-y-auto text-sm">
+                          <Card card={cardDef} isInTradeRow={false} />
+                        </div>
+                        <button className="mt-2 w-full border-2 border-red-500 bg-red-900/40 hover:bg-red-800/60 text-red-200 px-3 py-2 rounded-lg font-semibold transition-all">
+                          🗑 Scrap
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            }
-            {optional && <button onClick={skip} className="px-3 py-1 bg-gray-300 rounded">Skip</button>}
+            )}
           </div>
+          {optional && (
+            <button 
+              onClick={skip} 
+              className="border-2 border-gray-500 bg-gray-800/40 hover:bg-gray-700/60 text-gray-300 px-4 py-2 rounded-lg font-semibold transition-all w-full"
+            >
+              Skip
+            </button>
+          )}
         </div>
       </div>
     );

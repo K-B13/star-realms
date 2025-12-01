@@ -1,7 +1,7 @@
 'use client'
 import { useMemo, useState } from "react";
-import { replay } from "../engine/recompute";
-import { Event } from "../engine/events";
+import { replay, materialize } from "../engine/recompute";
+import { Event, Zone } from "../engine/events";
 import { initialSetup } from "../engine/initialSetup";
 import { useSearchParams } from "next/navigation";
 import { Player } from "../lobby/page";
@@ -25,6 +25,7 @@ import ChooseCardToCopyOverlay from "../promptOverlays/chooseCardToCopyOverlay";
 import ChooseOpponentBaseOverlay from "../promptOverlays/chooseOpponentBaseOverlay";
 import DiscardAndDrawOverlay from "../promptOverlays/discardAndDrawOverlay";
 import { getActivePrompt } from "../helperFunctions/activePromptFunction";
+import { CardDef, cardRegistry } from "../engine/cards";
 
 export default function NewGamePage() {
     const searchParams = useSearchParams();
@@ -58,26 +59,55 @@ export default function NewGamePage() {
     // Get active prompt
     const { prompt: activePrompt } = getActivePrompt(turnEvents)
 
-    // Append events function - YOU WIRE THIS UP
-    const append = (event: Event | Event[]) => {
-        const events = Array.isArray(event) ? event : [event];
-        setTurnEvents(prev => [...prev, ...events]);
+    // Append events function with rule expansion
+    const append = (root: Event | Event[]) => {
+        setTurnEvents(prev => {
+            const base = replay(snapshot, prev);
+            const roots = Array.isArray(root) ? root : [root];
+            const { events: expandedNew } = materialize(base, roots);
+            return [...prev, ...expandedNew];
+        });
     };
 
-    // Handler functions - YOU WIRE THESE UP
-    const handleSelectTradeCard = (card: string, index: number) => {
-        console.log('Select trade card:', card, index);
-        // Wire up: append trade row selection event
+    const handleSelectTradeCard = (card: CardDef, index: number) => {
+        append([
+            { t: 'CardPurchased', player: currentPlayerId, card: card.id, source: 'row', rowIndex: index },
+            { t: 'TradeSpent', player: currentPlayerId, card: card.id, amount: card.cost }
+        ])
     };
 
-    const handlePlayCard = (cardIndex: number) => {
-        console.log('Play card:', cardIndex);
-        // Wire up: append card played event
+    const handlePlayCard = (card: CardDef, cardIndex: number) => {
+        if (card.type === 'base') {
+            append({ t: 'BasePlayed', player: currentPlayerId, handIndex: cardIndex, card: card.id })
+        } else {
+            append({ t: 'CardPlayed', player: currentPlayerId, handIndex: cardIndex })
+        }
     };
 
     const handleActivateBase = (baseIndex: number) => {
-        console.log('Activate base:', baseIndex);
-        // Wire up: append base activated event
+        append({ t: 'BaseActivated', player: currentPlayerId, baseIndex })
+    };
+
+    const handleScrapCard = (card: CardDef, from: Zone, cardIndex: number) => {
+        append({ t: 'CardScrapped', player: currentPlayerId, from, placementIndex: cardIndex, card: card.id })
+    };
+
+    const handleScrapTradeRow = (idx: number, card: string, currentPlayer: string) => {
+        handleScrapCard(cardRegistry[card], 'row', idx)
+    }
+
+    const handleFreeCard = (idx: number, card: string, currentPlayer: string) => {
+        append([
+            { t: 'NextAcquireFreeSet', player: currentPlayer },
+            { t: 'NextAcquireToTopSet', player: currentPlayer },
+            { t: 'CardPurchased', player: currentPlayer, card: card, source: 'row', rowIndex: idx },
+            { t: "TradeSpent", player: state.order[state.activeIndex], card: card, amount: cardRegistry[card].cost }
+        ])
+    }
+
+    const handleScrapBase = (baseIndex: number) => {
+        const base = currentPlayer.bases[baseIndex];
+        append({ t: 'CardScrapped', player: currentPlayerId, from: 'bases', placementIndex: baseIndex, card: base.id })
     };
 
     const handleViewDiscard = () => {
@@ -90,6 +120,14 @@ export default function NewGamePage() {
         // Wire up: show deck modal/overlay
     };
 
+    const handleEndTurn = () => {
+        const base = replay(snapshot, turnEvents);
+        const { state: endState } = materialize(base, [{ t: 'PhaseChanged', from: 'MAIN', to: 'CLEANUP' }]);
+
+        setSnapshot(endState)
+        setTurnEvents([])
+    }
+
     return (
         <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 overflow-hidden">
             <div className="max-w-[1600px] mx-auto flex flex-col gap-2.5 h-full">
@@ -99,6 +137,7 @@ export default function NewGamePage() {
                     tradeDeck={state.tradeDeck}
                     tradeRow={state.row}
                     explorerDeck={state.explorerDeck}
+                    scrapPileCount={state.scrap.length}
                     onSelectCard={handleSelectTradeCard}
                 />
 
@@ -121,14 +160,17 @@ export default function NewGamePage() {
                     bases={currentPlayer.bases}
                     playerId={currentPlayerId}
                     onActivateBase={handleActivateBase}
+                    onScrapBase={handleScrapBase}
                 />
 
                 {/* CURRENT PLAYER HAND */}
                 <PlayerHand 
                     player={currentPlayer}
                     onPlayCard={handlePlayCard}
+                    onScrapCard={handleScrapCard}
                     onViewDiscard={handleViewDiscard}
                     onViewDeck={handleViewDeck}
+                    onEndTurn={handleEndTurn}
                 />
 
             </div>
@@ -139,7 +181,7 @@ export default function NewGamePage() {
                     state={state}
                     activePrompt={activePrompt}
                     append={append}
-                    handleFunction={() => {}} // Wire up
+                    handleFunction={handleScrapTradeRow}
                 />
             )}
 
@@ -148,7 +190,7 @@ export default function NewGamePage() {
                     state={state}
                     activePrompt={activePrompt}
                     append={append}
-                    handleFunction={() => {}} // Wire up
+                    handleFunction={handleFreeCard}
                 />
             )}
 
@@ -161,7 +203,7 @@ export default function NewGamePage() {
                 />
             )}
 
-            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'opponentChoice' && (
+            {activePrompt?.t === 'PromptShown' && (activePrompt.kind === 'opponentChoice' || activePrompt.kind === 'choosePlayer') && (
                 <OpponentChoiceOverlay
                     state={state}
                     activePrompt={activePrompt}
@@ -179,7 +221,7 @@ export default function NewGamePage() {
                 />
             )}
 
-            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapOther' && (
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseOtherCardToScrap' && (
                 <ChooseOtherCardToScrapOverlay
                     state={state}
                     activePrompt={activePrompt}
@@ -197,7 +239,7 @@ export default function NewGamePage() {
                 />
             )}
 
-            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'copyShip' && (
+            {activePrompt?.t === 'PromptShown' && (activePrompt.kind === 'copyShip' || activePrompt.kind === 'chooseInPlayShip') && (
                 <ChooseCardToCopyOverlay
                     state={state}
                     activePrompt={activePrompt}

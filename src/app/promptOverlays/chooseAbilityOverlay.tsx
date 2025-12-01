@@ -22,14 +22,19 @@ export default function ChooseAbilityOverlay({ state, activePrompt, append, curr
           append({ t: 'PromptCancelled' });
       
         return (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-blue p-4 rounded shadow-md max-w-lg w-full">
-              <h3 className="text-lg font-semibold mb-3">Choose an ability</h3>
-              <div className="flex gap-2 flex-wrap mb-4">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-3 border-purple-500 rounded-xl shadow-2xl shadow-purple-500/30 p-6 max-w-lg w-full">
+              <h3 className="text-xl font-bold mb-4 text-purple-300 text-center">Choose an Ability</h3>
+              <p className="text-gray-300 text-sm mb-6 text-center">Select which effect you want to activate</p>
+              <div className="flex gap-3 flex-wrap justify-center">
                 {
                     (activePrompt as Prompt).data!.options!.map((option, idx) => {
                         return (
-                            <button key={idx} onClick={() => chooseAbility(option)} className="border px-3 py-2 rounded">
+                            <button 
+                              key={idx} 
+                              onClick={() => chooseAbility(option)} 
+                              className="border-2 border-cyan-500 bg-cyan-900/40 hover:bg-cyan-800/60 text-cyan-200 px-6 py-3 rounded-lg font-semibold transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40"
+                            >
                                 {option.label}
                             </button>
                         )

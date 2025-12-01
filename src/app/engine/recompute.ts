@@ -146,7 +146,6 @@ const onSelfScrapEffectsRule: Rule<'CardScrapped'> = {
     run: (state, ev, emit) => {
         const def = cardRegistry[ev.card!];
         if (!def?.abilities) return;
-        console.log(ev.card)
         for (const a of def.abilities) {
             if (a.trigger !== 'onScrap') continue;
             for (const e of a.effects) {
