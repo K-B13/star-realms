@@ -8,6 +8,9 @@ interface TradeRowSectionProps {
     explorerDeck: string[];
     scrapPileCount: number;
     onSelectCard?: (card: CardDef, source: 'row' | 'explorer', index: number) => void;
+    onCardHover?: (card: CardDef, mode: 'hover' | 'click') => void;
+    onCardLeave?: () => void;
+    onCardClick?: (card: CardDef, mode: 'hover' | 'click') => void;
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
@@ -18,7 +21,7 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40", shadow: "shadow-gray-500/20" },
 };
 
-export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scrapPileCount, onSelectCard }: TradeRowSectionProps) {
+export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scrapPileCount, onSelectCard, onCardHover, onCardLeave, onCardClick }: TradeRowSectionProps) {
     return (
         <div className="flex gap-2.5 items-center">
             {/* Deck and Scrapped Counters */}
@@ -39,7 +42,18 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
                     {tradeRow.map((card, index) => {
                         const cardDef = cardRegistry[card];
                         const colors = factionColors[cardDef.faction];
-                        return <div key={index} className={`w-[calc(20%-0.5rem)] min-w-[150px] flex-shrink-0 border-3 ${colors.border} rounded-xl ${colors.bg} p-3 flex flex-col shadow-lg ${colors.shadow} min-h-[110px] relative`}>
+                        return <div 
+                            key={index} 
+                            className={`w-[calc(20%-0.5rem)] min-w-[150px] flex-shrink-0 border-3 ${colors.border} rounded-xl ${colors.bg} p-3 flex flex-col shadow-lg ${colors.shadow} min-h-[110px] relative cursor-pointer hover:brightness-110 transition-all`}
+                            onMouseEnter={() => onCardHover?.(cardDef, 'hover')}
+                            onMouseLeave={() => onCardLeave?.()}
+                            onClick={(e) => {
+                                // Only show detail if not clicking the buy button
+                                if (!(e.target as HTMLElement).closest('button')) {
+                                    onCardClick?.(cardDef, 'click');
+                                }
+                            }}
+                        >
                             <div className="absolute top-2 right-2 flex flex-row items-center gap-0.5">
                                 <p className="text-yellow-300 font-bold">{cardDef.cost}</p>
                                 <IconComponent img={icons.coin} amount={1} />
@@ -48,7 +62,10 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
                             <div className="flex-1 flex items-center justify-center">
                                 {card && (
                                     <button 
-                                        onClick={() => onSelectCard?.(cardDef, 'row', index)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onSelectCard?.(cardDef, 'row', index);
+                                        }}
                                         className={`border-2 ${colors.border} rounded-lg px-4 py-1.5 text-sm font-semibold hover:brightness-125 transition-all text-gray-100`}
                                     >
                                         Buy
@@ -61,7 +78,16 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
             </div>
 
             {/* Explorers */}
-            <div className="relative border-3 border-cyan-400 rounded-xl bg-slate-800 p-3 w-40 text-center shadow-lg shadow-cyan-500/20">
+            <div 
+                className="relative border-3 border-cyan-400 rounded-xl bg-slate-800 p-3 w-40 text-center shadow-lg shadow-cyan-500/20 cursor-pointer hover:brightness-110 transition-all"
+                onMouseEnter={() => onCardHover?.(cardRegistry['EXPLORER'], 'hover')}
+                onMouseLeave={() => onCardLeave?.()}
+                onClick={(e) => {
+                    if (!(e.target as HTMLElement).closest('button')) {
+                        onCardClick?.(cardRegistry['EXPLORER'], 'click');
+                    }
+                }}
+            >
                 <div className="absolute top-2 right-2 flex flex-row items-center gap-0.5">
                     <p className="text-yellow-300 font-bold">2</p>
                     <IconComponent img={icons.coin} amount={1} />
@@ -70,8 +96,12 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
                 <p className="text-xl font-bold text-gray-100">{explorerDeck.length}/10</p>
                 {
                     explorerDeck.length > 0 && (
-                        <button className="border-2 border-cyan-400 rounded-lg px-4 py-1.5 text-sm font-semibold hover:brightness-125 transition-all text-gray-100"
-                        onClick={() => onSelectCard?.(cardRegistry['EXPLORER'], 'explorer', 0)}
+                        <button 
+                            className="border-2 border-cyan-400 rounded-lg px-4 py-1.5 text-sm font-semibold hover:brightness-125 transition-all text-gray-100"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onSelectCard?.(cardRegistry['EXPLORER'], 'explorer', 0);
+                            }}
                         >
                             Buy
                         </button>

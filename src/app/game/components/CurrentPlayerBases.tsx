@@ -1,11 +1,13 @@
 import { BaseInstance } from "@/app/engine/state";
-import { BaseDef, cardRegistry, Faction } from "@/app/engine/cards";
+import { BaseDef, CardDef, cardRegistry, Faction } from "@/app/engine/cards";
 
 interface CurrentPlayerBasesProps {
     bases: BaseInstance[];
     playerId: string;
     onActivateBase?: (baseIndex: number) => void;
     onScrapBase?: (baseIndex: number) => void;
+    onCardHover?: (card: CardDef, mode: 'hover' | 'click') => void;
+    onCardLeave?: () => void;
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
@@ -16,7 +18,7 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40", shadow: "shadow-gray-500/20" },
 };
 
-export default function CurrentPlayerBases({ bases, playerId, onActivateBase, onScrapBase }: CurrentPlayerBasesProps) {
+export default function CurrentPlayerBases({ bases, playerId, onActivateBase, onScrapBase, onCardHover, onCardLeave }: CurrentPlayerBasesProps) {
     return (
         <div className="border-3 border-cyan-500 rounded-xl bg-slate-800 p-3 shadow-lg shadow-cyan-500/20">
             <p className="text-base font-bold text-cyan-300 mb-2 text-center">{playerId} Bases (You)</p>
@@ -31,8 +33,11 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
                         <div 
                             key={index} 
                             className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-3 w-40 shadow-md ${colors.shadow} cursor-pointer hover:brightness-110 transition-all relative`}
-                            onClick={() => {
-                                if (!base.activatedThisTurn) {
+                            onMouseEnter={() => onCardHover?.(cardDef, 'hover')}
+                            onMouseLeave={() => onCardLeave?.()}
+                            onClick={(e) => {
+                                // Only activate if not clicking scrap button
+                                if (!(e.target as HTMLElement).closest('button') && !base.activatedThisTurn) {
                                     onActivateBase?.(index)
                                 }
                             }}

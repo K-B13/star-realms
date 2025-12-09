@@ -1,5 +1,5 @@
 'use client'
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { replay, materialize } from "../engine/recompute";
 import { Event, Zone } from "../engine/events";
 import { initialSetup } from "../engine/initialSetup";
@@ -13,6 +13,7 @@ import PlayerSummaryBar from "./components/PlayerSummaryBar";
 import OpponentBasesViewer from "./components/OpponentBasesViewer";
 import CurrentPlayerBases from "./components/CurrentPlayerBases";
 import PlayerHand from "./components/PlayerHand";
+import CardDetailOverlay from "./components/CardDetailOverlay";
 
 // Import existing overlays (you'll wire these up)
 import ScrapPromptOverlay from "../promptOverlays/tradeRowOverlay";
@@ -26,10 +27,12 @@ import ChooseOpponentBaseOverlay from "../promptOverlays/chooseOpponentBaseOverl
 import DiscardAndDrawOverlay from "../promptOverlays/discardAndDrawOverlay";
 import { getActivePrompt } from "../helperFunctions/activePromptFunction";
 import { CardDef, cardRegistry } from "../engine/cards";
+import DiscardDeckOverlay from "./components/DiscardDeckOverlay";
 
 export default function NewGamePage() {
     const searchParams = useSearchParams();
     const playersParam = searchParams.get('players');
+    const [showDiscardDeck, setShowDiscardDeck] = useState(false);
     
     // Parse players from URL
     const players: Player[] = useMemo(() => {
@@ -46,6 +49,16 @@ export default function NewGamePage() {
     // Initialize game state
     const [turnEvents, setTurnEvents] = useState<Event[]>([]);
     const [snapshot, setSnapshot] = useState<GameState>(() => initialSetup(playerNames));
+
+    // Card detail overlay state
+    const [cardDetailState, setCardDetailState] = useState<{
+        card: CardDef | null;
+        isOpen: boolean;
+        mode: 'hover' | 'click';
+    }>({ card: null, isOpen: false, mode: 'hover' });
+    
+    // Ref to track hover timeout
+    const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Compute current state
     const state = useMemo(() => {
@@ -111,9 +124,12 @@ export default function NewGamePage() {
     };
 
     const handleViewDiscard = () => {
-        console.log('View discard');
-        // Wire up: show discard pile modal/overlay
+        setShowDiscardDeck(true);
     };
+
+    const closeViewDiscard = () => {
+        setShowDiscardDeck(false);
+    }
 
     const handleViewDeck = () => {
         console.log('View deck');
@@ -128,6 +144,38 @@ export default function NewGamePage() {
         setTurnEvents([])
     }
 
+    // Card detail handlers
+    const showCardDetail = (card: CardDef, mode: 'hover' | 'click') => {
+        // Clear any pending hide timeout
+        if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current);
+            hoverTimeoutRef.current = null;
+        }
+        setCardDetailState({ card, isOpen: true, mode });
+    };
+
+    const hideCardDetail = () => {
+        // Don't hide if in click mode - user must click close button or outside
+        if (cardDetailState.mode === 'click') {
+            return;
+        }
+        
+        // For hover mode, add a small delay before hiding
+        // This prevents flickering when moving between card and overlay
+        hoverTimeoutRef.current = setTimeout(() => {
+            setCardDetailState({ card: null, isOpen: false, mode: 'hover' });
+        }, 100);
+    };
+
+    const forceCloseCardDetail = () => {
+        // Force close regardless of mode (for click mode close button/backdrop)
+        if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current);
+            hoverTimeoutRef.current = null;
+        }
+        setCardDetailState({ card: null, isOpen: false, mode: 'hover' });
+    };
+
     return (
         <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 overflow-hidden">
             <div className="max-w-[1600px] mx-auto flex flex-col gap-2.5 h-full">
@@ -138,6 +186,9 @@ export default function NewGamePage() {
                     explorerDeck={state.explorerDeck}
                     scrapPileCount={state.scrap.length}
                     onSelectCard={handleSelectTradeCard}
+                    onCardHover={showCardDetail}
+                    onCardLeave={hideCardDetail}
+                    onCardClick={showCardDetail}
                 />
 
                 <PlayerSummaryBar 
@@ -159,6 +210,8 @@ export default function NewGamePage() {
                     playerId={currentPlayerId}
                     onActivateBase={handleActivateBase}
                     onScrapBase={handleScrapBase}
+                    onCardHover={showCardDetail}
+                    onCardLeave={hideCardDetail}
                 />
 
                 <PlayerHand 
@@ -168,6 +221,7 @@ export default function NewGamePage() {
                     onViewDiscard={handleViewDiscard}
                     onViewDeck={handleViewDeck}
                     onEndTurn={handleEndTurn}
+                    onCardClick={showCardDetail}
                 />
 
             </div>
@@ -262,6 +316,29 @@ export default function NewGamePage() {
                     currentPlayer={state.order[state.activeIndex]}
                 />
             )}
+
+            {/* Card Detail Overlay */}
+            <CardDetailOverlay
+                card={cardDetailState.card}
+                isOpen={cardDetailState.isOpen}
+                onClose={forceCloseCardDetail}
+                mode={cardDetailState.mode}
+                onMouseEnter={() => {
+                    // Cancel hide timeout when hovering over overlay
+                    if (hoverTimeoutRef.current) {
+                        clearTimeout(hoverTimeoutRef.current);
+                        hoverTimeoutRef.current = null;
+                    }
+                }}
+                onMouseLeave={hideCardDetail}
+            />
+            {
+                showDiscardDeck &&
+                <DiscardDeckOverlay
+                    currentPlayer={currentPlayer}
+                    onClose={closeViewDiscard}
+                />
+            }
         </div>
     );
 }

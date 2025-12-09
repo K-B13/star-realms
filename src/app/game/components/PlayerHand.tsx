@@ -10,6 +10,7 @@ interface PlayerHandProps {
     onViewDiscard?: () => void;
     onViewDeck?: () => void;
     onEndTurn?: () => void;
+    onCardClick?: (card: CardDef, mode: 'hover' | 'click') => void;
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
@@ -20,7 +21,7 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40", shadow: "shadow-gray-500/20" },
 };
 
-export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onEndTurn }: PlayerHandProps) {
+export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onEndTurn, onCardClick }: PlayerHandProps) {
     return (
         <div className="flex gap-2.5 flex-1 min-h-0">
             {/* Left Side: Discard & Deck */}
@@ -52,22 +53,43 @@ export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDisc
                         const cardDef = cardRegistry[card];
                         const colors = factionColors[cardDef.faction];
                         return (
-                            <div key={index} className={`w-[calc(20%-0.5rem)] min-w-[150px] flex-shrink-0 border-3 ${colors.border} rounded-xl ${colors.bg} p-2 flex flex-col shadow-lg ${colors.shadow} relative`}>
+                            <div 
+                                key={index} 
+                                className={`w-[calc(20%-0.5rem)] min-w-[150px] flex-shrink-0 border-3 ${colors.border} rounded-xl ${colors.bg} p-2 flex flex-col shadow-lg ${colors.shadow} relative cursor-pointer hover:brightness-110 transition-all`}
+                                onClick={(e) => {
+                                    // Only show detail if not clicking a button
+                                    if (!(e.target as HTMLElement).closest('button')) {
+                                        onCardClick?.(cardDef, 'click');
+                                    }
+                                }}
+                            >
                                 {cardDef.selfScrap && (
                                     <button
-                                        onClick={() => onScrapCard?.(cardDef, 'hand', index)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onScrapCard?.(cardDef, 'hand', index);
+                                        }}
                                         className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600/80 hover:bg-red-500 text-white text-xs font-bold flex items-center justify-center transition-all shadow-md z-10"
                                         title="Scrap this card"
                                     >
                                         🗑
                                     </button>
                                 )}
-                                <div className="text-gray-200 text-xs mb-1 text-center font-semibold break-words line-clamp-2 w-full">{cardDef.name}</div>
+                                {/* Card type badge */}
+                                <div className="absolute top-1 left-1">
+                                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${colors.border} border ${colors.bg} font-semibold`}>
+                                        {cardDef.type === 'base' ? '🏰' : '🚀'}
+                                    </span>
+                                </div>
+                                <div className="text-gray-200 text-xs mb-1 text-center font-semibold break-words line-clamp-2 w-full mt-6">{cardDef.name}</div>
                                 <div className="flex-1 overflow-y-auto min-h-0 text-sm">
                                     <Card card={cardDef} isInTradeRow={false} inPlayerHand={true} />
                                 </div>
                                 <button 
-                                    onClick={() => onPlayCard?.(cardDef, index)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onPlayCard?.(cardDef, index);
+                                    }}
                                     className={`border-2 ${colors.border} rounded-lg px-3 py-1 text-sm font-semibold hover:brightness-125 transition-all w-full mt-1 text-gray-100`}
                                 >
                                     Play
