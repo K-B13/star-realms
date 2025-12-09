@@ -768,8 +768,8 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
                 effects: [
                     { kind: 'prompt', prompt: { kind: 'chooseAbility', optional: false, data: { options:
                         [
-                            { t: 'DrawPerFactionCard', card: 'BLOBWORLD' },
-                            { t: 'CombatAdded', amount: 5, label: '+5 Combat' }
+                            { t: 'CombatAdded', amount: 5, label: '+5 Combat' },
+                            { t: 'DrawPerFactionCard', card: 'BLOBWORLD', label: 'Draw 1 card for each Blob Faction card played this turn' }
                         ],
                         card: 'BLOBWORLD'
                     }} }

@@ -132,7 +132,6 @@ export default function NewGamePage() {
         <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 overflow-hidden">
             <div className="max-w-[1600px] mx-auto flex flex-col gap-2.5 h-full">
                 
-                {/* TOP SECTION: Trade Row & Explorers */}
                 <TradeRowSection 
                     tradeDeck={state.tradeDeck}
                     tradeRow={state.row}
@@ -141,21 +140,20 @@ export default function NewGamePage() {
                     onSelectCard={handleSelectTradeCard}
                 />
 
-                {/* PLAYER SUMMARY BAR */}
                 <PlayerSummaryBar 
                     players={state.players}
                     playerOrder={state.order}
                     currentPlayerId={currentPlayerId}
+                    append={append}
                 />
 
-                {/* OPPONENT BASES VIEWER */}
                 <OpponentBasesViewer 
                     players={state.players}
                     playerOrder={state.order}
                     currentPlayerId={currentPlayerId}
+                    append={append}
                 />
 
-                {/* CURRENT PLAYER BASES */}
                 <CurrentPlayerBases 
                     bases={currentPlayer.bases}
                     playerId={currentPlayerId}
@@ -163,7 +161,6 @@ export default function NewGamePage() {
                     onScrapBase={handleScrapBase}
                 />
 
-                {/* CURRENT PLAYER HAND */}
                 <PlayerHand 
                     player={currentPlayer}
                     onPlayCard={handlePlayCard}

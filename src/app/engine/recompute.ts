@@ -280,7 +280,7 @@ const drawPerFactionCardRule: Rule<'DrawPerFactionCard'> = {
     run: (state, ev, emit) => {
         const factionCounter = factionCalculator(cardRegistry[ev.card], state, state.order[state.activeIndex]);
         if (factionCounter >= 1) {
-            emit({ t: 'CardsDrawn', player: state.order[state.activeIndex], count: factionCounter })
+            emit({ t: 'CardsDrawn', player: state.order[state.activeIndex], count: factionCounter - 1})
         }
     }
 }

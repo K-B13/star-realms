@@ -8,7 +8,7 @@ export const getActivePrompt = (events: Event[]): { prompt?: Event, resolver?: (
             choosePlayer: (e: Event) => e.t === "PromptCancelled"  || (e.t === "TargetChosen"),
             opponentDiscard: (e: Event) => e.t === "PromptCancelled" || (e.t === "CardDiscarded"),
             chooseOtherCardToScrap: (e: Event) => e.t === "PromptCancelled" || (e.t === "CardScrapped"),
-            chooseAbility: (e: Event) => (e.t === "TradeAdded" || e.t === "CombatAdded" || e.t === "AuthorityAdded" || e.t === "DiscardOrScrapAndDrawChosen"),
+            chooseAbility: (e: Event) => (e.t === "TradeAdded" || e.t === "CombatAdded" || e.t === "AuthorityAdded" || e.t === "DiscardOrScrapAndDrawChosen" || e.t === "DrawPerFactionCard"),
             chooseInPlayShip: (e: Event) => e.t === "PromptCancelled" || (e.t === "TargetCardChosen" && e.source === "copyShip"),
             copyShip: (e: Event) => e.t === "PromptCancelled" || (e.t === "TargetCardChosen" && e.source === "copyShip"),
             chooseOpponentBase: (e: Event) => e.t === "PromptCancelled" || (e.t === "BaseChosenToDestroy"),

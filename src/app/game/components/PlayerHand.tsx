@@ -52,18 +52,18 @@ export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDisc
                         const cardDef = cardRegistry[card];
                         const colors = factionColors[cardDef.faction];
                         return (
-                            <div key={index} className={`w-[calc(20%-0.5rem)] min-w-[150px] flex-shrink-0 border-3 ${colors.border} rounded-xl ${colors.bg} p-2 flex flex-col items-center justify-between shadow-lg ${colors.shadow} relative`}>
+                            <div key={index} className={`w-[calc(20%-0.5rem)] min-w-[150px] flex-shrink-0 border-3 ${colors.border} rounded-xl ${colors.bg} p-2 flex flex-col shadow-lg ${colors.shadow} relative`}>
                                 {cardDef.selfScrap && (
                                     <button
                                         onClick={() => onScrapCard?.(cardDef, 'hand', index)}
-                                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600/80 hover:bg-red-500 text-white text-xs font-bold flex items-center justify-center transition-all shadow-md"
+                                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600/80 hover:bg-red-500 text-white text-xs font-bold flex items-center justify-center transition-all shadow-md z-10"
                                         title="Scrap this card"
                                     >
                                         🗑
                                     </button>
                                 )}
                                 <div className="text-gray-200 text-xs mb-1 text-center font-semibold break-words line-clamp-2 w-full">{cardDef.name}</div>
-                                <div className="flex-1 flex items-center justify-center overflow-hidden">
+                                <div className="flex-1 overflow-y-auto min-h-0 text-sm">
                                     <Card card={cardDef} isInTradeRow={false} inPlayerHand={true} />
                                 </div>
                                 <button 

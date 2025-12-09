@@ -1,6 +1,7 @@
-import { PlayerState, BaseInstance } from "@/app/engine/state";
+import { BaseInstance, PlayerState } from "@/app/engine/state";
 import { cardRegistry, Faction } from "@/app/engine/cards";
 import { useState } from "react";
+import { Event } from "@/app/engine/events";
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
     "Trade Federation": { border: "border-blue-400", bg: "bg-blue-900/40", shadow: "shadow-blue-500/20" },
@@ -14,9 +15,10 @@ interface OpponentBasesViewerProps {
     players: Record<string, PlayerState>;
     playerOrder: string[];
     currentPlayerId: string;
+    append: (event: Event | Event[]) => void;
 }
 
-export default function OpponentBasesViewer({ players, playerOrder, currentPlayerId }: OpponentBasesViewerProps) {
+export default function OpponentBasesViewer({ players, playerOrder, currentPlayerId, append }: OpponentBasesViewerProps) {
     const otherPlayers = playerOrder.filter(pid => pid !== currentPlayerId);
     const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
 
@@ -34,6 +36,7 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
 
     const selectedPlayerId = otherPlayers[selectedPlayerIndex];
     const selectedPlayer = players[selectedPlayerId];
+    const currentPlayer = players[currentPlayerId];
 
     return (
         <div className="border-3 border-purple-500 rounded-xl bg-slate-800 p-3 shadow-lg shadow-purple-500/20 h-40">
@@ -49,7 +52,7 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
                 {/* Bases Display */}
                 <div className="flex-1 h-full flex flex-col">
                     <p className="text-base font-bold text-purple-300 mb-2 text-center">{selectedPlayer.id} Bases</p>
-                    <div className="flex gap-3 justify-center flex-wrap flex-1 items-center">
+                    <div className="flex-1 flex gap-3 justify-center flex-wrap items-center content-center mb-6">
                         {selectedPlayer.bases.length === 0 ? (
                             <p className="text-gray-400 text-sm">No bases</p>
                         ) : (
@@ -57,18 +60,27 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
                                 const cardDef = cardRegistry[base.id];
                                 const colors = factionColors[cardDef.faction];
                                 return (
-                                <div key={index} className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-3 w-40 shadow-md ${colors.shadow}`}>
-                                    <p className="text-center text-sm font-bold text-gray-100 mb-1">{base.id}</p>
-                                    <p className="text-center text-xs text-gray-200">
-                                        Shield: {base.defence} {base.shield === 'outpost' ? '⚫' : '⚪'}
-                                    </p>
-                                    {/* Damage bar (red) */}
-                                    <div className="mt-2 bg-gray-700 h-1.5 rounded-full overflow-hidden">
-                                        <div 
-                                            className="bg-red-500 h-full rounded-full transition-all"
-                                            style={{ width: `${(base.damage / base.defence) * 100}%` }}
-                                        ></div>
+                                <div key={index} className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-2 w-40 h-28 shadow-md ${colors.shadow} flex flex-col`}>
+                                    <p className="text-center text-sm font-bold text-gray-100 mb-0.5">{base.id}</p>
+                                    <div className="flex-1 flex flex-col justify-center">
+                                        <p className="text-center text-xs text-gray-200">
+                                            Shield: {base.defence - base.damage} {base.shield === 'outpost' ? '⚫' : '⚪'}
+                                        </p>
+                                        <div className="mt-1 bg-gray-700 h-1.5 rounded-full overflow-hidden">
+                                            <div 
+                                                className="bg-red-500 h-full rounded-full transition-all"
+                                                style={{ width: `${(base.damage / base.defence) * 100}%` }}
+                                            ></div>
+                                        </div>
                                     </div>
+                                    { currentPlayer.combat > 0 && (
+                                        <button 
+                                            onClick={() => append({ t: 'BaseDamaged', player: selectedPlayer.id, baseIndex: index, amount: currentPlayer.combat })}
+                                            className="w-full border border-red-500 bg-red-900/40 hover:bg-red-800/60 text-red-200 px-1 py-0.5 rounded text-xs font-semibold transition-all mt-1"
+                                        >
+                                            ⚔️ Attack ({currentPlayer.combat})
+                                        </button>
+                                    )}
                                 </div>
                                 );
                             })
