@@ -42,7 +42,7 @@ export default function OpponentChoiceOverlay({ state, activePrompt, append, cur
       append({ t: 'TargetChosen', player: currentPlayer, target: pid, purpose } as Event);
 
     const skip = () =>
-        append({ t: 'PromptCancelled' });  
+        append({ t: 'PromptCancelled', kind: 'choosePlayer' });  
     
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">

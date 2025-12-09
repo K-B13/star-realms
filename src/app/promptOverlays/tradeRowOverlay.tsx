@@ -13,7 +13,7 @@ export default function ScrapPromptOverlay({ state, activePrompt, append, handle
 
 
     const handleSkip = () => {
-        append({ t: 'PromptCancelled' })
+        append({ t: 'PromptCancelled', kind: 'scrapRow' })
     }
 
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapRow'

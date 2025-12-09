@@ -45,7 +45,7 @@ export default function DiscardAndDrawOverlay({ state, activePrompt, append, cur
     };
 
     const skip = () => {
-        append({ t: 'PromptCancelled' });
+        append({ t: 'PromptCancelled', kind: 'discardOrScrapAndDraw' });
         setSelectedIndices([]);
     };
 

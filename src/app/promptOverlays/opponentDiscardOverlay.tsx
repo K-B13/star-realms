@@ -21,7 +21,7 @@ export default function OpponentDiscardOverlay({ state, activePrompt, append, cu
       append({ t: 'CardDiscarded', player: target, card: state.players[target].hand[idx], rowIndex: idx });
   
     const skip = () =>
-      append({ t: 'PromptCancelled' });
+      append({ t: 'PromptCancelled', kind: 'opponentDiscard' });
   
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">

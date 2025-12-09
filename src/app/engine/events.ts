@@ -38,4 +38,4 @@ export type Event =
   | { t: 'TurnAdvanced' }
   | { t: 'PhaseChanged'; from: Phase; to: Phase }
   | { t: 'PromptShown'; player: PID; kind: string; optional?: boolean; data?: unknown }
-  | { t: 'PromptCancelled' };
+  | { t: 'PromptCancelled'; kind: string };

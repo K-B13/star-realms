@@ -23,7 +23,7 @@ export default function ChooseOpponentBaseOverlay({ state, activePrompt, append,
         append({ t: 'BaseChosenToDestroy', player: currentPlayer, targetPlayer: target, baseIndex: idx });
 
     const skip = () =>
-        append({ t: 'PromptCancelled' });
+        append({ t: 'PromptCancelled', kind: 'chooseOpponentBase' });
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">

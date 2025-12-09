@@ -32,7 +32,7 @@ export default function ChooseCardToCopyOverlay({ state, activePrompt, append }:
       append({ t:'TargetCardChosen', player: p, source: 'copyShip', inPlayIndex: idx });
     };
     const skip = () =>
-        append({ t: 'PromptCancelled' });  
+        append({ t: 'PromptCancelled', kind: 'chooseInPlayShip' });  
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
