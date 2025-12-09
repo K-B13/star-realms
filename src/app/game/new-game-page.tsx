@@ -55,6 +55,9 @@ export default function NewGamePage() {
         card: CardDef | null;
         isOpen: boolean;
         mode: 'hover' | 'click';
+        onActivateBase?: () => void;
+        baseAlreadyActivated?: boolean;
+        onScrapBase?: () => void;
     }>({ card: null, isOpen: false, mode: 'hover' });
     
     // Ref to track hover timeout
@@ -87,6 +90,8 @@ export default function NewGamePage() {
             { t: 'CardPurchased', player: currentPlayerId, card: card.id, source: source, rowIndex: index },
             { t: 'TradeSpent', player: currentPlayerId, card: card.id, amount: card.cost }
         ])
+        // Close the overlay when buying a card
+        forceCloseCardDetail();
     };
 
     const handlePlayCard = (card: CardDef, cardIndex: number) => {
@@ -145,13 +150,13 @@ export default function NewGamePage() {
     }
 
     // Card detail handlers
-    const showCardDetail = (card: CardDef, mode: 'hover' | 'click') => {
+    const showCardDetail = (card: CardDef, mode: 'hover' | 'click', onActivateBase?: () => void, baseAlreadyActivated?: boolean, onScrapBase?: () => void) => {
         // Clear any pending hide timeout
         if (hoverTimeoutRef.current) {
             clearTimeout(hoverTimeoutRef.current);
             hoverTimeoutRef.current = null;
         }
-        setCardDetailState({ card, isOpen: true, mode });
+        setCardDetailState({ card, isOpen: true, mode, onActivateBase, baseAlreadyActivated, onScrapBase });
     };
 
     const hideCardDetail = () => {
@@ -331,6 +336,11 @@ export default function NewGamePage() {
                     }
                 }}
                 onMouseLeave={hideCardDetail}
+                onActivateBase={cardDetailState.onActivateBase}
+                showActivateButton={!!cardDetailState.onActivateBase}
+                baseAlreadyActivated={cardDetailState.baseAlreadyActivated}
+                onScrapBase={cardDetailState.onScrapBase}
+                showScrapButton={!!cardDetailState.onScrapBase}
             />
             {
                 showDiscardDeck &&

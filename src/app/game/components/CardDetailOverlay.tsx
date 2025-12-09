@@ -9,6 +9,11 @@ interface CardDetailOverlayProps {
     mode: 'hover' | 'click';
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
+    onActivateBase?: () => void;
+    showActivateButton?: boolean;
+    baseAlreadyActivated?: boolean;
+    onScrapBase?: () => void;
+    showScrapButton?: boolean;
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, text: string }> = {
@@ -19,7 +24,7 @@ const factionColors: Record<Faction, { border: string, bg: string, text: string 
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/90", text: "text-gray-300" },
 };
 
-export default function CardDetailOverlay({ card, isOpen, onClose, mode, onMouseEnter, onMouseLeave }: CardDetailOverlayProps) {
+export default function CardDetailOverlay({ card, isOpen, onClose, mode, onMouseEnter, onMouseLeave, onActivateBase, showActivateButton, baseAlreadyActivated, onScrapBase, showScrapButton }: CardDetailOverlayProps) {
     if (!isOpen || !card) return null;
 
     const colors = factionColors[card.faction];
@@ -50,16 +55,16 @@ export default function CardDetailOverlay({ card, isOpen, onClose, mode, onMouse
 
                 {/* Card Header */}
                 <div className="flex justify-between items-start mb-4">
-                    <div>
+                    <div className="flex-1 pr-4">
                         <h2 className={`text-2xl font-bold ${colors.text}`}>{card.name}</h2>
                         <p className="text-sm text-gray-300 mt-1">{card.faction}</p>
                         {card.description && (
                             <p className="text-xs text-gray-400 italic mt-2">{card.description}</p>
                         )}
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 flex-shrink-0">
                         <p className="text-yellow-300 font-bold text-xl">{card.cost}</p>
-                        <IconComponent img={icons.coin} amount={1} />
+                        <IconComponent img={icons.coin} amount={1} size={24} />
                     </div>
                 </div>
 
@@ -122,6 +127,42 @@ export default function CardDetailOverlay({ card, isOpen, onClose, mode, onMouse
                         </div>
                     )}
                 </div>
+
+                {/* Activate Base button or status - only for bases in hover mode */}
+                {isBase && mode === 'hover' && (showActivateButton || baseAlreadyActivated) && (
+                    <>
+                        {showActivateButton && onActivateBase && !baseAlreadyActivated ? (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onActivateBase();
+                                    onClose();
+                                }}
+                                className={`mt-4 w-full border-2 ${colors.border} rounded-lg px-4 py-2 font-semibold hover:brightness-125 transition-all text-gray-100`}
+                            >
+                                Activate Base
+                            </button>
+                        ) : baseAlreadyActivated && (
+                            <div className="mt-4 w-full border-2 border-gray-500 rounded-lg px-4 py-2 text-center bg-gray-800/40">
+                                <p className="text-gray-400 font-semibold">Already Activated This Turn</p>
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {/* Scrap Base button - only for bases with selfScrap in hover mode */}
+                {showScrapButton && card.selfScrap && isBase && mode === 'hover' && onScrapBase && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onScrapBase();
+                            onClose();
+                        }}
+                        className="mt-2 w-full border-2 border-red-500 rounded-lg px-4 py-2 font-semibold hover:bg-red-900/30 transition-all text-red-300"
+                    >
+                        🗑 Scrap Base
+                    </button>
+                )}
 
                 {/* Click mode instruction */}
                 {mode === 'click' && (

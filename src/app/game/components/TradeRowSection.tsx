@@ -56,7 +56,7 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
                         >
                             <div className="absolute top-2 right-2 flex flex-row items-center gap-0.5">
                                 <p className="text-yellow-300 font-bold">{cardDef.cost}</p>
-                                <IconComponent img={icons.coin} amount={1} />
+                                <IconComponent img={icons.coin} amount={1} size={18} />
                             </div>
                             <div className="text-gray-200 text-sm mb-1 mt-6 text-center font-semibold break-words line-clamp-2">{cardDef.name || 'Empty'}</div>
                             <div className="flex-1 flex items-center justify-center">
@@ -90,7 +90,7 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
             >
                 <div className="absolute top-2 right-2 flex flex-row items-center gap-0.5">
                     <p className="text-yellow-300 font-bold">2</p>
-                    <IconComponent img={icons.coin} amount={1} />
+                    <IconComponent img={icons.coin} amount={1} size={18} />
                 </div>
                 <p className="text-sm font-bold text-cyan-300 mb-2">Explorers</p>
                 <p className="text-xl font-bold text-gray-100">{explorerDeck.length}/10</p>

@@ -6,7 +6,7 @@ interface CurrentPlayerBasesProps {
     playerId: string;
     onActivateBase?: (baseIndex: number) => void;
     onScrapBase?: (baseIndex: number) => void;
-    onCardHover?: (card: CardDef, mode: 'hover' | 'click') => void;
+    onCardHover?: (card: CardDef, mode: 'hover' | 'click', onActivate?: () => void, alreadyActivated?: boolean, onScrap?: () => void) => void;
     onCardLeave?: () => void;
 }
 
@@ -33,7 +33,11 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
                         <div 
                             key={index} 
                             className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-3 w-40 shadow-md ${colors.shadow} cursor-pointer hover:brightness-110 transition-all relative`}
-                            onMouseEnter={() => onCardHover?.(cardDef, 'hover')}
+                            onMouseEnter={() => {
+                                const activateCallback = !base.activatedThisTurn ? () => onActivateBase?.(index) : undefined;
+                                const scrapCallback = cardDef.selfScrap ? () => onScrapBase?.(index) : undefined;
+                                onCardHover?.(cardDef, 'hover', activateCallback, base.activatedThisTurn, scrapCallback);
+                            }}
                             onMouseLeave={() => onCardLeave?.()}
                             onClick={(e) => {
                                 // Only activate if not clicking scrap button

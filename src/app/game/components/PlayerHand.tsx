@@ -22,6 +22,24 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
 };
 
 export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onEndTurn, onCardClick }: PlayerHandProps) {
+    const countBases = (playerId: PlayerState) => {
+        const silverShields = playerId.bases.reduce((acc, base) => {
+            if (base.shield === 'normal') {
+                const leftoverShield = base.defence - base.damage
+                return acc + leftoverShield
+            }
+            return acc
+        }, 0);
+        const blackShields = playerId.bases.reduce((acc, base) => {
+            if (base.shield === 'outpost') {
+                const leftoverShield = base.defence - base.damage
+                return acc + leftoverShield
+            }
+            return acc
+        }, 0);
+        return { silverShields, blackShields };
+    };
+    const { silverShields, blackShields } = countBases(player);
     return (
         <div className="flex gap-2.5 flex-1 min-h-0">
             {/* Left Side: Discard & Deck */}
@@ -107,6 +125,14 @@ export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDisc
                     <p className="text-xs text-gray-200 mb-0.5">Authority: {player.authority}</p>
                     <p className="text-xs text-gray-200 mb-0.5">Trade: {player.trade}</p>
                     <p className="text-xs text-gray-200 mb-0.5">Combat: {player.combat}</p>
+                    <div className="flex gap-3 text-xs text-gray-200">
+                        <span className="flex items-center gap-1">
+                            <span className="text-gray-300">⚪</span> {silverShields}
+                        </span>
+                        <span className="flex items-center gap-1">
+                            <span className="text-gray-900">⚫</span> {blackShields}
+                        </span>
+                    </div>
                 </div>
                 <button 
                     onClick={onEndTurn}
