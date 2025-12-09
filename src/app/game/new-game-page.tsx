@@ -28,11 +28,13 @@ import DiscardAndDrawOverlay from "../promptOverlays/discardAndDrawOverlay";
 import { getActivePrompt } from "../helperFunctions/activePromptFunction";
 import { CardDef, cardRegistry } from "../engine/cards";
 import DiscardDeckOverlay from "./components/DiscardDeckOverlay";
+import DeckOverlay from "./components/DeckOverlay";
 
 export default function NewGamePage() {
     const searchParams = useSearchParams();
     const playersParam = searchParams.get('players');
     const [showDiscardDeck, setShowDiscardDeck] = useState(false);
+    const [showDeck, setShowDeck] = useState(false);
     
     // Parse players from URL
     const players: Player[] = useMemo(() => {
@@ -137,8 +139,11 @@ export default function NewGamePage() {
     }
 
     const handleViewDeck = () => {
-        console.log('View deck');
-        // Wire up: show deck modal/overlay
+        setShowDeck(true);
+    };
+
+    const closeViewDeck = () => {
+        setShowDeck(false);
     };
 
     const handleEndTurn = () => {
@@ -347,6 +352,13 @@ export default function NewGamePage() {
                 <DiscardDeckOverlay
                     currentPlayer={currentPlayer}
                     onClose={closeViewDiscard}
+                />
+            }
+            {
+                showDeck &&
+                <DeckOverlay
+                    currentPlayer={currentPlayer}
+                    onClose={closeViewDeck}
                 />
             }
         </div>
