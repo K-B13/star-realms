@@ -15,8 +15,20 @@ export default function PlayerSummaryBar({ players, playerOrder, currentPlayerId
     // Count bases by shield type
     const countBases = (playerId: string) => {
         const player = players[playerId];
-        const silverShields = player.bases.filter(b => b.shield === 'normal').length;
-        const blackShields = player.bases.filter(b => b.shield === 'outpost').length;
+        const silverShields = player.bases.reduce((acc, base) => {
+            if (base.shield === 'normal') {
+                const leftoverShield = base.defence - base.damage
+                return acc + leftoverShield
+            }
+            return acc
+        }, 0);
+        const blackShields = player.bases.reduce((acc, base) => {
+            if (base.shield === 'outpost') {
+                const leftoverShield = base.defence - base.damage
+                return acc + leftoverShield
+            }
+            return acc
+        }, 0);
         return { silverShields, blackShields };
     };
 
@@ -34,10 +46,10 @@ export default function PlayerSummaryBar({ players, playerOrder, currentPlayerId
                 
                 return (
                     <div key={pid} className="w-48 h-28 border-3 border-blue-500 rounded-xl bg-slate-700 p-2.5 shadow-lg shadow-blue-500/20 flex flex-col">
-                        <div>
+                        <div className="text-center">
                             <p className="text-sm font-bold text-yellow-400 mb-1">{player.id}</p>
                             <p className="text-xs text-gray-200 mb-1">Authority: {player.authority}</p>
-                            <div className="flex gap-3 text-xs text-gray-200">
+                            <div className="flex gap-3 text-xs text-gray-200 justify-center">
                                 <span className="flex items-center gap-1">
                                     <span className="text-gray-300">⚪</span> {silverShields}
                                 </span>

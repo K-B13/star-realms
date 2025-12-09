@@ -7,7 +7,7 @@ interface TradeRowSectionProps {
     tradeRow: string[];
     explorerDeck: string[];
     scrapPileCount: number;
-    onSelectCard?: (card: CardDef, index: number) => void;
+    onSelectCard?: (card: CardDef, source: 'row' | 'explorer', index: number) => void;
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
@@ -48,7 +48,7 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
                             <div className="flex-1 flex items-center justify-center">
                                 {card && (
                                     <button 
-                                        onClick={() => onSelectCard?.(cardDef, index)}
+                                        onClick={() => onSelectCard?.(cardDef, 'row', index)}
                                         className={`border-2 ${colors.border} rounded-lg px-4 py-1.5 text-sm font-semibold hover:brightness-125 transition-all text-gray-100`}
                                     >
                                         Buy
@@ -61,9 +61,22 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
             </div>
 
             {/* Explorers */}
-            <div className="border-3 border-cyan-400 rounded-xl bg-slate-800 p-3 w-28 text-center shadow-lg shadow-cyan-500/20">
-                <p className="text-sm font-bold text-cyan-300">Explorers</p>
+            <div className="relative border-3 border-cyan-400 rounded-xl bg-slate-800 p-3 w-40 text-center shadow-lg shadow-cyan-500/20">
+                <div className="absolute top-2 right-2 flex flex-row items-center gap-0.5">
+                    <p className="text-yellow-300 font-bold">2</p>
+                    <IconComponent img={icons.coin} amount={1} />
+                </div>
+                <p className="text-sm font-bold text-cyan-300 mb-2">Explorers</p>
                 <p className="text-xl font-bold text-gray-100">{explorerDeck.length}/10</p>
+                {
+                    explorerDeck.length > 0 && (
+                        <button className="border-2 border-cyan-400 rounded-lg px-4 py-1.5 text-sm font-semibold hover:brightness-125 transition-all text-gray-100"
+                        onClick={() => onSelectCard?.(cardRegistry['EXPLORER'], 'explorer', 0)}
+                        >
+                            Buy
+                        </button>
+                    )
+                }
             </div>
         </div>
     );

@@ -69,9 +69,9 @@ export default function NewGamePage() {
         });
     };
 
-    const handleSelectTradeCard = (card: CardDef, index: number) => {
+    const handleSelectTradeCard = (card: CardDef, source: 'row' | 'explorer', index: number) => {
         append([
-            { t: 'CardPurchased', player: currentPlayerId, card: card.id, source: 'row', rowIndex: index },
+            { t: 'CardPurchased', player: currentPlayerId, card: card.id, source: source, rowIndex: index },
             { t: 'TradeSpent', player: currentPlayerId, card: card.id, amount: card.cost }
         ])
     };
