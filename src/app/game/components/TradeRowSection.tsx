@@ -4,13 +4,14 @@ import { icons } from "../iconIndex";
 
 interface TradeRowSectionProps {
     tradeDeck: string[];
-    tradeRow: string[];
+    tradeRow: (string | null)[];
     explorerDeck: string[];
     scrapPileCount: number;
     onSelectCard?: (card: CardDef, source: 'row' | 'explorer', index: number) => void;
     onCardHover?: (card: CardDef, mode: 'hover' | 'click') => void;
     onCardLeave?: () => void;
     onCardClick?: (card: CardDef, mode: 'hover' | 'click') => void;
+    onViewTradeDeck?: () => void;
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
@@ -21,25 +22,30 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40", shadow: "shadow-gray-500/20" },
 };
 
-export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scrapPileCount, onSelectCard, onCardHover, onCardLeave, onCardClick }: TradeRowSectionProps) {
+export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scrapPileCount, onSelectCard, onCardHover, onCardLeave, onCardClick, onViewTradeDeck }: TradeRowSectionProps) {
     return (
         <div className="flex gap-2.5 items-center">
             {/* Deck and Scrapped Counters */}
-            <div className="flex flex-col gap-2.5">
-                <div className="border-3 border-cyan-400 rounded-xl bg-slate-800 p-2 w-28 text-center shadow-lg shadow-cyan-500/20">
-                    <p className="text-xs font-bold text-cyan-300">Deck</p>
-                    <p className="text-lg font-bold text-gray-100">{tradeDeck.length}/80</p>
-                </div>
-                <div className="border-3 border-red-500 rounded-xl bg-slate-800 p-2 w-28 text-center shadow-lg shadow-red-500/20">
-                    <p className="text-xs font-bold text-red-300">Scrapped</p>
-                    <p className="text-lg font-bold text-gray-100">{scrapPileCount}</p>
-                </div>
+            <div 
+                className="relative border-3 border-cyan-400 rounded-xl bg-slate-800 p-2 w-30 text-center shadow-lg shadow-cyan-500/20 cursor-pointer hover:brightness-110 transition-all flex flex-col justify-center min-h-[100px]"
+                onClick={onViewTradeDeck}
+            >
+                <p className="text-sm font-bold text-cyan-300 mb-2">Trade Deck</p>
+                <p className="text-xl font-bold text-gray-100">{tradeDeck.length}/80</p>
             </div>
 
             {/* Trade Row - 5 cards, scrollable on overflow */}
             <div className="flex-1 overflow-x-auto">
                 <div className="flex gap-2.5 min-w-min">
                     {tradeRow.map((card, index) => {
+                        if (!card) {
+                            return <div 
+                                key={index} 
+                                className="w-[calc(20%-0.5rem)] min-w-[150px] flex-shrink-0 border-3 border-gray-600 rounded-xl bg-gray-800/40 p-3 flex flex-col shadow-lg shadow-gray-500/20 min-h-[110px] relative"
+                            >
+                                <div className="text-gray-500 text-sm mb-1 mt-6 text-center font-semibold">Empty</div>
+                            </div>
+                        }
                         const cardDef = cardRegistry[card];
                         const colors = factionColors[cardDef.faction];
                         return <div 
@@ -60,17 +66,15 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
                             </div>
                             <div className="text-gray-200 text-sm mb-1 mt-6 text-center font-semibold break-words line-clamp-2">{cardDef.name || 'Empty'}</div>
                             <div className="flex-1 flex items-center justify-center">
-                                {card && (
-                                    <button 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onSelectCard?.(cardDef, 'row', index);
-                                        }}
-                                        className={`border-2 ${colors.border} rounded-lg px-4 py-1.5 text-sm font-semibold hover:brightness-125 transition-all text-gray-100`}
-                                    >
-                                        Buy
-                                    </button>
-                                )}
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onSelectCard?.(cardDef, 'row', index);
+                                    }}
+                                    className={`border-2 ${colors.border} rounded-lg px-4 py-1.5 text-sm font-semibold hover:brightness-125 transition-all text-gray-100`}
+                                >
+                                    Buy
+                                </button>
                             </div>
                         </div>
                     })}

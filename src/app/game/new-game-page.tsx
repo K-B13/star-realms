@@ -29,12 +29,16 @@ import { getActivePrompt } from "../helperFunctions/activePromptFunction";
 import { CardDef, cardRegistry } from "../engine/cards";
 import DiscardDeckOverlay from "./components/DiscardDeckOverlay";
 import DeckOverlay from "./components/DeckOverlay";
+import ScrapOverlay from "./components/ScrapOverlay";
+import TradeRowDeckOverlay from "./components/TradeRowDeckOverlay";
 
 export default function NewGamePage() {
     const searchParams = useSearchParams();
     const playersParam = searchParams.get('players');
     const [showDiscardDeck, setShowDiscardDeck] = useState(false);
     const [showDeck, setShowDeck] = useState(false);
+    const [showScrap, setShowScrap] = useState(false);
+    const [showTradeDeck, setShowTradeDeck] = useState(false);
     
     // Parse players from URL
     const players: Player[] = useMemo(() => {
@@ -146,6 +150,22 @@ export default function NewGamePage() {
         setShowDeck(false);
     };
 
+    const handleViewScrap = () => {
+        setShowScrap(true);
+    };
+
+    const closeViewScrap = () => {
+        setShowScrap(false);
+    };
+
+    const handleViewTradeDeck = () => {
+        setShowTradeDeck(true);
+    };
+
+    const closeViewTradeDeck = () => {
+        setShowTradeDeck(false);
+    };
+
     const handleEndTurn = () => {
         const base = replay(snapshot, turnEvents);
         const { state: endState } = materialize(base, [{ t: 'PhaseChanged', from: 'MAIN', to: 'CLEANUP' }]);
@@ -199,6 +219,7 @@ export default function NewGamePage() {
                     onCardHover={showCardDetail}
                     onCardLeave={hideCardDetail}
                     onCardClick={showCardDetail}
+                    onViewTradeDeck={handleViewTradeDeck}
                 />
 
                 <PlayerSummaryBar 
@@ -230,8 +251,10 @@ export default function NewGamePage() {
                     onScrapCard={handleScrapCard}
                     onViewDiscard={handleViewDiscard}
                     onViewDeck={handleViewDeck}
+                    onViewScrap={handleViewScrap}
                     onEndTurn={handleEndTurn}
                     onCardClick={showCardDetail}
+                    scrapPileCount={state.scrap.length}
                 />
 
             </div>
@@ -359,6 +382,20 @@ export default function NewGamePage() {
                 <DeckOverlay
                     currentPlayer={currentPlayer}
                     onClose={closeViewDeck}
+                />
+            }
+            {
+                showScrap &&
+                <ScrapOverlay
+                    scrappedCards={state.scrap}
+                    onClose={closeViewScrap}
+                />
+            }
+            {
+                showTradeDeck &&
+                <TradeRowDeckOverlay
+                    tradeDeck={state.tradeDeck}
+                    onClose={closeViewTradeDeck}
                 />
             }
         </div>

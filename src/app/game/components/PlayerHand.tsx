@@ -9,8 +9,10 @@ interface PlayerHandProps {
     onScrapCard?: (card: CardDef, from: Zone, cardIndex: number) => void;
     onViewDiscard?: () => void;
     onViewDeck?: () => void;
+    onViewScrap?: () => void;
     onEndTurn?: () => void;
     onCardClick?: (card: CardDef, mode: 'hover' | 'click') => void;
+    scrapPileCount?: number;
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
@@ -21,7 +23,7 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40", shadow: "shadow-gray-500/20" },
 };
 
-export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onEndTurn, onCardClick }: PlayerHandProps) {
+export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onViewScrap, onEndTurn, onCardClick, scrapPileCount = 0 }: PlayerHandProps) {
     const countBases = (playerId: PlayerState) => {
         const silverShields = playerId.bases.reduce((acc, base) => {
             if (base.shield === 'normal') {
@@ -42,24 +44,33 @@ export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDisc
     const { silverShields, blackShields } = countBases(player);
     return (
         <div className="flex gap-2.5 flex-1 min-h-0">
-            {/* Left Side: Discard & Deck */}
+            {/* Left Side: Discard, Deck & Scrap */}
             <div className="flex flex-col gap-2.5">
                 <button 
                     onClick={onViewDiscard}
-                    className="border-3 border-emerald-500 rounded-xl bg-slate-800 p-2 w-20 text-center shadow-lg shadow-emerald-500/20 flex-1 flex items-center justify-center hover:bg-slate-700 transition-colors"
+                    className="border-3 border-purple-500 rounded-xl bg-slate-800 p-2 w-20 text-center shadow-lg shadow-purple-500/20 flex-1 flex items-center justify-center hover:bg-slate-700 transition-colors"
                 >
                     <div>
-                        <p className="text-xs font-bold text-emerald-300">Discard</p>
+                        <p className="text-xs font-bold text-purple-300">Discard</p>
                         <p className="text-xs text-gray-400 mt-0.5">{player.discard.length + player.inPlay.length}</p>
                     </div>
                 </button>
                 <button 
                     onClick={onViewDeck}
-                    className="border-3 border-emerald-500 rounded-xl bg-slate-800 p-2 w-20 text-center shadow-lg shadow-emerald-500/20 flex-1 flex items-center justify-center hover:bg-slate-700 transition-colors"
+                    className="border-3 border-cyan-500 rounded-xl bg-slate-800 p-2 w-20 text-center shadow-lg shadow-cyan-500/20 flex-1 flex items-center justify-center hover:bg-slate-700 transition-colors"
                 >
                     <div>
-                        <p className="text-xs font-bold text-emerald-300">Deck</p>
+                        <p className="text-xs font-bold text-cyan-300">Deck</p>
                         <p className="text-xs text-gray-400 mt-0.5">{player.deck.length}</p>
+                    </div>
+                </button>
+                <button 
+                    onClick={onViewScrap}
+                    className="border-3 border-red-500 rounded-xl bg-slate-800 p-2 w-20 text-center shadow-lg shadow-red-500/20 flex-1 flex items-center justify-center hover:bg-slate-700 transition-colors"
+                >
+                    <div>
+                        <p className="text-xs font-bold text-red-300">Scrap</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{scrapPileCount}</p>
                     </div>
                 </button>
             </div>
