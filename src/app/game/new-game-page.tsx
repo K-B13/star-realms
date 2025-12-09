@@ -31,6 +31,7 @@ import DiscardDeckOverlay from "./components/DiscardDeckOverlay";
 import DeckOverlay from "./components/DeckOverlay";
 import ScrapOverlay from "./components/ScrapOverlay";
 import TradeRowDeckOverlay from "./components/TradeRowDeckOverlay";
+import GameOverOverlay from "./components/GameOverOverlay";
 
 export default function NewGamePage() {
     const searchParams = useSearchParams();
@@ -398,6 +399,15 @@ export default function NewGamePage() {
                     onClose={closeViewTradeDeck}
                 />
             }
+            
+            {/* Game Over Overlay */}
+            <GameOverOverlay
+                state={state}
+                onNewGame={() => {
+                    setTurnEvents([]);
+                    setSnapshot(initialSetup(playerNames));
+                }}
+            />
         </div>
     );
 }

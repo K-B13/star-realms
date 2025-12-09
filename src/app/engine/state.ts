@@ -19,6 +19,7 @@ export interface PlayerState {
     trade: number;
     freeNextAcquire: boolean;
     factionTags: Record<string, number>;
+    isDead: boolean;
 }
 
 export interface GameState {
@@ -32,4 +33,6 @@ export interface GameState {
     turn: { phase: 'MAIN' | 'CLEANUP', playedThisTurn: string[] }
     prompt: null | { kind: string; player: string; optional?: boolean; data?: unknown}
     log: string[];
+    gameOver: boolean;
+    winner: string | null;
 }

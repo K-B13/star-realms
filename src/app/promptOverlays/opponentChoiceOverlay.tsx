@@ -36,7 +36,8 @@ export default function OpponentChoiceOverlay({ state, activePrompt, append, cur
 
     const purpose = (activePrompt as Prompt)?.data?.purpose ?? 'opponentDiscard';
 
-    const candidates = state.order.filter(pid => pid !== currentPlayer);
+    // Filter out current player and dead players
+    const candidates = state.order.filter(pid => pid !== currentPlayer && !state.players[pid].isDead);
 
     const pick = (pid: string) =>
       append({ t: 'TargetChosen', player: currentPlayer, target: pid, purpose } as Event);

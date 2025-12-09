@@ -20,6 +20,8 @@ export type Event =
   | { t: 'DeckShuffle'; player: PID, newDeck: string[] }
   | { t: 'DiscardInPlayAndHand'; player: PID }
   | { t: 'DamageDealt'; from: PID; to: PID; amount: number }
+  | { t: 'PlayerDied'; player: PID }
+  | { t: 'GameOver'; winner: PID }
   | { t: 'NextAcquireToTopSet'; player: PID }
   | { t: 'NextAcquireFreeSet'; player: PID }
   | { t: 'TargetCardChosen'; player: PID; source: 'copyShip'; inPlayIndex: number }

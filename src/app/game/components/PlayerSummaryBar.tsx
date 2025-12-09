@@ -44,8 +44,18 @@ export default function PlayerSummaryBar({ players, playerOrder, currentPlayerId
                 const { silverShields, blackShields } = countBases(pid);
                 const canAttackDirectly = !hasOutpost(pid) && currentPlayer.combat > 0;
                 
+                const isDead = player.isDead;
+                const borderColor = isDead ? "border-gray-600" : "border-blue-500";
+                const shadowColor = isDead ? "shadow-gray-600/20" : "shadow-blue-500/20";
+                const bgColor = isDead ? "bg-gray-900" : "bg-slate-700";
+                
                 return (
-                    <div key={pid} className="w-48 h-28 border-3 border-blue-500 rounded-xl bg-slate-700 p-2.5 shadow-lg shadow-blue-500/20 flex flex-col">
+                    <div key={pid} className={`w-48 h-28 border-3 ${borderColor} rounded-xl ${bgColor} p-2.5 shadow-lg ${shadowColor} flex flex-col relative`}>
+                        {isDead && (
+                            <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center">
+                                <span className="text-red-500 font-bold text-lg">☠ DEAD</span>
+                            </div>
+                        )}
                         <div className="text-center">
                             <p className="text-sm font-bold text-yellow-400 mb-1">{player.id}</p>
                             <p className="text-xs text-gray-200 mb-1">Authority: {player.authority}</p>
@@ -58,7 +68,7 @@ export default function PlayerSummaryBar({ players, playerOrder, currentPlayerId
                                 </span>
                             </div>
                         </div>
-                        {canAttackDirectly && (
+                        {canAttackDirectly && !isDead && (
                             <button 
                                 onClick={() => append({ t: 'DamageDealt', from: currentPlayerId, to: pid, amount: currentPlayer.combat })}
                                 className="border border-orange-500 bg-orange-900/80 hover:bg-orange-800 text-orange-200 px-2 py-1 rounded-lg text-xs font-semibold transition-all shadow-md mt-auto mb-2"

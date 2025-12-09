@@ -161,8 +161,13 @@ const cleanupRule: Rule<'PhaseChanged'> = {
         if (ev.from !== 'MAIN' || ev.to !== 'CLEANUP') return;
         const activeIdx = state.activeIndex
         const active = state.order[activeIdx]
-        emit({ t: 'DiscardInPlayAndHand', player: active })
-        emit({ t: 'CardsDrawn', player: active, count: 5 })
+        
+        // Only discard and draw if player is alive
+        if (!state.players[active].isDead) {
+            emit({ t: 'DiscardInPlayAndHand', player: active })
+            emit({ t: 'CardsDrawn', player: active, count: 5 })
+        }
+        
         emit({ t: 'TurnAdvanced' })
         emit({ t: 'PhaseChanged', from: 'CLEANUP', to: 'MAIN' })
     }
@@ -321,7 +326,27 @@ const fleetHQRule: Rule<'ShipPlayed'> = {
     }
 }
 
-const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule, twoOrMoreBasesInPlayRule, drawPerFactionCardRule, discardOrScrapAndDrawChosenRule, discardOrScrapAndDrawRule, fleetHQRule ] as Rule<Event['t']>[]
+const playerDeathRule: Rule<'DamageDealt'> = {
+    on: 'DamageDealt',
+    run: (state, ev, emit) => {
+        const target = state.players[ev.to];
+        if (target.authority <= 0 && !target.isDead) {
+            emit({ t: 'PlayerDied', player: ev.to });
+        }
+    }
+}
+
+const gameOverRule: Rule<'PlayerDied'> = {
+    on: 'PlayerDied',
+    run: (state, _ev, emit) => {
+        const alivePlayers = state.order.filter(pid => !state.players[pid].isDead);
+        if (alivePlayers.length === 1) {
+            emit({ t: 'GameOver', winner: alivePlayers[0] });
+        }
+    }
+}
+
+const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBaseAllyRule, applyCopyRule, onSelfScrapEffectsRule, cleanupRule, refillRule, drawManyRule, ensureDeckRule, onScrapTradeRowRules, opponentSelectedRules, onBaseUpkeepRule, baseUpkeepResetRule, twoOrMoreBasesInPlayRule, drawPerFactionCardRule, discardOrScrapAndDrawChosenRule, discardOrScrapAndDrawRule, fleetHQRule, playerDeathRule, gameOverRule ] as Rule<Event['t']>[]
 
 const emitEffects = (e: Effect, player: PID, emit: Emit) => {
     switch (e.kind) {
@@ -490,8 +515,10 @@ export const applyEvent = (state: GameState, event: Event) => {
             if (attacker.combat < amount){
                 return state;
             }
+            // Only consume the combat needed to kill the player
+            const actualDamage = Math.min(amount, target.authority);
             target.authority = Math.max(0, target.authority - amount);
-            attacker.combat -= amount;
+            attacker.combat -= actualDamage;
             return state;
         case 'NextAcquireToTopSet':
             const player = state.players[event.player];
@@ -555,7 +582,15 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'ShipPlayed':
             return state;
         case 'TurnAdvanced':
-            state.activeIndex = (state.activeIndex + 1) % state.order.length;
+            // Skip dead players
+            let nextIndex = (state.activeIndex + 1) % state.order.length;
+            let attempts = 0;
+            // Keep advancing until we find an alive player or we've checked everyone
+            while (state.players[state.order[nextIndex]].isDead && attempts < state.order.length) {
+                nextIndex = (nextIndex + 1) % state.order.length;
+                attempts++;
+            }
+            state.activeIndex = nextIndex;
             return state;
         case 'PhaseChanged':
             state.turn.phase = event.to;
@@ -563,6 +598,13 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'PromptShown':
             return state;
         case 'PromptCancelled':
+            return state;
+        case 'PlayerDied':
+            state.players[event.player].isDead = true;
+            return state;
+        case 'GameOver':
+            state.gameOver = true;
+            state.winner = event.winner;
             return state;
         default:
             return state;

@@ -15,6 +15,7 @@ export const playerSetup: (playerName: string) => PlayerState = (playerName: str
         combat: 0,
         trade: 0,
         bases: [],
+        isDead: false,
     }
 }
 
@@ -78,10 +79,10 @@ export const drawN = (deck: string[], discard: string[], n: number) => {
 }
 
 export const initialSetup = (playerNames: string[]) => {
-    const playersArr = playerNames.map(playerName => {
+    const playersArr = playerNames.map((playerName, index) => {
         const player: PlayerState = playerSetup(playerName)
         const deck = shuffle(startingDeck())
-        const { hand, deck: rest } = drawN(deck, [], 5)
+        const { hand, deck: rest } = drawN(deck, [], index === 0 ? 3 : 5)
         player.hand = hand
         player.deck = rest
         return player
@@ -100,7 +101,9 @@ export const initialSetup = (playerNames: string[]) => {
         scrap: [],
         turn: { phase: 'MAIN', playedThisTurn: [] },
         prompt: null,
-        log: []
+        log: [],
+        gameOver: false,
+        winner: null,
     }
 
     return state
