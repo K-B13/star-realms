@@ -19,7 +19,8 @@ interface OpponentBasesViewerProps {
 }
 
 export default function OpponentBasesViewer({ players, playerOrder, currentPlayerId, append }: OpponentBasesViewerProps) {
-    const otherPlayers = playerOrder.filter(pid => pid !== currentPlayerId);
+    // Filter out current player and dead players
+    const otherPlayers = playerOrder.filter(pid => pid !== currentPlayerId && !players[pid].isDead);
     const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
 
     const handlePrevious = () => {
@@ -31,7 +32,11 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
     };
 
     if (otherPlayers.length === 0) {
-        return null;
+        return (
+            <div className="border-3 border-purple-500 rounded-xl bg-slate-800 p-3 shadow-lg shadow-purple-500/20 h-40 flex items-center justify-center">
+                <p className="text-gray-400 text-sm">No opponent bases to view</p>
+            </div>
+        );
     }
 
     const selectedPlayerId = otherPlayers[selectedPlayerIndex];

@@ -20,6 +20,7 @@ export interface PlayerState {
     freeNextAcquire: boolean;
     factionTags: Record<string, number>;
     isDead: boolean;
+    eliminationOrder: number; // 0 = not eliminated, 1 = first to die, 2 = second to die, etc.
 }
 
 export interface GameState {
@@ -35,4 +36,5 @@ export interface GameState {
     log: string[];
     gameOver: boolean;
     winner: string | null;
+    eliminationCount: number; 
 }

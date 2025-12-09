@@ -16,6 +16,7 @@ export const playerSetup: (playerName: string) => PlayerState = (playerName: str
         trade: 0,
         bases: [],
         isDead: false,
+        eliminationOrder: 0,
     }
 }
 
@@ -104,6 +105,7 @@ export const initialSetup = (playerNames: string[]) => {
         log: [],
         gameOver: false,
         winner: null,
+        eliminationCount: 0,
     }
 
     return state

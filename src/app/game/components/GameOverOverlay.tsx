@@ -9,7 +9,22 @@ export default function GameOverOverlay({ state, onNewGame }: GameOverOverlayPro
     if (!state.gameOver || !state.winner) return null;
 
     const winner = state.players[state.winner];
-    const deadPlayers = state.order.filter(pid => state.players[pid].isDead);
+    
+    // Sort players by final placement:
+    // Winner (eliminationOrder = 0) gets rank 1
+    // Last to die (highest eliminationOrder) gets rank 2
+    // First to die (eliminationOrder = 1) gets last rank
+    const sortedPlayers = [...state.order].sort((a, b) => {
+        const playerA = state.players[a];
+        const playerB = state.players[b];
+        
+        // Winner always first
+        if (playerA.id === state.winner) return -1;
+        if (playerB.id === state.winner) return 1;
+        
+        // Among dead players, higher eliminationOrder (died later) ranks better
+        return playerB.eliminationOrder - playerA.eliminationOrder;
+    });
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50">
@@ -24,10 +39,17 @@ export default function GameOverOverlay({ state, onNewGame }: GameOverOverlayPro
                     <div className="mb-6">
                         <h3 className="text-xl font-semibold text-gray-300 mb-3">Final Standings</h3>
                         <div className="space-y-2">
-                            {state.order.map((pid, idx) => {
+                            {sortedPlayers.map((pid, idx) => {
                                 const player = state.players[pid];
                                 const isWinner = pid === state.winner;
                                 const isDead = player.isDead;
+                                const rank = idx + 1;
+                                
+                                // Determine medal/emoji for top 3
+                                let rankEmoji = '';
+                                if (rank === 1) rankEmoji = '🥇';
+                                else if (rank === 2) rankEmoji = '🥈';
+                                else if (rank === 3) rankEmoji = '🥉';
                                 
                                 return (
                                     <div 
@@ -35,17 +57,25 @@ export default function GameOverOverlay({ state, onNewGame }: GameOverOverlayPro
                                         className={`flex items-center justify-between p-3 rounded-lg ${
                                             isWinner 
                                                 ? 'bg-yellow-900/40 border-2 border-yellow-500' 
-                                                : isDead
-                                                ? 'bg-gray-800/40 border border-gray-600'
-                                                : 'bg-slate-700/40 border border-slate-500'
+                                                : rank === 2
+                                                ? 'bg-gray-700/40 border border-gray-400'
+                                                : rank === 3
+                                                ? 'bg-orange-900/40 border border-orange-600'
+                                                : 'bg-slate-800/40 border border-slate-600'
                                         }`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <span className="text-2xl font-bold text-gray-400">#{idx + 1}</span>
-                                            <span className={`font-semibold ${isWinner ? 'text-yellow-300' : 'text-gray-300'}`}>
+                                            <span className="text-2xl font-bold text-gray-400">
+                                                {rankEmoji || `#${rank}`}
+                                            </span>
+                                            <span className={`font-semibold ${
+                                                isWinner ? 'text-yellow-300' : 
+                                                rank === 2 ? 'text-gray-200' :
+                                                rank === 3 ? 'text-orange-300' :
+                                                'text-gray-400'
+                                            }`}>
                                                 {player.id}
                                             </span>
-                                            {isDead && <span className="text-red-500 text-sm">☠ Eliminated</span>}
                                             {isWinner && <span className="text-yellow-400 text-sm">👑 Winner</span>}
                                         </div>
                                         <span className="text-gray-300">

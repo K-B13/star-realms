@@ -601,6 +601,8 @@ export const applyEvent = (state: GameState, event: Event) => {
             return state;
         case 'PlayerDied':
             state.players[event.player].isDead = true;
+            state.eliminationCount++;
+            state.players[event.player].eliminationOrder = state.eliminationCount;
             return state;
         case 'GameOver':
             state.gameOver = true;
