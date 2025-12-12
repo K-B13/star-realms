@@ -1,6 +1,6 @@
-import { BaseInstance, PlayerState } from "@/app/engine/state";
+import { PlayerState } from "@/app/engine/state";
 import { cardRegistry, Faction } from "@/app/engine/cards";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Event } from "@/app/engine/events";
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
@@ -23,6 +23,13 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
     const otherPlayers = playerOrder.filter(pid => pid !== currentPlayerId && !players[pid].isDead);
     const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
 
+    // Clamp selectedPlayerIndex when players die
+    useEffect(() => {
+        if (selectedPlayerIndex >= otherPlayers.length && otherPlayers.length > 0) {
+            setSelectedPlayerIndex(otherPlayers.length - 1);
+        }
+    }, [otherPlayers.length, selectedPlayerIndex]);
+
     const handlePrevious = () => {
         setSelectedPlayerIndex((prev) => (prev - 1 + otherPlayers.length) % otherPlayers.length);
     };
@@ -42,6 +49,15 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
     const selectedPlayerId = otherPlayers[selectedPlayerIndex];
     const selectedPlayer = players[selectedPlayerId];
     const currentPlayer = players[currentPlayerId];
+
+    // Safety check in case selectedPlayer is undefined
+    if (!selectedPlayer) {
+        return (
+            <div className="border-3 border-purple-500 rounded-xl bg-slate-800 p-3 shadow-lg shadow-purple-500/20 h-40 flex items-center justify-center">
+                <p className="text-gray-400 text-sm">No opponent bases to view</p>
+            </div>
+        );
+    }
 
     return (
         <div className="border-3 border-purple-500 rounded-xl bg-slate-800 p-3 shadow-lg shadow-purple-500/20 h-40">
