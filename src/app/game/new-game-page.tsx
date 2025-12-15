@@ -4,7 +4,7 @@ import { replay, materialize } from "../engine/recompute";
 import { Event, Zone } from "../engine/events";
 import { initialSetup } from "../engine/initialSetup";
 import { useSearchParams } from "next/navigation";
-import { Player } from "../lobby/page";
+import { Player } from "../offlineLobby/page";
 import { GameState } from "../engine/state";
 
 // Import new components
