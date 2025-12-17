@@ -27,6 +27,7 @@ export interface GameState {
     order: string[];
     activeIndex: number;
     players: Record<string, PlayerState>;
+    playerNames?: Record<string, string>; // Maps UID -> display name (optional for backwards compatibility)
     row: string[];
     tradeDeck: string[];
     explorerDeck: string[];

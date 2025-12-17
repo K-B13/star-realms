@@ -1,14 +1,49 @@
 'use client'
+/**
+ * ============================================================================
+ * ONLINE GAME PAGE - Star Realms Multiplayer
+ * ============================================================================
+ * 
+ * ARCHITECTURE OVERVIEW:
+ * This component implements a real-time multiplayer game using Firebase Realtime Database.
+ * 
+ * DATA FLOW:
+ * 1. Firebase stores the "source of truth" game state
+ * 2. All players listen to the same Firebase path
+ * 3. When a player takes an action → write to Firebase → all players receive update
+ * 4. React re-renders with the new state → all players stay synchronized
+ * 
+ * KEY CONCEPTS:
+ * - UIDs vs Names: Game state uses Firebase UIDs as player IDs, names are for display only
+ * - currentUserId: The logged-in user (constant per session)
+ * - currentPlayerId: Whose turn it is (changes each turn)
+ * - myPlayer: The logged-in user's hand/bases (what they see)
+ * - isMyTurn: Whether the logged-in user can take actions
+ * 
+ * FIREBASE PATHS:
+ * - setup/lobbies/{gameUid} → Lobby data (player names, host)
+ * - games/{gameUid}/gameState → Current game state (cards, players, turn)
+ * - games/{gameUid}/events → (TODO) Event queue for actions
+ * 
+ * SYNCHRONIZATION:
+ * - useEffect #1: Listen to auth state → know who is logged in
+ * - useEffect #2: Listen to lobby data → map UIDs to names
+ * - useEffect #3: Listen to game state → receive updates from all players
+ * - useEffect #4: Initialize game (host only) → create initial state
+ * 
+ * ============================================================================
+ */
 import { useState, useEffect, useRef } from "react"
 import { onValue, ref } from "firebase/database"
 import { useParams, useRouter } from "next/navigation"
 import { db, auth } from "../../firebase/firebaseConfig"
-import { lobbyPath, gameStatePath } from "@/app/firebase/firebasePaths"
+import { lobbyPath, gameStatePath, eventPath } from "@/app/firebase/firebasePaths"
 import { GameState, PlayerState } from "../../engine/state"
 import { LobbyInterface } from "../../lobbyCreation/page"
 import { initialSetup } from "../../engine/initialSetup"
 import { writeValue } from "../../firebase/firebaseActions"
-import { CardDef } from "../../engine/cards"
+import { CardDef, cardRegistry } from "../../engine/cards"
+import { materialize, replay } from "../../engine/recompute"
 
 // Import components from offline game
 import TradeRowSection from "../../game/components/TradeRowSection"
@@ -17,6 +52,21 @@ import OpponentBasesViewer from "../../game/components/OpponentBasesViewer"
 import CurrentPlayerBases from "../../game/components/CurrentPlayerBases"
 import PlayerHand from "../../game/components/PlayerHand"
 import CardDetailOverlay from "../../game/components/CardDetailOverlay"
+import { Event, Zone } from "@/app/engine/events"
+import ScrapPromptOverlay from "@/app/promptOverlays/tradeRowOverlay"
+import { getActivePrompt } from "@/app/helperFunctions/activePromptFunction"
+import OpponentDiscardOverlay from "@/app/promptOverlays/opponentDiscardOverlay"
+import OpponentChoiceOverlay from "@/app/promptOverlays/opponentChoiceOverlay"
+import ChooseToScrapOverlay from "@/app/promptOverlays/chooseToScrapOverlay"
+import ChooseOtherCardToScrapOverlay from "@/app/promptOverlays/chooseOtherCardToScrapOverlay"
+import ChooseAbilityOverlay from "@/app/promptOverlays/chooseAbilityOverlay"
+import ChooseCardToCopyOverlay from "@/app/promptOverlays/chooseCardToCopyOverlay"
+import ChooseOpponentBaseOverlay from "@/app/promptOverlays/chooseOpponentBaseOverlay"
+import DiscardAndDrawOverlay from "@/app/promptOverlays/discardAndDrawOverlay"
+import DeckOverlay from "@/app/game/components/DeckOverlay"
+import ScrapOverlay from "@/app/game/components/ScrapOverlay"
+import TradeRowDeckOverlay from "@/app/game/components/TradeRowDeckOverlay"
+import DiscardDeckOverlay from "@/app/game/components/DiscardDeckOverlay"
 
 export default function OnlineGamePage() {
     const [gameState, setGameState] = useState<GameState>({
@@ -37,6 +87,7 @@ export default function OnlineGamePage() {
     const [lobby, setLobby] = useState<LobbyInterface | null>(null)
     const [currentUserId, setCurrentUserId] = useState<string | null>(null)
     const [isGameReady, setIsGameReady] = useState(false)
+    const [turnEvents, setTurnEvents] = useState<Event[]>([])
     const params = useParams()
     const router = useRouter()
     const gameUid = params.gameUid as string
@@ -59,7 +110,25 @@ export default function OnlineGamePage() {
     
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Get current user ID
+    /**
+     * useEffect #1: Authentication Listener
+     * 
+     * WHAT: Listens to Firebase authentication state changes
+     * WHY: We need to know which user is logged in to determine:
+     *      - Which player's hand/bases to show
+     *      - Whether it's the current user's turn
+     *      - Which player can take actions
+     * 
+     * DEPENDENCIES: [] (empty array)
+     *      - Runs once on component mount
+     *      - Sets up a persistent listener that stays active
+     *      - Cleanup function unsubscribes when component unmounts
+     * 
+     * FLOW:
+     *      1. Component mounts → listener is set up
+     *      2. User logs in/out → callback fires → setCurrentUserId updates
+     *      3. Component unmounts → cleanup runs → listener is removed
+     */
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
@@ -69,6 +138,27 @@ export default function OnlineGamePage() {
         return () => unsubscribe()
     }, [])
 
+    /**
+     * useEffect #2: Lobby Data Listener
+     * 
+     * WHAT: Listens to the lobby data in Firebase for this specific game
+     * WHY: We need lobby data to:
+     *      - Map player UIDs to display names (lobby.players[uid].name)
+     *      - Know who the host is
+     *      - Redirect if the lobby is deleted/doesn't exist
+     * 
+     * DEPENDENCIES: [gameUid, router]
+     *      - gameUid: Re-run if the game ID changes (shouldn't happen, but safety)
+     *      - router: Required for the redirect, included for React exhaustive-deps
+     * 
+     * FLOW:
+     *      1. Component mounts → listener subscribes to Firebase path: setup/lobbies/{gameUid}
+     *      2. Lobby data changes → callback fires → setLobby updates
+     *      3. If lobby deleted → redirect to lobby selection
+     *      4. Component unmounts or gameUid changes → cleanup runs → listener removed
+     * 
+     * NOTE: This stays subscribed even after game starts because we need player names
+     */
     useEffect(() => {
         const unsubscribe = onValue(ref(db, lobbyPath(gameUid)), (snapshot) => {
             const data = snapshot.val()
@@ -83,10 +173,35 @@ export default function OnlineGamePage() {
         return () => unsubscribe()
     }, [gameUid, router])
 
+    /**
+     * useEffect #3: Game State Listener (MAIN GAME SYNC)
+     * 
+     * WHAT: Listens to the game state in Firebase - this is the SOURCE OF TRUTH
+     * WHY: This is how all players stay synchronized:
+     *      - When ANY player takes an action, the game state in Firebase updates
+     *      - This listener receives the update and re-renders all players' screens
+     *      - This is the "read" side of the Firebase sync
+     * 
+     * DEPENDENCIES: [gameUid]
+     *      - gameUid: Re-subscribe if game ID changes
+     * 
+     * FLOW:
+     *      1. Component mounts → listener subscribes to Firebase path: games/{gameUid}/gameState
+     *      2. Game state changes (by ANY player) → callback fires → setGameState updates
+     *      3. React re-renders with new game state → all players see the update
+     *      4. Component unmounts → cleanup runs → listener removed
+     * 
+     * FIREBASE QUIRK: Firebase doesn't store empty arrays (they become null)
+     *      - We must provide default empty arrays for: deck, hand, discard, inPlay, bases
+     *      - Otherwise the game will crash when trying to map/filter these arrays
+     * 
+     * STATE UPDATES:
+     *      - setGameState: Updates the entire game state (cards, players, turn, etc.)
+     *      - setIsGameReady: Signals that game has been initialized and can render
+     */
     useEffect(() => {
         const unsubscribe = onValue(ref(db, gameStatePath(gameUid)), (snapshot) => {
             const data = snapshot.val()
-            console.log('Game state from Firebase:', data)
             if (data && data.order && data.order.length > 0) {
                 // Firebase doesn't store empty arrays, so we need to provide defaults
                 // Also need to ensure player arrays exist
@@ -99,7 +214,8 @@ export default function OnlineGamePage() {
                         hand: player.hand || [],
                         discard: player.discard || [],
                         inPlay: player.inPlay || [],
-                        bases: player.bases || []
+                        bases: player.bases || [],
+                        factionTags: player.factionTags || {}
                     }
                 })
                 
@@ -110,7 +226,11 @@ export default function OnlineGamePage() {
                     row: data.row || [],
                     tradeDeck: data.tradeDeck || [],
                     explorerDeck: data.explorerDeck || [],
-                    log: data.log || []
+                    log: data.log || [],
+                    turn: {
+                        ...data.turn,
+                        playedThisTurn: data.turn?.playedThisTurn || []
+                    }
                 } as GameState
                 setGameState(gameStateWithDefaults)
                 setIsGameReady(true)
@@ -119,6 +239,36 @@ export default function OnlineGamePage() {
         return () => unsubscribe()
     }, [gameUid])
 
+    /**
+     * useEffect #4: Game Initialization (HOST ONLY)
+     * 
+     * WHAT: Initializes the game state in Firebase when the lobby is ready
+     * WHY: Someone needs to create the initial game state (deal cards, set up decks)
+     *      - Only the HOST does this to avoid duplicate initialization
+     *      - Other players just wait for useEffect #3 to receive the state
+     * 
+     * DEPENDENCIES: [lobby, isGameReady, gameUid]
+     *      - lobby: Need lobby data to know who the host is and get player UIDs
+     *      - isGameReady: Prevents re-initialization if game already started
+     *      - gameUid: Need this to write to the correct Firebase path
+     * 
+     * FLOW:
+     *      1. Lobby loads (useEffect #2) → lobby state updates
+     *      2. This effect runs → checks if we're the host
+     *      3. If host AND game not ready → call initialSetup() → write to Firebase
+     *      4. Firebase write triggers useEffect #3 for ALL players
+     *      5. All players receive initial game state and render
+     * 
+     * GUARDS:
+     *      - if (!lobby || isGameReady) return: Don't run if lobby not loaded or game already started
+     *      - if (!currentUser) return: Don't run if not authenticated
+     *      - if (lobby.hostUid === currentUser.uid): Only host initializes
+     * 
+     * NOTE: Uses player UIDs (not names) for game state
+     *       - gameState.order = [uid1, uid2, ...]
+     *       - gameState.players = { uid1: {...}, uid2: {...} }
+     *       - Names are looked up from lobby data for display only
+     */
     useEffect(() => {
         if (!lobby || isGameReady) return
         
@@ -131,11 +281,89 @@ export default function OnlineGamePage() {
             const playerUids = Object.keys(lobby.players)
             const initialGameState = initialSetup(playerUids)
             
+            // Store player names in game state (so they persist even if lobby.players changes)
+            const playerNames: Record<string, string> = {}
+            playerUids.forEach(uid => {
+                playerNames[uid] = lobby.players[uid]?.name || uid
+            })
+            initialGameState.playerNames = playerNames
+            
             // Write to separate gameState path
             writeValue(gameStatePath(gameUid), initialGameState)
         }
     }, [lobby, isGameReady, gameUid])
 
+    /**
+     * useEffect #5: Turn Events Listener & Processor
+     * 
+     * WHAT: Listens to turn events and processes them to compute new game state
+     * WHY: This is the "event processing engine" that makes the game interactive
+     *      - Players write events (play card, buy card, etc.)
+     *      - This listener receives events and computes the new game state
+     *      - Updates the local React state for immediate UI feedback
+     * 
+     * DEPENDENCIES: [gameUid, isGameReady, gameState]
+     *      - gameUid: Re-subscribe if game ID changes
+     *      - isGameReady: Don't process events until game is initialized
+     *      - gameState: Need the base state to apply events on top of
+     * 
+     * FLOW:
+     *      1. Player takes action → writes Event to Firebase: games/{gameUid}/events
+     *      2. This listener receives the events array
+     *      3. Apply events on top of current gameState using replay()
+     *      4. Update local React state → immediate UI feedback
+     *      5. All other players receive same events → compute same state
+     * 
+     * EVENT PROCESSING (matches offline game pattern):
+     *      - gameState: Base state (like "snapshot" in offline game)
+     *      - turnEvents: Events that happened this turn
+     *      - currentState = replay(gameState, turnEvents)
+     *      - This computes the current state by applying events to base
+     * 
+     * WHY THIS DOESN'T CAUSE INFINITE LOOP:
+     *      - We only update LOCAL state (setTurnEvents)
+     *      - We DON'T write back to Firebase here
+     *      - gameState only changes when someone writes to gameStatePath
+     *      - Events are written by action handlers, not this effect
+     * 
+     * ARCHITECTURE:
+     *      - gameState = "snapshot" (base state, updated less frequently)
+     *      - turnEvents = events since last snapshot (updated frequently)
+     *      - Displayed state = replay(gameState, turnEvents)
+     *      - When turn ends, merge turnEvents into gameState, clear turnEvents
+     */
+    useEffect(() => {
+        if (!isGameReady) return
+
+        const unsubscribe = onValue(ref(db, eventPath(gameUid)), (snapshot) => {
+            const data = snapshot.val()
+            
+            // If no events yet, initialize as empty array
+            if (!data) {
+                setTurnEvents([])
+                return
+            }
+
+            // Firebase stores arrays as objects with numeric keys
+            // Convert back to array if needed
+            const eventsArray = Array.isArray(data) ? data : Object.values(data)
+            
+            // Filter out null/undefined values (Firebase quirk)
+            const validEvents = eventsArray.filter(e => e != null)
+            
+            // Update local state with the events
+            // The UI will use replay(gameState, turnEvents) to compute current state
+            setTurnEvents(validEvents)
+            
+            console.log('Received events:', validEvents)
+        })
+
+        return () => unsubscribe()
+    }, [gameUid, isGameReady])
+    
+    // ============================================================================
+    // RENDER GUARDS: Wait for all required data before rendering the game
+    // ============================================================================
     if (!isGameReady || !currentUserId) {
         return (
             <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
@@ -146,13 +374,56 @@ export default function OnlineGamePage() {
         )
     }
 
-    // Get current player - the player ID in gameState.order is the UID
-    const currentPlayerId = gameState.order[gameState.activeIndex]
-    const currentPlayer = gameState.players[currentPlayerId]
+    // ============================================================================
+    // COMPUTE CURRENT STATE: Apply turn events on top of base game state
+    // ============================================================================
+    
+    /**
+     * currentState: The actual game state to display (base + events)
+     * 
+     * PATTERN (same as offline game):
+     *      - gameState: Base "snapshot" state (updated less frequently)
+     *      - turnEvents: Events that happened this turn (updated frequently)
+     *      - currentState: Computed by applying events to base
+     * 
+     * WHY THIS PATTERN:
+     *      - Writing full game state to Firebase is expensive (large data)
+     *      - Writing small events is cheap (just the action)
+     *      - Each client computes the same state from same events
+     *      - When turn ends, merge events into base, clear events
+     * 
+     * EXAMPLE:
+     *      - gameState: { player1: { hand: ['SCOUT', 'VIPER'], trade: 0 }, ... }
+     *      - turnEvents: [{ t: 'CardPlayed', player: 'player1', handIndex: 0 }]
+     *      - currentState: { player1: { hand: ['VIPER'], trade: 1 }, ... }
+     * 
+     * replay() applies each event to the state without expanding rules
+     * This is fast and deterministic - all clients get the same result
+     */
+    const currentState = replay(gameState, turnEvents)
+
+    // ============================================================================
+    // DATA EXTRACTION: Get key player and game information
+    // ============================================================================
+    
+    /**
+     * currentPlayerId: The UID of the player whose turn it is (from currentState.order[activeIndex])
+     * currentPlayer: The full player state of whose turn it is
+     * 
+     * IMPORTANT DISTINCTION:
+     * - currentPlayerId = whose turn it is (changes each turn)
+     * - currentUserId = the logged-in user (stays constant, set by useEffect #1)
+     * 
+     * NOTE: We use currentState (not gameState) because it includes turn events
+     */
+    const currentPlayerId = currentState.order[currentState.activeIndex]
+    const currentPlayer = currentState.players[currentPlayerId]
+    
+    const { prompt: activePrompt } = getActivePrompt(turnEvents)
     
     // Safety check - ensure all required fields exist (arrays can be empty, just need to exist)
-    if (!currentPlayer || !Array.isArray(gameState.scrap) || !Array.isArray(gameState.row) || !Array.isArray(gameState.tradeDeck)) {
-        console.log('Missing data - Current Player:', !!currentPlayer, 'Scrap:', Array.isArray(gameState.scrap), 'Row:', Array.isArray(gameState.row), 'TradeDeck:', Array.isArray(gameState.tradeDeck))
+    if (!currentPlayer || !Array.isArray(currentState.scrap) || !Array.isArray(currentState.row) || !Array.isArray(currentState.tradeDeck)) {
+        console.log('Missing data - Current Player:', !!currentPlayer, 'Scrap:', Array.isArray(currentState.scrap), 'Row:', Array.isArray(currentState.row), 'TradeDeck:', Array.isArray(currentState.tradeDeck))
         return (
             <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
                 <div className="text-center">
@@ -162,85 +433,195 @@ export default function OnlineGamePage() {
             </div>
         )
     }
-    
-    // Helper function to get player name from UID
+
     const getPlayerName = (uid: string) => {
-        return lobby?.players[uid]?.name || uid
+        // Try game state first (persists even if player disconnects from lobby)
+        const nameFromGame = currentState.playerNames?.[uid]
+        if (nameFromGame) return nameFromGame
+        
+        // Fall back to lobby (for backwards compatibility with old games)
+        const nameFromLobby = lobby?.players[uid]?.name
+        if (nameFromLobby) return nameFromLobby
+        
+        // Last resort: return UID
+        return uid
     }
-    
-    // Create a modified game state with player names for display
-    const gameStateWithNames = {
-        ...gameState,
+
+    const currentStateWithNames = {
+        ...currentState,
         players: Object.fromEntries(
-            Object.entries(gameState.players).map(([uid, player]) => [
+            Object.entries(currentState.players).map(([uid, player]) => [
                 uid,
                 { ...player, id: getPlayerName(uid) }
             ])
         )
     }
     
-    // Get the LOGGED IN user's player data (not the active turn player)
-    const myPlayer = gameStateWithNames.players[currentUserId]
+    const myPlayer = currentStateWithNames.players[currentUserId]
     const isMyTurn = currentUserId === currentPlayerId
-    
-    // Debug logging
-    // console.log('Current User ID:', currentUserId)
-    // console.log('Current Player ID (active turn):', currentPlayerId)
-    // console.log('Is My Turn:', isMyTurn)
-    // console.log('My Player:', myPlayer)
-    // console.log('Lobby Players:', lobby?.players)
-    // console.log('Game State Players (original):', gameState.players)
-    // console.log('Game State With Names:', gameStateWithNames.players)
-    // console.log('Player Order:', gameState.order)
-    
-    /* 
-     * FIREBASE CONNECTIONS YOU NEED TO IMPLEMENT:
+
+    /**
+     * cleanUndefined: Remove undefined values from objects (Firebase doesn't allow them)
      * 
-     * 1. EVENT SYSTEM: You need to create a Firebase path for events
-     *    - Path: `games/${gameUid}/events` (array of events)
-     *    - When a player takes an action, push an event to this array
-     *    - All players listen to this events array
-     * 
-     * 2. EVENT PROCESSING: 
-     *    - Listen to the events array with onValue()
-     *    - When new events arrive, use materialize() to expand them (like offline game)
-     *    - Update the gameState in Firebase with the new computed state
-     * 
-     * 3. TURN MANAGEMENT:
-     *    - Only the current player (currentUserId === currentPlayerId) should be able to write events
-     *    - You can add validation in the handlers below
-     * 
-     * 4. SNAPSHOT SYSTEM (optional but recommended):
-     *    - Store a snapshot at games/${gameUid}/snapshot
-     *    - Store turn events at games/${gameUid}/turnEvents
-     *    - When turn ends, merge turnEvents into snapshot and clear turnEvents
-     *    - This matches the offline game's snapshot + turnEvents pattern
+     * WHY: Some events have optional properties that can be undefined
+     *      Example: PromptShown event has optional 'data' field
+     *      Firebase rejects: { data: undefined }
+     *      Firebase accepts: { } (property omitted)
      */
+    const cleanUndefined = <T,>(obj: T): T => {
+        if (Array.isArray(obj)) {
+            return obj.map(cleanUndefined) as T
+        }
+        if (obj && typeof obj === 'object') {
+            const cleaned: Record<string, unknown> = {}
+            for (const key in obj) {
+                if (obj[key] !== undefined) {
+                    cleaned[key] = cleanUndefined(obj[key])
+                }
+            }
+            return cleaned as T
+        }
+        return obj
+    }
+
+    const append = (rootEvent: Event | Event[]) => {
+        const base = replay(gameState, turnEvents)
+        
+        // Ensure turn.playedThisTurn exists (Firebase quirk: empty arrays become null)
+        if (!base.turn.playedThisTurn) {
+            base.turn.playedThisTurn = []
+        }
+        
+        const roots = Array.isArray(rootEvent) ? rootEvent : [rootEvent]
+        const { events: expandedEvents } = materialize(base, roots)
+        
+        // Clean undefined values before writing to Firebase
+        const cleanedEvents = cleanUndefined([...turnEvents, ...expandedEvents])
+        
+        writeValue(eventPath(gameUid), cleanedEvents)
+    }
     
-    // Placeholder handlers - YOU will implement these with Firebase writes
     const handleSelectTradeCard = (card: CardDef, source: 'row' | 'explorer', index: number) => {
-        // TODO: Write event to Firebase
-        console.log('Buy card:', card.id, source, index)
+        if (!isMyTurn) return
+
+        append([
+            { t: 'CardPurchased', player: currentPlayerId, card: card.id, source: source, rowIndex: index },
+            { t: 'TradeSpent', player: currentPlayerId, card: card.id, amount: card.cost }
+        ])
+        // Close the overlay when buying a card
+        forceCloseCardDetail()
     }
 
     const handlePlayCard = (card: CardDef, cardIndex: number) => {
-        // TODO: Write event to Firebase
-        console.log('Play card:', card.id, cardIndex)
+        if (!isMyTurn) return // Guard: only on your turn
+        
+        if (card.type === 'ship') {
+            append({ 
+                t: 'CardPlayed', 
+                player: currentPlayerId, 
+                handIndex: cardIndex 
+            })
+        } else if (card.type === 'base') {
+            append({ 
+                t: 'BasePlayed', 
+                player: currentPlayerId, 
+                card: card.id, 
+                handIndex: cardIndex 
+            })
+        }
     }
 
     const handleActivateBase = (baseIndex: number) => {
-        // TODO: Write event to Firebase
-        console.log('Activate base:', baseIndex)
+        if (!isMyTurn) return
+        append({
+            t: 'BaseActivated',
+            player: currentPlayerId,
+            baseIndex
+        })
+    }
+
+    const handleScrapCard = (card: CardDef, from: Zone, cardIndex: number) => {
+        append({ t: 'CardScrapped', player: currentPlayerId, from, placementIndex: cardIndex, card: card.id })
+    };
+
+    const handleScrapTradeRow = (idx: number, card: string, currentPlayer: string) => {
+        handleScrapCard(cardRegistry[card], 'row', idx)
+    }
+
+    const handleFreeCard = (idx: number, card: string, currentPlayer: string) => {
+        append([
+            { t: 'NextAcquireFreeSet', player: currentPlayer },
+            { t: 'NextAcquireToTopSet', player: currentPlayer },
+            { t: 'CardPurchased', player: currentPlayer, card: card, source: 'row', rowIndex: idx },
+            { t: "TradeSpent", player: currentPlayerId, card: card, amount: cardRegistry[card].cost }
+        ])
     }
 
     const handleScrapBase = (baseIndex: number) => {
-        // TODO: Write event to Firebase
-        console.log('Scrap base:', baseIndex)
+        if (!isMyTurn) return
+        const base = currentPlayer.bases[baseIndex]
+        append({
+            t: 'CardScrapped',
+            player: currentPlayerId,
+            from: 'bases',
+            placementIndex: baseIndex,
+            card: base.id
+        })
     }
 
+    const handleViewDiscard = () => {
+        setShowDiscardDeck(true);
+    };
+
+    const closeViewDiscard = () => {
+        setShowDiscardDeck(false);
+    }
+
+    const handleViewDeck = () => {
+        setShowDeck(true);
+    };
+
+    const closeViewDeck = () => {
+        setShowDeck(false);
+    };
+
+    const handleViewScrap = () => {
+        setShowScrap(true);
+    };
+
+    const closeViewScrap = () => {
+        setShowScrap(false);
+    };
+
+    const handleViewTradeDeck = () => {
+        setShowTradeDeck(true);
+    };
+
+    const closeViewTradeDeck = () => {
+        setShowTradeDeck(false);
+    };
+
     const handleEndTurn = () => {
-        // TODO: Write phase change event to Firebase
-        console.log('End turn')
+        if (!isMyTurn) return // Guard: only on your turn
+        
+        // Step 1: Merge all turn events into the base state
+        const base = replay(gameState, turnEvents)
+        
+        // Ensure required fields exist (Firebase quirks)
+        if (!base.turn.playedThisTurn) {
+            base.turn.playedThisTurn = []
+        }
+        
+        // Step 2: Apply the end turn event (triggers cleanup, draw, advance turn)
+        const { state: endState } = materialize(base, [
+            { t: 'PhaseChanged', from: 'MAIN', to: 'CLEANUP' }
+        ])
+        
+        // Step 3: Write the new base state to Firebase
+        writeValue(gameStatePath(gameUid), endState)
+        
+        // Step 4: Clear the events for the next turn
+        writeValue(eventPath(gameUid), [])
     }
 
     // Card detail handlers
@@ -273,10 +654,10 @@ export default function OnlineGamePage() {
             <div className="max-w-[1600px] mx-auto flex flex-col gap-2.5 h-full">
                 
                 <TradeRowSection 
-                    tradeDeck={gameState.tradeDeck}
-                    tradeRow={gameState.row}
-                    explorerDeck={gameState.explorerDeck}
-                    scrapPileCount={gameState.scrap.length}
+                    tradeDeck={currentState.tradeDeck}
+                    tradeRow={currentState.row}
+                    explorerDeck={currentState.explorerDeck}
+                    scrapPileCount={currentState.scrap.length}
                     onSelectCard={handleSelectTradeCard}
                     onCardHover={showCardDetail}
                     onCardLeave={hideCardDetail}
@@ -285,17 +666,17 @@ export default function OnlineGamePage() {
                 />
 
                 <PlayerSummaryBar 
-                    players={gameStateWithNames.players}
-                    playerOrder={gameState.order}
+                    players={currentStateWithNames.players}
+                    playerOrder={currentState.order}
                     currentPlayerId={currentUserId}
-                    append={() => {}} // TODO: You'll implement this
+                    append={append}
                 />
 
                 <OpponentBasesViewer 
-                    players={gameStateWithNames.players}
-                    playerOrder={gameState.order}
+                    players={currentStateWithNames.players}
+                    playerOrder={currentState.order}
                     currentPlayerId={currentUserId}
-                    append={() => {}} // TODO: You'll implement this
+                    append={append} 
                 />
 
                 <CurrentPlayerBases 
@@ -309,17 +690,110 @@ export default function OnlineGamePage() {
 
                 <PlayerHand 
                     player={myPlayer}
-                    onPlayCard={isMyTurn ? handlePlayCard : () => {}}
-                    onScrapCard={isMyTurn ? (() => {}) : () => {}} // TODO: You'll implement this
-                    onViewDiscard={() => setShowDiscardDeck(true)}
-                    onViewDeck={() => setShowDeck(true)}
-                    onViewScrap={() => setShowScrap(true)}
-                    onEndTurn={isMyTurn ? handleEndTurn : () => {}}
+                    onPlayCard={isMyTurn ? handlePlayCard : undefined}
+                    onScrapCard={isMyTurn ? (() => {}) : undefined}
+                    onViewDiscard={handleViewDiscard}
+                    onViewDeck={handleViewDeck}
+                    onViewScrap={handleViewScrap}
+                    onEndTurn={isMyTurn ? handleEndTurn : undefined}
                     onCardClick={showCardDetail}
-                    scrapPileCount={gameState.scrap.length}
+                    scrapPileCount={currentState.scrap.length}
                 />
 
             </div>
+
+            {/* OVERLAYS - Wire these up to show based on activePrompt */}
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapRow' && isMyTurn && (
+                <ScrapPromptOverlay 
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    handleFunction={handleScrapTradeRow}
+                />
+            )}
+
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseRowForFree' && isMyTurn && (
+                <ScrapPromptOverlay 
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    handleFunction={handleFreeCard}
+                />
+            )}
+            
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'opponentDiscard' && isMyTurn && (
+                <OpponentDiscardOverlay
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    currentPlayer={currentState.order[currentState.activeIndex]}
+                    getPlayerName={getPlayerName}
+                />
+            )}
+
+            {activePrompt?.t === 'PromptShown' && (activePrompt.kind === 'opponentChoice' || activePrompt.kind === 'choosePlayer') && isMyTurn && (
+                <OpponentChoiceOverlay
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    currentPlayer={currentState.order[currentState.activeIndex]}
+                    getPlayerName={getPlayerName}
+                />
+            )}
+
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapSelf' && isMyTurn && (
+                <ChooseToScrapOverlay
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    currentPlayer={currentState.order[currentState.activeIndex]}
+                />
+            )}
+
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseOtherCardToScrap' && isMyTurn && (
+                <ChooseOtherCardToScrapOverlay
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    currentPlayer={currentState.order[currentState.activeIndex]}
+                />
+            )}
+
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseAbility' && isMyTurn && (
+                <ChooseAbilityOverlay
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    currentPlayer={currentState.order[currentState.activeIndex]}
+                />
+            )}
+
+            {activePrompt?.t === 'PromptShown' && (activePrompt.kind === 'copyShip' || activePrompt.kind === 'chooseInPlayShip') && isMyTurn && (
+                <ChooseCardToCopyOverlay
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    currentPlayer={currentState.order[currentState.activeIndex]}
+                />
+            )}
+
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseOpponentBase' && isMyTurn && (
+                <ChooseOpponentBaseOverlay
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    currentPlayer={currentState.order[currentState.activeIndex]}
+                />
+            )}
+
+            {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'discardOrScrapAndDraw' && isMyTurn && (
+                <DiscardAndDrawOverlay
+                    state={currentState}
+                    activePrompt={activePrompt}
+                    append={append}
+                    currentPlayer={currentState.order[currentState.activeIndex]}
+                />
+            )}
 
             {/* Card Detail Overlay */}
             <CardDetailOverlay
@@ -340,6 +814,34 @@ export default function OnlineGamePage() {
                 onScrapBase={cardDetailState.onScrapBase}
                 showScrapButton={!!cardDetailState.onScrapBase}
             />
+            {
+                showDiscardDeck &&
+                <DiscardDeckOverlay
+                    currentPlayer={myPlayer}
+                    onClose={closeViewDiscard}
+                />
+            }
+            {
+                showDeck &&
+                <DeckOverlay
+                    currentPlayer={myPlayer}
+                    onClose={closeViewDeck}
+                />
+            }
+            {
+                showScrap &&
+                <ScrapOverlay
+                    scrappedCards={currentState.scrap}
+                    onClose={closeViewScrap}
+                />
+            }
+            {
+                showTradeDeck &&
+                <TradeRowDeckOverlay
+                    tradeDeck={currentState.tradeDeck}
+                    onClose={closeViewTradeDeck}
+                />
+            }
         </div>
     )
 }

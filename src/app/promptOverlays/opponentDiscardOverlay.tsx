@@ -7,9 +7,10 @@ interface OpponentHandChoiceOverlayProps {
     activePrompt: Event;
     append: (event: Event | Event[]) => void;
     currentPlayer: string;
+    getPlayerName?: (uid: string) => string;
 }
 
-export default function OpponentDiscardOverlay({ state, activePrompt, append, currentPlayer }: OpponentHandChoiceOverlayProps ) {
+export default function OpponentDiscardOverlay({ state, activePrompt, append, currentPlayer, getPlayerName }: OpponentHandChoiceOverlayProps ) {
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'opponentDiscard';
     if (!isOpen) return null;
   
@@ -27,7 +28,7 @@ export default function OpponentDiscardOverlay({ state, activePrompt, append, cu
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-3 border-purple-500 rounded-xl shadow-2xl shadow-purple-500/30 p-6 max-w-lg w-full">
           <h3 className="text-xl font-bold mb-4 text-purple-300 text-center">Opponent Discard</h3>
-          <p className="text-gray-300 text-sm mb-6 text-center">{target} must discard a card. Choose which card position.</p>
+          <p className="text-gray-300 text-sm mb-6 text-center">{getPlayerName ? getPlayerName(target) : target} must discard a card. Choose which card position.</p>
           <div className="flex gap-3 flex-wrap justify-center mb-4">
             {Array.from({ length: handSize }).map((_, idx) => (
               <button

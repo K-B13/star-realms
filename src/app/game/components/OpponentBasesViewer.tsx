@@ -96,7 +96,9 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
                                     </div>
                                     { currentPlayer.combat > 0 && (
                                         <button 
-                                            onClick={() => append({ t: 'BaseDamaged', player: selectedPlayer.id, baseIndex: index, amount: currentPlayer.combat })}
+                                            onClick={() => {
+                                                append({ t: 'BaseDamaged', player: selectedPlayerId, baseIndex: index, amount: currentPlayer.combat })
+                                            }}
                                             className="w-full border border-red-500 bg-red-900/40 hover:bg-red-800/60 text-red-200 px-1 py-0.5 rounded text-xs font-semibold transition-all mt-1"
                                         >
                                             ⚔️ Attack ({currentPlayer.combat})

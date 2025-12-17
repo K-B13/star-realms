@@ -114,15 +114,17 @@ export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDisc
                                 <div className="flex-1 overflow-y-auto min-h-0 text-sm">
                                     <Card card={cardDef} isInTradeRow={false} inPlayerHand={true} />
                                 </div>
-                                <button 
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onPlayCard?.(cardDef, index);
-                                    }}
-                                    className={`border-2 ${colors.border} rounded-lg px-3 py-1 text-sm font-semibold hover:brightness-125 transition-all w-full mt-1 text-gray-100`}
-                                >
-                                    Play
-                                </button>
+                                {onPlayCard && (
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onPlayCard(cardDef, index);
+                                        }}
+                                        className={`border-2 ${colors.border} rounded-lg px-3 py-1 text-sm font-semibold hover:brightness-125 transition-all w-full mt-1 text-gray-100`}
+                                    >
+                                        Play
+                                    </button>
+                                )}
                             </div>
                         );
                     })}
@@ -145,12 +147,14 @@ export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDisc
                         </span>
                     </div>
                 </div>
-                <button 
-                    onClick={onEndTurn}
-                    className="border-2 border-red-500 rounded-lg px-2 py-1.5 text-red-300 font-semibold hover:bg-red-900/30 transition-colors w-full text-xs"
-                >
-                    End Turn
-                </button>
+                {onEndTurn && (
+                    <button 
+                        onClick={onEndTurn}
+                        className="border-2 border-red-500 rounded-lg px-2 py-1.5 text-red-300 font-semibold hover:bg-red-900/30 transition-colors w-full text-xs"
+                    >
+                        End Turn
+                    </button>
+                )}
             </div>
         </div>
     );

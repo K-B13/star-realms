@@ -550,10 +550,22 @@ export const applyEvent = (state: GameState, event: Event) => {
             return state;
         case 'BaseActivated':
             const playerWithBase = state.players[event.player];
+            
+            // safety check: base might have been destroyed by a previous event
+            if (!playerWithBase.bases[event.baseIndex]) {
+                return state;
+            }
+            
             playerWithBase.bases[event.baseIndex].activatedThisTurn = true;
             return state;
         case 'BaseDamaged':
             const playerWithBaseToBeDamaged = state.players[event.player];
+            
+            // Safety check: base might have been destroyed by a previous event
+            if (!playerWithBaseToBeDamaged.bases[event.baseIndex]) {
+                return state;
+            }
+            
             const baseDef = cardRegistry[playerWithBaseToBeDamaged.bases[event.baseIndex].id] as BaseDef
             const currentShieldHealth = baseDef.defence - playerWithBaseToBeDamaged.bases[event.baseIndex].damage
             if (currentShieldHealth > event.amount) {

@@ -6,6 +6,7 @@ interface OpponentChoiceOverlayProps {
     activePrompt: Event;
     append: (event: Event | Event[]) => void;
     currentPlayer: string;
+    getPlayerName?: (uid: string) => string;
 }
 
 type Options = {
@@ -30,7 +31,7 @@ export interface Prompt {
     };
 }
 
-export default function OpponentChoiceOverlay({ state, activePrompt, append, currentPlayer }: OpponentChoiceOverlayProps ) {
+export default function OpponentChoiceOverlay({ state, activePrompt, append, currentPlayer, getPlayerName }: OpponentChoiceOverlayProps ) {
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'choosePlayer';
     if (!isOpen) return null;
 
@@ -84,7 +85,7 @@ export default function OpponentChoiceOverlay({ state, activePrompt, append, cur
                   onClick={() => pick(candidate)} 
                   className="border-2 border-yellow-500 bg-yellow-900/40 hover:bg-yellow-800/60 text-yellow-200 px-6 py-3 rounded-lg font-semibold transition-all shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 flex flex-col items-center"
                 >
-                  <span>{candidate}</span>
+                  <span>{getPlayerName ? getPlayerName(candidate) : candidate}</span>
                   {isDestroyBase && playerState.bases.length > 0 && (
                     <div className="flex gap-3 text-xs text-yellow-300 mt-1">
                       <span className="flex items-center gap-1">
