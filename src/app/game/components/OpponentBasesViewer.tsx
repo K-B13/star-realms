@@ -1,5 +1,5 @@
 import { PlayerState } from "@/app/engine/state";
-import { cardRegistry, Faction } from "@/app/engine/cards";
+import { cardRegistry, Faction, CardDef } from "@/app/engine/cards";
 import { useState, useEffect } from "react";
 import { Event } from "@/app/engine/events";
 
@@ -16,9 +16,11 @@ interface OpponentBasesViewerProps {
     playerOrder: string[];
     currentPlayerId: string;
     append: (event: Event | Event[]) => void;
+    onCardHover?: (card: CardDef, mode: 'hover' | 'click', onAttack?: () => void) => void;
+    onCardLeave?: () => void;
 }
 
-export default function OpponentBasesViewer({ players, playerOrder, currentPlayerId, append }: OpponentBasesViewerProps) {
+export default function OpponentBasesViewer({ players, playerOrder, currentPlayerId, append, onCardHover, onCardLeave }: OpponentBasesViewerProps) {
     // Filter out current player and dead players
     const otherPlayers = playerOrder.filter(pid => pid !== currentPlayerId && !players[pid].isDead);
     const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
@@ -81,7 +83,17 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
                                 const cardDef = cardRegistry[base.id];
                                 const colors = factionColors[cardDef.faction];
                                 return (
-                                <div key={index} className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-2 w-40 h-28 shadow-md ${colors.shadow} flex flex-col`}>
+                                <div 
+                                    key={index} 
+                                    className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-2 w-40 h-28 shadow-md ${colors.shadow} flex flex-col cursor-pointer hover:brightness-110 transition-all`}
+                                    onMouseEnter={() => {
+                                        const attackCallback = currentPlayer.combat > 0 ? () => {
+                                            append({ t: 'BaseDamaged', player: selectedPlayerId, baseIndex: index, amount: currentPlayer.combat })
+                                        } : undefined;
+                                        onCardHover?.(cardDef, 'hover', attackCallback);
+                                    }}
+                                    onMouseLeave={() => onCardLeave?.()}
+                                >
                                     <p className="text-center text-sm font-bold text-gray-100 mb-0.5">{base.id}</p>
                                     <div className="flex-1 flex flex-col justify-center">
                                         <p className="text-center text-xs text-gray-200">

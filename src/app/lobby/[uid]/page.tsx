@@ -239,7 +239,7 @@ export default function Lobby() {
                             </div>
                             
                             {
-                                lobby && Object.keys(lobby.players).length > 1 && checkAllReady() && <div className="pt-4">
+                                lobby && Object.keys(lobby.players).length > 1 && checkAllReady() && auth.currentUser?.uid === lobby.hostUid && <div className="pt-4">
                                     <button 
                                         onClick={startGame}
                                         className="w-full px-8 py-4 rounded-xl border-3 border-cyan-400 bg-gradient-to-r from-cyan-600 to-cyan-500 text-white text-xl font-bold hover:from-cyan-500 hover:to-cyan-400 transition-all shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50">
@@ -247,7 +247,6 @@ export default function Lobby() {
                                     </button>
                                 </div>
                             }
-                            <button onClick={() => console.log(lobby)}>Log</button>
                         </div>
                     </div>
                 </div>

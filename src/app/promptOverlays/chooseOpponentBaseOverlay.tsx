@@ -17,9 +17,10 @@ interface ChooseOpponentBaseOverlayProps {
     activePrompt: Event;
     append: (event: Event | Event[]) => void;
     currentPlayer: string;
+    getPlayerName?: (uid: string) => string;
 }
 
-export default function ChooseOpponentBaseOverlay({ state, activePrompt, append, currentPlayer }: ChooseOpponentBaseOverlayProps) {
+export default function ChooseOpponentBaseOverlay({ state, activePrompt, append, currentPlayer, getPlayerName }: ChooseOpponentBaseOverlayProps) {
     const isOpen = activePrompt?.t === 'PromptShown' && activePrompt.kind === 'chooseOpponentBase';
     if (!isOpen) return null;
 
@@ -38,7 +39,7 @@ export default function ChooseOpponentBaseOverlay({ state, activePrompt, append,
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-3 border-purple-500 rounded-xl shadow-2xl shadow-purple-500/30 p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto">
                 <h3 className="text-xl font-bold mb-4 text-purple-300 text-center">Destroy Opponent Base</h3>
-                <p className="text-gray-300 text-sm mb-6 text-center">Choose a base to destroy from {target}&apos;s bases</p>
+                <p className="text-gray-300 text-sm mb-6 text-center">Choose a base to destroy from {getPlayerName ? getPlayerName(target) : target}&apos;s bases</p>
                 <div className="flex gap-4 flex-wrap justify-center mb-4">
                     {targetBases.map((base, idx) => {
                         const def = cardRegistry[base.id];

@@ -67,6 +67,8 @@ import DeckOverlay from "@/app/game/components/DeckOverlay"
 import ScrapOverlay from "@/app/game/components/ScrapOverlay"
 import TradeRowDeckOverlay from "@/app/game/components/TradeRowDeckOverlay"
 import DiscardDeckOverlay from "@/app/game/components/DiscardDeckOverlay"
+import { icons } from "@/app/game/iconIndex"
+import GameOverOverlay from "@/app/game/components/GameOverOverlay"
 
 export default function OnlineGamePage() {
     const [gameState, setGameState] = useState<GameState>({
@@ -98,6 +100,9 @@ export default function OnlineGamePage() {
     const [showScrap, setShowScrap] = useState(false)
     const [showTradeDeck, setShowTradeDeck] = useState(false)
     
+    // Error notification state
+    const [errorMessage, setErrorMessage] = useState<string | null>(null)
+    
     // Card detail overlay state
     const [cardDetailState, setCardDetailState] = useState<{
         card: CardDef | null;
@@ -106,6 +111,7 @@ export default function OnlineGamePage() {
         onActivateBase?: () => void;
         baseAlreadyActivated?: boolean;
         onScrapBase?: () => void;
+        buttonMode?: 'activate' | 'attack';
     }>({ card: null, isOpen: false, mode: 'hover' })
     
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -353,9 +359,8 @@ export default function OnlineGamePage() {
             
             // Update local state with the events
             // The UI will use replay(gameState, turnEvents) to compute current state
-            setTurnEvents(validEvents)
+            setTurnEvents(validEvents)   
             
-            console.log('Received events:', validEvents)
         })
 
         return () => unsubscribe()
@@ -504,6 +509,14 @@ export default function OnlineGamePage() {
     const handleSelectTradeCard = (card: CardDef, source: 'row' | 'explorer', index: number) => {
         if (!isMyTurn) return
 
+        // Check if player can afford the card
+        const canAfford = currentPlayer.trade >= card.cost || currentPlayer.freeNextAcquire
+        if (!canAfford) {
+            setErrorMessage(`Not enough trade! Need ${card.cost} 🟡, you have ${currentPlayer.trade} 🟡`)
+            setTimeout(() => setErrorMessage(null), 2000) // Auto-dismiss after 3 seconds
+            return
+        }
+
         append([
             { t: 'CardPurchased', player: currentPlayerId, card: card.id, source: source, rowIndex: index },
             { t: 'TradeSpent', player: currentPlayerId, card: card.id, amount: card.cost }
@@ -625,12 +638,12 @@ export default function OnlineGamePage() {
     }
 
     // Card detail handlers
-    const showCardDetail = (card: CardDef, mode: 'hover' | 'click', onActivateBase?: () => void, baseAlreadyActivated?: boolean, onScrapBase?: () => void) => {
+    const showCardDetail = (card: CardDef, mode: 'hover' | 'click', onActivateBase?: () => void, baseAlreadyActivated?: boolean, onScrapBase?: () => void, buttonMode?: 'activate' | 'attack') => {
         if (hoverTimeoutRef.current) {
             clearTimeout(hoverTimeoutRef.current)
             hoverTimeoutRef.current = null
         }
-        setCardDetailState({ card, isOpen: true, mode, onActivateBase, baseAlreadyActivated, onScrapBase })
+        setCardDetailState({ card, isOpen: true, mode, onActivateBase, baseAlreadyActivated, onScrapBase, buttonMode })
     }
 
     const hideCardDetail = () => {
@@ -662,7 +675,7 @@ export default function OnlineGamePage() {
                     onCardHover={showCardDetail}
                     onCardLeave={hideCardDetail}
                     onCardClick={showCardDetail}
-                    onViewTradeDeck={() => setShowTradeDeck(true)}
+                    onViewTradeDeck={handleViewTradeDeck}
                 />
 
                 <PlayerSummaryBar 
@@ -676,14 +689,16 @@ export default function OnlineGamePage() {
                     players={currentStateWithNames.players}
                     playerOrder={currentState.order}
                     currentPlayerId={currentUserId}
-                    append={append} 
+                    append={append}
+                    onCardHover={(card, mode, onAttack) => showCardDetail(card, mode, onAttack, false, undefined, 'attack')}
+                    onCardLeave={hideCardDetail}
                 />
 
                 <CurrentPlayerBases 
                     bases={myPlayer.bases}
                     playerId={getPlayerName(currentUserId)}
-                    onActivateBase={isMyTurn ? handleActivateBase : () => {}}
-                    onScrapBase={isMyTurn ? handleScrapBase : () => {}}
+                    onActivateBase={isMyTurn ? handleActivateBase : undefined}
+                    onScrapBase={isMyTurn ? handleScrapBase : undefined}
                     onCardHover={showCardDetail}
                     onCardLeave={hideCardDetail}
                 />
@@ -783,6 +798,7 @@ export default function OnlineGamePage() {
                     activePrompt={activePrompt}
                     append={append}
                     currentPlayer={currentState.order[currentState.activeIndex]}
+                    getPlayerName={getPlayerName}
                 />
             )}
 
@@ -813,6 +829,7 @@ export default function OnlineGamePage() {
                 baseAlreadyActivated={cardDetailState.baseAlreadyActivated}
                 onScrapBase={cardDetailState.onScrapBase}
                 showScrapButton={!!cardDetailState.onScrapBase}
+                buttonMode={cardDetailState.buttonMode}
             />
             {
                 showDiscardDeck &&
@@ -842,6 +859,27 @@ export default function OnlineGamePage() {
                     onClose={closeViewTradeDeck}
                 />
             }
+
+            {/* Error Notification Overlay */}
+            {errorMessage && (
+                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[70] animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="bg-gradient-to-r from-red-600 to-red-500 border-3 border-red-400 rounded-xl shadow-2xl shadow-red-500/50 px-6 py-4 max-w-md">
+                        <div className="flex items-center gap-3">
+                            <div>
+                                <p className="text-white font-bold text-lg">Cannot Purchase</p>
+                                <p className="text-red-100 text-sm">{errorMessage}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            <GameOverOverlay
+                state={currentStateWithNames}
+                onNewGame={() => {
+                    // For online games, redirect to lobby selection
+                    router.push('/lobbySelection')
+                }}
+            />
         </div>
     )
 }

@@ -14,6 +14,7 @@ interface CardDetailOverlayProps {
     baseAlreadyActivated?: boolean;
     onScrapBase?: () => void;
     showScrapButton?: boolean;
+    buttonMode?: 'activate' | 'attack';
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, text: string }> = {
@@ -24,7 +25,7 @@ const factionColors: Record<Faction, { border: string, bg: string, text: string 
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/90", text: "text-gray-300" },
 };
 
-export default function CardDetailOverlay({ card, isOpen, onClose, mode, onMouseEnter, onMouseLeave, onActivateBase, showActivateButton, baseAlreadyActivated, onScrapBase, showScrapButton }: CardDetailOverlayProps) {
+export default function CardDetailOverlay({ card, isOpen, onClose, mode, onMouseEnter, onMouseLeave, onActivateBase, showActivateButton, baseAlreadyActivated, onScrapBase, showScrapButton, buttonMode = 'activate' }: CardDetailOverlayProps) {
     if (!isOpen || !card) return null;
 
     const colors = factionColors[card.faction];
@@ -128,7 +129,7 @@ export default function CardDetailOverlay({ card, isOpen, onClose, mode, onMouse
                     )}
                 </div>
 
-                {/* Activate Base button or status - only for bases in hover mode */}
+                {/* Activate/Attack Base button or status - only for bases in hover mode */}
                 {isBase && mode === 'hover' && (showActivateButton || baseAlreadyActivated) && (
                     <>
                         {showActivateButton && onActivateBase && !baseAlreadyActivated ? (
@@ -138,11 +139,15 @@ export default function CardDetailOverlay({ card, isOpen, onClose, mode, onMouse
                                     onActivateBase();
                                     onClose();
                                 }}
-                                className={`mt-4 w-full border-2 ${colors.border} rounded-lg px-4 py-2 font-semibold hover:brightness-125 transition-all text-gray-100`}
+                                className={`mt-4 w-full border-2 ${
+                                    buttonMode === 'attack' 
+                                        ? 'border-red-500 bg-red-900/40 hover:bg-red-800/60 text-red-200' 
+                                        : `${colors.border} text-gray-100`
+                                } rounded-lg px-4 py-2 font-semibold hover:brightness-125 transition-all`}
                             >
-                                Activate Base
+                                {buttonMode === 'attack' ? '⚔️ Attack Base' : 'Activate Base'}
                             </button>
-                        ) : baseAlreadyActivated && (
+                        ) : baseAlreadyActivated && buttonMode === 'activate' && (
                             <div className="mt-4 w-full border-2 border-gray-500 rounded-lg px-4 py-2 text-center bg-gray-800/40">
                                 <p className="text-gray-400 font-semibold">Already Activated This Turn</p>
                             </div>
