@@ -68,9 +68,9 @@ export default function Players({
                     {playerData.host && <span className="text-lg font-bold text-yellow-400 whitespace-nowrap ml-4">- Host</span>}
                 </div>
                 <div className="flex items-center gap-3 ml-4">
-                    <div className={`w-10 h-10 rounded-lg border-2 border-gray-400 ${colorMap[colourState]}`}></div>
+                    <div className={`w-10 h-10 rounded-lg border-2 border-gray-400 ${colourState ? colorMap[colourState] : 'bg-gray-500'}`}></div>
                     <select 
-                        value={colourState}
+                        value={colourState || ''}
                         onChange={handleChangeSelect}
                         onBlur={stateDifference() ? handleSave : undefined}
                         className="text-lg font-semibold border-2 border-blue-400 rounded-lg px-3 py-1.5 bg-slate-700 text-gray-100"
