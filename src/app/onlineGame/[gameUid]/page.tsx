@@ -67,7 +67,6 @@ import DeckOverlay from "@/app/game/components/DeckOverlay"
 import ScrapOverlay from "@/app/game/components/ScrapOverlay"
 import TradeRowDeckOverlay from "@/app/game/components/TradeRowDeckOverlay"
 import DiscardDeckOverlay from "@/app/game/components/DiscardDeckOverlay"
-import { icons } from "@/app/game/iconIndex"
 import GameOverOverlay from "@/app/game/components/GameOverOverlay"
 
 export default function OnlineGamePage() {
