@@ -27,9 +27,9 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
     };
 
     return (
-        <div className="border-3 border-cyan-500 rounded-xl bg-slate-800 p-3 shadow-lg shadow-cyan-500/20">
-            <p className="text-base font-bold text-cyan-300 mb-2 text-center">{playerId} Bases (You)</p>
-            <div className="flex gap-3 justify-center flex-wrap items-center content-center min-h-[140px]">
+        <div className="border-3 border-cyan-500 rounded-xl bg-slate-800 p-2 shadow-lg shadow-cyan-500/20">
+            <p className="text-xs font-bold text-cyan-300 mb-1 text-center">{playerId} Bases (You)</p>
+            <div className="flex gap-2 justify-center flex-wrap items-center content-center min-h-[80px]">
                 {bases.length === 0 ? (
                     <p className="text-gray-400 text-sm">No bases in play</p>
                 ) : (
@@ -41,7 +41,7 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
                         return (
                         <div 
                             key={index} 
-                            className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-3 w-40 shadow-md ${colors.shadow} cursor-pointer hover:brightness-110 transition-all relative`}
+                            className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-2 w-36 shadow-md ${colors.shadow} cursor-pointer hover:brightness-110 transition-all relative`}
                             onMouseEnter={() => {
                                 const activateCallback = canActivate ? () => onActivateBase(index) : undefined;
                                 const scrapCallback = cardDef.selfScrap ? () => onScrapBase?.(index) : undefined;
@@ -67,14 +67,14 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
                                     🗑
                                 </button>
                             )}
-                            <p className="text-center text-sm font-bold text-gray-100 mb-1">{base.id}</p>
+                            <p className="text-center text-xs font-bold text-gray-100 mb-0.5">{base.id}</p>
                             <p className="text-center text-xs text-gray-200">
                                 Shield: {base.defence} {base.shield === 'outpost' ? '⚫' : '⚪'}
                             </p>
                             {base.activatedThisTurn ? (
-                                <p className="text-center text-xs text-green-400 mt-1">✓ Activated</p>
+                                <p className="text-center text-xs text-green-400 mt-0.5">✓ Activated</p>
                             ) : (
-                                <p className="text-center text-xs text-cyan-400 mt-1">● Ready</p>
+                                <p className="text-center text-xs text-cyan-400 mt-0.5">● Ready</p>
                             )}
                             {/* Damage bar (red) */}
                             <div className="mt-2 bg-gray-700 h-1.5 rounded-full overflow-hidden">

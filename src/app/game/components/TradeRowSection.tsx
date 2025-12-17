@@ -27,11 +27,11 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
         <div className="flex gap-2.5 items-center">
             {/* Deck and Scrapped Counters */}
             <div 
-                className="relative border-3 border-cyan-400 rounded-xl bg-slate-800 p-2 w-30 text-center shadow-lg shadow-cyan-500/20 cursor-pointer hover:brightness-110 transition-all flex flex-col justify-center min-h-[100px]"
+                className="relative border-3 border-cyan-400 rounded-xl bg-slate-800 p-2 w-30 text-center shadow-lg shadow-cyan-500/20 cursor-pointer hover:brightness-110 transition-all flex flex-col justify-center min-h-[85px]"
                 onClick={onViewTradeDeck}
             >
-                <p className="text-sm font-bold text-cyan-300 mb-2">Trade Deck</p>
-                <p className="text-xl font-bold text-gray-100">{tradeDeck.length}/80</p>
+                <p className="text-xs font-bold text-cyan-300 mb-1">Trade Deck</p>
+                <p className="text-lg font-bold text-gray-100">{tradeDeck.length}/80</p>
             </div>
 
             {/* Trade Row - 5 cards, scrollable on overflow */}
@@ -41,7 +41,7 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
                         if (!card) {
                             return <div 
                                 key={index} 
-                                className="w-[calc(20%-0.5rem)] min-w-[150px] flex-shrink-0 border-3 border-gray-600 rounded-xl bg-gray-800/40 p-3 flex flex-col shadow-lg shadow-gray-500/20 min-h-[110px] relative"
+                                className="w-[calc(20%-0.5rem)] min-w-[140px] flex-shrink-0 border-3 border-gray-600 rounded-xl bg-gray-800/40 p-2 flex flex-col shadow-lg shadow-gray-500/20 min-h-[85px] relative"
                             >
                                 <div className="text-gray-500 text-sm mb-1 mt-6 text-center font-semibold">Empty</div>
                             </div>
@@ -50,7 +50,7 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
                         const colors = factionColors[cardDef.faction];
                         return <div 
                             key={index} 
-                            className={`w-[calc(20%-0.5rem)] min-w-[150px] flex-shrink-0 border-3 ${colors.border} rounded-xl ${colors.bg} p-3 flex flex-col shadow-lg ${colors.shadow} min-h-[110px] relative cursor-pointer hover:brightness-110 transition-all`}
+                            className={`w-[calc(20%-0.5rem)] min-w-[140px] flex-shrink-0 border-3 ${colors.border} rounded-xl ${colors.bg} p-2 flex flex-col shadow-lg ${colors.shadow} min-h-[85px] relative cursor-pointer hover:brightness-110 transition-all`}
                             onMouseEnter={() => onCardHover?.(cardDef, 'hover')}
                             onMouseLeave={() => onCardLeave?.()}
                             onClick={(e) => {
@@ -83,7 +83,7 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
 
             {/* Explorers */}
             <div 
-                className="relative border-3 border-cyan-400 rounded-xl bg-slate-800 p-3 w-40 text-center shadow-lg shadow-cyan-500/20 cursor-pointer hover:brightness-110 transition-all"
+                className="relative border-3 border-cyan-400 rounded-xl bg-slate-800 p-2 w-32 text-center shadow-lg shadow-cyan-500/20 cursor-pointer hover:brightness-110 transition-all"
                 onMouseEnter={() => onCardHover?.(cardRegistry['EXPLORER'], 'hover')}
                 onMouseLeave={() => onCardLeave?.()}
                 onClick={(e) => {
@@ -96,8 +96,8 @@ export default function TradeRowSection({ tradeDeck, tradeRow, explorerDeck, scr
                     <p className="text-yellow-300 font-bold">2</p>
                     <IconComponent img={icons.coin} amount={1} size={18} />
                 </div>
-                <p className="text-sm font-bold text-cyan-300 mb-2">Explorers</p>
-                <p className="text-xl font-bold text-gray-100">{explorerDeck.length}/10</p>
+                <p className="text-xs font-bold text-cyan-300 mb-1">Explorers</p>
+                <p className="text-lg font-bold text-gray-100">{explorerDeck.length}/10</p>
                 {
                     explorerDeck.length > 0 && (
                         <button 

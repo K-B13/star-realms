@@ -662,8 +662,8 @@ export default function OnlineGamePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-            <div className="max-w-[1600px] mx-auto flex flex-col gap-2.5 min-h-screen">
+        <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 overflow-hidden flex flex-col">
+            <div className="max-w-[1600px] mx-auto flex flex-col gap-2.5 flex-1 overflow-y-auto">
                 
                 <TradeRowSection 
                     tradeDeck={currentState.tradeDeck}

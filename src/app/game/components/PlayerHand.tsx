@@ -76,8 +76,8 @@ export default function PlayerHand({ player, onPlayCard, onScrapCard, onViewDisc
             </div>
 
             {/* Center: Hand Cards - Scrollable with fixed card width */}
-            <div className="flex-1 overflow-x-auto min-h-[280px]">
-                <div className="flex gap-2.5 h-full min-h-[280px]">
+            <div className="flex-1 overflow-x-auto min-h-[240px]">
+                <div className="flex gap-2.5 h-full min-h-[240px]">
                     {player.hand.map((card, index) => {
                         const cardDef = cardRegistry[card];
                         const colors = factionColors[cardDef.faction];
