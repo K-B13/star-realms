@@ -1,12 +1,13 @@
 'use client'
-import { lobbyPath } from "@/app/firebase/firebasePaths"
+import { lobbyPath, playerLobbyPath } from "@/app/firebase/firebasePaths"
 import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { auth, db } from "@/app/firebase/firebaseConfig"
-import { onValue, ref } from "firebase/database"
+import { onDisconnect, onValue, ref } from "firebase/database"
 import { LobbyInterface } from "@/app/lobbyCreation/page"
 import { OnlinePlayer } from "@/app/onlineLandingPage/onlineNameCreation"
-import { updateValue } from "@/app/firebase/firebaseActions"
+import { removeValue, updateValue } from "@/app/firebase/firebaseActions"
+import { useRouter } from "next/navigation"
 
 
 export default function Lobby() {
@@ -14,13 +15,36 @@ export default function Lobby() {
     const hostUid = params.uid as string
     const [lobby, setLobby] = useState<LobbyInterface | null>(null)
     const [ showLobbySettings, setShowLobbySettings ] = useState(true)
+    const router = useRouter()
 
     useEffect(() => {
         const unsubscribe = onValue(ref(db, lobbyPath(hostUid)), (snapshot) => {
             const lobby = snapshot.val()
+            if (!lobby) {
+                router.push('/lobbySelection')
+                return
+            }
+            if (lobby.gameStarted) {
+                router.push(`/onlineGame/${hostUid}`)
+                return
+            }
             setLobby(lobby)
         })
         return () => unsubscribe()
+    }, [hostUid, router])
+
+    useEffect(() => {
+        const uid = auth.currentUser?.uid
+        if (!uid) return;
+
+        if (uid === hostUid) {
+            const lobbyRef = ref(db, lobbyPath(hostUid))
+            onDisconnect(lobbyRef).remove()
+        } else {
+            const playerRef = ref(db, playerLobbyPath(hostUid, uid))
+            onDisconnect(playerRef).remove()
+        }
+
     }, [hostUid])
 
     const handleReady = async () => {
@@ -38,6 +62,23 @@ export default function Lobby() {
         if (!lobby) return false;
         const players = Object.values(lobby.players)
         return players.every(player => player.ready)
+    }
+
+    const leaveLobby = async () => {
+        const uid = auth.currentUser?.uid
+        if (!uid || !lobby) return;
+        if (uid === hostUid) {
+            await removeValue(lobbyPath(hostUid))
+            router.push('/lobbyCreation')
+            return
+        }
+        await removeValue(playerLobbyPath(hostUid, uid))
+        router.push('/lobbySelection')
+    }
+
+    const startGame = async () => {
+        await updateValue(lobbyPath(hostUid), { gameStarted: true })
+        
     }
     
     return (
@@ -92,7 +133,7 @@ export default function Lobby() {
                                     </div>
                                     
                                     <div className="pt-4">
-                                        <button className="w-full px-6 py-3 rounded-xl border-2 border-red-500 bg-red-900/30 text-red-300 hover:bg-red-900/50 transition-colors font-semibold">
+                                        <button onClick={leaveLobby} className="w-full px-6 py-3 rounded-xl border-2 border-red-500 bg-red-900/30 text-red-300 hover:bg-red-900/50 transition-colors font-semibold">
                                             Leave
                                         </button>
                                     </div>
@@ -137,7 +178,7 @@ export default function Lobby() {
                                     </div>
                                     
                                     <div className="pt-4">
-                                        <button className="w-full px-6 py-3 rounded-xl border-2 border-red-500 bg-red-900/30 text-red-300 hover:bg-red-900/50 transition-colors font-semibold">
+                                        <button onClick={leaveLobby} className="w-full px-6 py-3 rounded-xl border-2 border-red-500 bg-red-900/30 text-red-300 hover:bg-red-900/50 transition-colors font-semibold">
                                             Leave
                                         </button>
                                     </div>
@@ -199,7 +240,9 @@ export default function Lobby() {
                             
                             {
                                 lobby && Object.keys(lobby.players).length > 1 && checkAllReady() && <div className="pt-4">
-                                    <button className="w-full px-8 py-4 rounded-xl border-3 border-cyan-400 bg-gradient-to-r from-cyan-600 to-cyan-500 text-white text-xl font-bold hover:from-cyan-500 hover:to-cyan-400 transition-all shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50">
+                                    <button 
+                                        onClick={startGame}
+                                        className="w-full px-8 py-4 rounded-xl border-3 border-cyan-400 bg-gradient-to-r from-cyan-600 to-cyan-500 text-white text-xl font-bold hover:from-cyan-500 hover:to-cyan-400 transition-all shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50">
                                         Start
                                     </button>
                                 </div>

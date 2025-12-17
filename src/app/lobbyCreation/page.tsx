@@ -16,7 +16,8 @@ export interface LobbyInterface {
     hasPassword: boolean,
     lobbyPassword: string,
     expansionPacks: string[]
-    players: { [uid: string]: OnlinePlayer }
+    players: { [uid: string]: OnlinePlayer },
+    gameStarted: boolean
 }
 
 export default function LobbyCreation() {
@@ -32,7 +33,8 @@ export default function LobbyCreation() {
         hasPassword: false,
         lobbyPassword: '',
         expansionPacks: [],
-        players: {}
+        players: {},
+        gameStarted: false
     })
 
     const fetchHostName = async () => {
@@ -267,7 +269,7 @@ export default function LobbyCreation() {
 
                 <div className="mt-6 text-center">
                     <button 
-                        onClick={() => router.back()}
+                        onClick={() => router.push('/onlineLandingPage')}
                         className="px-8 py-3 rounded-xl border-2 border-gray-500 bg-slate-800/50 text-gray-300 hover:bg-slate-700 transition-colors font-semibold"
                     >
                         Cancel

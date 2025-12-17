@@ -1,7 +1,7 @@
 'use client'
 import { onValue, ref } from "firebase/database"
 import { useState, useEffect } from "react"
-import { allLobbyPath, playerLobbyPath, playerPath } from "../firebase/firebasePaths"
+import { allLobbyPath, lobbyPath, playerLobbyPath, playerPath } from "../firebase/firebasePaths"
 import { auth, db } from "../firebase/firebaseConfig"
 import { LobbyInterface } from "../lobbyCreation/page"
 import { useRouter } from "next/navigation"
@@ -148,7 +148,7 @@ export default function LobbySelection() {
 
                     <div className="mt-8 text-center">
                         <button 
-                            onClick={() => router.back()}
+                            onClick={() => router.push('/onlineLandingPage')}
                             className="px-8 py-3 rounded-xl border-2 border-gray-500 bg-slate-800/50 text-gray-300 hover:bg-slate-700 transition-colors font-semibold"
                         >
                             Cancel

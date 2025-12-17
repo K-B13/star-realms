@@ -7,7 +7,7 @@ export interface Player {
     id: string,
     name: string,
     host: boolean,
-    color: string,
+    color?: string,
 }
 
 export interface GameData {
