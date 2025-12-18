@@ -1343,7 +1343,7 @@ export const cardRegistry: Record<string, ShipDef | BaseDef> = {
         shield: 'outpost',
         description: 'This high-tech city is like a beehive it looks chaotic but vital work is being done efficiently at a frenetic pace',
         text: {
-            play: [`Draw 1 card`, `Then scrap a card`],
+            play: [`Draw 1 card`, `Then scrap a card from your hand`],
         },
         abilities: [
             {

@@ -115,25 +115,6 @@ export default function OnlineGamePage() {
     
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    /**
-     * useEffect #1: Authentication Listener
-     * 
-     * WHAT: Listens to Firebase authentication state changes
-     * WHY: We need to know which user is logged in to determine:
-     *      - Which player's hand/bases to show
-     *      - Whether it's the current user's turn
-     *      - Which player can take actions
-     * 
-     * DEPENDENCIES: [] (empty array)
-     *      - Runs once on component mount
-     *      - Sets up a persistent listener that stays active
-     *      - Cleanup function unsubscribes when component unmounts
-     * 
-     * FLOW:
-     *      1. Component mounts → listener is set up
-     *      2. User logs in/out → callback fires → setCurrentUserId updates
-     *      3. Component unmounts → cleanup runs → listener is removed
-     */
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
@@ -143,27 +124,6 @@ export default function OnlineGamePage() {
         return () => unsubscribe()
     }, [])
 
-    /**
-     * useEffect #2: Lobby Data Listener
-     * 
-     * WHAT: Listens to the lobby data in Firebase for this specific game
-     * WHY: We need lobby data to:
-     *      - Map player UIDs to display names (lobby.players[uid].name)
-     *      - Know who the host is
-     *      - Redirect if the lobby is deleted/doesn't exist
-     * 
-     * DEPENDENCIES: [gameUid, router]
-     *      - gameUid: Re-run if the game ID changes (shouldn't happen, but safety)
-     *      - router: Required for the redirect, included for React exhaustive-deps
-     * 
-     * FLOW:
-     *      1. Component mounts → listener subscribes to Firebase path: setup/lobbies/{gameUid}
-     *      2. Lobby data changes → callback fires → setLobby updates
-     *      3. If lobby deleted → redirect to lobby selection
-     *      4. Component unmounts or gameUid changes → cleanup runs → listener removed
-     * 
-     * NOTE: This stays subscribed even after game starts because we need player names
-     */
     useEffect(() => {
         const unsubscribe = onValue(ref(db, lobbyPath(gameUid)), (snapshot) => {
             const data = snapshot.val()
@@ -178,32 +138,6 @@ export default function OnlineGamePage() {
         return () => unsubscribe()
     }, [gameUid, router])
 
-    /**
-     * useEffect #3: Game State Listener (MAIN GAME SYNC)
-     * 
-     * WHAT: Listens to the game state in Firebase - this is the SOURCE OF TRUTH
-     * WHY: This is how all players stay synchronized:
-     *      - When ANY player takes an action, the game state in Firebase updates
-     *      - This listener receives the update and re-renders all players' screens
-     *      - This is the "read" side of the Firebase sync
-     * 
-     * DEPENDENCIES: [gameUid]
-     *      - gameUid: Re-subscribe if game ID changes
-     * 
-     * FLOW:
-     *      1. Component mounts → listener subscribes to Firebase path: games/{gameUid}/gameState
-     *      2. Game state changes (by ANY player) → callback fires → setGameState updates
-     *      3. React re-renders with new game state → all players see the update
-     *      4. Component unmounts → cleanup runs → listener removed
-     * 
-     * FIREBASE QUIRK: Firebase doesn't store empty arrays (they become null)
-     *      - We must provide default empty arrays for: deck, hand, discard, inPlay, bases
-     *      - Otherwise the game will crash when trying to map/filter these arrays
-     * 
-     * STATE UPDATES:
-     *      - setGameState: Updates the entire game state (cards, players, turn, etc.)
-     *      - setIsGameReady: Signals that game has been initialized and can render
-     */
     useEffect(() => {
         const unsubscribe = onValue(ref(db, gameStatePath(gameUid)), (snapshot) => {
             const data = snapshot.val()
@@ -244,36 +178,6 @@ export default function OnlineGamePage() {
         return () => unsubscribe()
     }, [gameUid])
 
-    /**
-     * useEffect #4: Game Initialization (HOST ONLY)
-     * 
-     * WHAT: Initializes the game state in Firebase when the lobby is ready
-     * WHY: Someone needs to create the initial game state (deal cards, set up decks)
-     *      - Only the HOST does this to avoid duplicate initialization
-     *      - Other players just wait for useEffect #3 to receive the state
-     * 
-     * DEPENDENCIES: [lobby, isGameReady, gameUid]
-     *      - lobby: Need lobby data to know who the host is and get player UIDs
-     *      - isGameReady: Prevents re-initialization if game already started
-     *      - gameUid: Need this to write to the correct Firebase path
-     * 
-     * FLOW:
-     *      1. Lobby loads (useEffect #2) → lobby state updates
-     *      2. This effect runs → checks if we're the host
-     *      3. If host AND game not ready → call initialSetup() → write to Firebase
-     *      4. Firebase write triggers useEffect #3 for ALL players
-     *      5. All players receive initial game state and render
-     * 
-     * GUARDS:
-     *      - if (!lobby || isGameReady) return: Don't run if lobby not loaded or game already started
-     *      - if (!currentUser) return: Don't run if not authenticated
-     *      - if (lobby.hostUid === currentUser.uid): Only host initializes
-     * 
-     * NOTE: Uses player UIDs (not names) for game state
-     *       - gameState.order = [uid1, uid2, ...]
-     *       - gameState.players = { uid1: {...}, uid2: {...} }
-     *       - Names are looked up from lobby data for display only
-     */
     useEffect(() => {
         if (!lobby || isGameReady) return
         
@@ -298,45 +202,6 @@ export default function OnlineGamePage() {
         }
     }, [lobby, isGameReady, gameUid])
 
-    /**
-     * useEffect #5: Turn Events Listener & Processor
-     * 
-     * WHAT: Listens to turn events and processes them to compute new game state
-     * WHY: This is the "event processing engine" that makes the game interactive
-     *      - Players write events (play card, buy card, etc.)
-     *      - This listener receives events and computes the new game state
-     *      - Updates the local React state for immediate UI feedback
-     * 
-     * DEPENDENCIES: [gameUid, isGameReady, gameState]
-     *      - gameUid: Re-subscribe if game ID changes
-     *      - isGameReady: Don't process events until game is initialized
-     *      - gameState: Need the base state to apply events on top of
-     * 
-     * FLOW:
-     *      1. Player takes action → writes Event to Firebase: games/{gameUid}/events
-     *      2. This listener receives the events array
-     *      3. Apply events on top of current gameState using replay()
-     *      4. Update local React state → immediate UI feedback
-     *      5. All other players receive same events → compute same state
-     * 
-     * EVENT PROCESSING (matches offline game pattern):
-     *      - gameState: Base state (like "snapshot" in offline game)
-     *      - turnEvents: Events that happened this turn
-     *      - currentState = replay(gameState, turnEvents)
-     *      - This computes the current state by applying events to base
-     * 
-     * WHY THIS DOESN'T CAUSE INFINITE LOOP:
-     *      - We only update LOCAL state (setTurnEvents)
-     *      - We DON'T write back to Firebase here
-     *      - gameState only changes when someone writes to gameStatePath
-     *      - Events are written by action handlers, not this effect
-     * 
-     * ARCHITECTURE:
-     *      - gameState = "snapshot" (base state, updated less frequently)
-     *      - turnEvents = events since last snapshot (updated frequently)
-     *      - Displayed state = replay(gameState, turnEvents)
-     *      - When turn ends, merge turnEvents into gameState, clear turnEvents
-     */
     useEffect(() => {
         if (!isGameReady) return
 
@@ -364,10 +229,7 @@ export default function OnlineGamePage() {
 
         return () => unsubscribe()
     }, [gameUid, isGameReady])
-    
-    // ============================================================================
-    // RENDER GUARDS: Wait for all required data before rendering the game
-    // ============================================================================
+ 
     if (!isGameReady || !currentUserId) {
         return (
             <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
@@ -378,48 +240,8 @@ export default function OnlineGamePage() {
         )
     }
 
-    // ============================================================================
-    // COMPUTE CURRENT STATE: Apply turn events on top of base game state
-    // ============================================================================
-    
-    /**
-     * currentState: The actual game state to display (base + events)
-     * 
-     * PATTERN (same as offline game):
-     *      - gameState: Base "snapshot" state (updated less frequently)
-     *      - turnEvents: Events that happened this turn (updated frequently)
-     *      - currentState: Computed by applying events to base
-     * 
-     * WHY THIS PATTERN:
-     *      - Writing full game state to Firebase is expensive (large data)
-     *      - Writing small events is cheap (just the action)
-     *      - Each client computes the same state from same events
-     *      - When turn ends, merge events into base, clear events
-     * 
-     * EXAMPLE:
-     *      - gameState: { player1: { hand: ['SCOUT', 'VIPER'], trade: 0 }, ... }
-     *      - turnEvents: [{ t: 'CardPlayed', player: 'player1', handIndex: 0 }]
-     *      - currentState: { player1: { hand: ['VIPER'], trade: 1 }, ... }
-     * 
-     * replay() applies each event to the state without expanding rules
-     * This is fast and deterministic - all clients get the same result
-     */
     const currentState = replay(gameState, turnEvents)
 
-    // ============================================================================
-    // DATA EXTRACTION: Get key player and game information
-    // ============================================================================
-    
-    /**
-     * currentPlayerId: The UID of the player whose turn it is (from currentState.order[activeIndex])
-     * currentPlayer: The full player state of whose turn it is
-     * 
-     * IMPORTANT DISTINCTION:
-     * - currentPlayerId = whose turn it is (changes each turn)
-     * - currentUserId = the logged-in user (stays constant, set by useEffect #1)
-     * 
-     * NOTE: We use currentState (not gameState) because it includes turn events
-     */
     const currentPlayerId = currentState.order[currentState.activeIndex]
     const currentPlayer = currentState.players[currentPlayerId]
     
