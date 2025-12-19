@@ -48,9 +48,10 @@ export default function PlayerSummaryBar({ players, playerOrder, currentPlayerId
                 const borderColor = isDead ? "border-gray-600" : "border-blue-500";
                 const shadowColor = isDead ? "shadow-gray-600/20" : "shadow-blue-500/20";
                 const bgColor = isDead ? "bg-gray-900" : "bg-slate-700";
+                const isPlayerColor = pid === currentPlayerId ? "border-gold-500" : borderColor;
                 
                 return (
-                    <div key={pid} className={`w-48 h-28 border-3 ${borderColor} rounded-xl ${bgColor} p-2.5 shadow-lg ${shadowColor} flex flex-col relative`}>
+                    <div key={pid} className={`w-48 h-28 border-3 ${isPlayerColor} rounded-xl ${bgColor} p-2.5 shadow-lg ${shadowColor} flex flex-col relative`}>
                         {isDead && (
                             <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center">
                                 <span className="text-red-500 font-bold text-lg">☠ DEAD</span>

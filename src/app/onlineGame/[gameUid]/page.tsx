@@ -1,38 +1,4 @@
 'use client'
-/**
- * ============================================================================
- * ONLINE GAME PAGE - Star Realms Multiplayer
- * ============================================================================
- * 
- * ARCHITECTURE OVERVIEW:
- * This component implements a real-time multiplayer game using Firebase Realtime Database.
- * 
- * DATA FLOW:
- * 1. Firebase stores the "source of truth" game state
- * 2. All players listen to the same Firebase path
- * 3. When a player takes an action → write to Firebase → all players receive update
- * 4. React re-renders with the new state → all players stay synchronized
- * 
- * KEY CONCEPTS:
- * - UIDs vs Names: Game state uses Firebase UIDs as player IDs, names are for display only
- * - currentUserId: The logged-in user (constant per session)
- * - currentPlayerId: Whose turn it is (changes each turn)
- * - myPlayer: The logged-in user's hand/bases (what they see)
- * - isMyTurn: Whether the logged-in user can take actions
- * 
- * FIREBASE PATHS:
- * - setup/lobbies/{gameUid} → Lobby data (player names, host)
- * - games/{gameUid}/gameState → Current game state (cards, players, turn)
- * - games/{gameUid}/events → (TODO) Event queue for actions
- * 
- * SYNCHRONIZATION:
- * - useEffect #1: Listen to auth state → know who is logged in
- * - useEffect #2: Listen to lobby data → map UIDs to names
- * - useEffect #3: Listen to game state → receive updates from all players
- * - useEffect #4: Initialize game (host only) → create initial state
- * 
- * ============================================================================
- */
 import { useState, useEffect, useRef } from "react"
 import { onValue, ref } from "firebase/database"
 import { useParams, useRouter } from "next/navigation"
@@ -485,7 +451,7 @@ export default function OnlineGamePage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-            <div className="max-w-[1600px] mx-auto flex flex-col gap-2.5">
+            <div className="mx-auto flex flex-col gap-2.5">
                 
                 <TradeRowSection 
                     tradeDeck={currentState.tradeDeck}
@@ -526,6 +492,7 @@ export default function OnlineGamePage() {
 
                 <PlayerHand 
                     player={myPlayer}
+                    currentPlayerId={currentUserId}
                     onPlayCard={isMyTurn ? handlePlayCard : undefined}
                     onScrapCard={isMyTurn ? (() => {}) : undefined}
                     onViewDiscard={handleViewDiscard}

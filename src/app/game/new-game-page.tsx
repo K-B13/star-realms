@@ -248,6 +248,7 @@ export default function NewGamePage() {
 
                 <PlayerHand 
                     player={currentPlayer}
+                    currentPlayerId={currentPlayerId}
                     onPlayCard={handlePlayCard}
                     onScrapCard={handleScrapCard}
                     onViewDiscard={handleViewDiscard}
