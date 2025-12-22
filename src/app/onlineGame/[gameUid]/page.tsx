@@ -34,6 +34,7 @@ import ScrapOverlay from "@/app/game/components/ScrapOverlay"
 import TradeRowDeckOverlay from "@/app/game/components/TradeRowDeckOverlay"
 import DiscardDeckOverlay from "@/app/game/components/DiscardDeckOverlay"
 import GameOverOverlay from "@/app/game/components/GameOverOverlay"
+import CombatNotificationOverlay from "@/app/game/components/CombatNotificationOverlay"
 
 export default function OnlineGamePage() {
     const [gameState, setGameState] = useState<GameState>({
@@ -50,6 +51,8 @@ export default function OnlineGamePage() {
         gameOver: false,
         winner: null,
         eliminationCount: 0,
+        combatLog: [],
+        currentTurnNotifications: {}
     })
     const [lobby, setLobby] = useState<LobbyInterface | null>(null)
     const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -108,8 +111,6 @@ export default function OnlineGamePage() {
         const unsubscribe = onValue(ref(db, gameStatePath(gameUid)), (snapshot) => {
             const data = snapshot.val()
             if (data && data.order && data.order.length > 0) {
-                // Firebase doesn't store empty arrays, so we need to provide defaults
-                // Also need to ensure player arrays exist
                 const playersWithDefaults: Record<string, PlayerState> = {}
                 Object.keys(data.players || {}).forEach(playerId => {
                     const player = data.players[playerId]
@@ -135,7 +136,9 @@ export default function OnlineGamePage() {
                     turn: {
                         ...data.turn,
                         playedThisTurn: data.turn?.playedThisTurn || []
-                    }
+                    },
+                    combatLog: data.combatLog || [],
+                    currentTurnNotifications: data.currentTurnNotifications || {}
                 } as GameState
                 setGameState(gameStateWithDefaults)
                 setIsGameReady(true)
@@ -416,6 +419,19 @@ export default function OnlineGamePage() {
         writeValue(eventPath(gameUid), [])
     }
 
+    const handleClearCombatNotifications = () => {
+        // Clear combat notifications for the current player
+        const updatedNotifications = { ...currentState.currentTurnNotifications }
+        delete updatedNotifications[currentUserId]
+        
+        // Update the game state in Firebase
+        const updatedState = {
+            ...gameState,
+            currentTurnNotifications: updatedNotifications
+        }
+        writeValue(gameStatePath(gameUid), updatedState)
+    }
+
     // Card detail handlers
     const showCardDetail = (card: CardDef, mode: 'hover' | 'click', onActivateBase?: () => void, baseAlreadyActivated?: boolean, onScrapBase?: () => void, buttonMode?: 'activate' | 'attack') => {
         if (hoverTimeoutRef.current) {
@@ -660,6 +676,17 @@ export default function OnlineGamePage() {
                     router.push('/lobbySelection')
                 }}
             />
+            
+            {/* Combat Notification Overlay */}
+            {currentState.currentTurnNotifications[currentUserId] && currentState.currentTurnNotifications[currentUserId].length > 0 && (
+                <CombatNotificationOverlay
+                    notifications={currentState.currentTurnNotifications[currentUserId]}
+                    playerNames={Object.fromEntries(
+                        currentState.order.map(uid => [uid, getPlayerName(uid)])
+                    )}
+                    onClose={handleClearCombatNotifications}
+                />
+            )}
         </div>
     )
 }

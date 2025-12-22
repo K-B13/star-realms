@@ -106,6 +106,8 @@ export const initialSetup = (playerNames: string[]) => {
         gameOver: false,
         winner: null,
         eliminationCount: 0,
+        combatLog: [],
+        currentTurnNotifications: {}
     }
 
     return state

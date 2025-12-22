@@ -32,6 +32,9 @@ import DeckOverlay from "./components/DeckOverlay";
 import ScrapOverlay from "./components/ScrapOverlay";
 import TradeRowDeckOverlay from "./components/TradeRowDeckOverlay";
 import GameOverOverlay from "./components/GameOverOverlay";
+import CombatNotificationOverlay from "./components/CombatNotificationOverlay";
+import { CombatNotification } from "../engine/state";
+import { useEffect } from "react";
 
 export default function NewGamePage() {
     const searchParams = useSearchParams();
@@ -40,6 +43,8 @@ export default function NewGamePage() {
     const [showDeck, setShowDeck] = useState(false);
     const [showScrap, setShowScrap] = useState(false);
     const [showTradeDeck, setShowTradeDeck] = useState(false);
+    const [showCombatPopup, setShowCombatPopup] = useState(false);
+    const [combatNotifications, setCombatNotifications] = useState<CombatNotification[]>([]);
     
     // Parse players from URL
     const players: Player[] = useMemo(() => {
@@ -81,6 +86,16 @@ export default function NewGamePage() {
 
     // Get active prompt
     const { prompt: activePrompt } = getActivePrompt(turnEvents)
+
+    // Show combat notifications on turn start
+    useEffect(() => {
+        const notifications = state.currentTurnNotifications[currentPlayerId] || [];
+        
+        if (notifications.length > 0) {
+            setCombatNotifications(notifications);
+            setShowCombatPopup(true);
+        }
+    }, [state.activeIndex, currentPlayerId, state.currentTurnNotifications]);
 
     // Append events function with rule expansion
     const append = (root: Event | Event[]) => {
@@ -263,7 +278,6 @@ export default function NewGamePage() {
 
             </div>
 
-            {/* OVERLAYS - Wire these up to show based on activePrompt */}
             {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapRow' && (
                 <ScrapPromptOverlay 
                     state={state}
@@ -354,14 +368,12 @@ export default function NewGamePage() {
                 />
             )}
 
-            {/* Card Detail Overlay */}
             <CardDetailOverlay
                 card={cardDetailState.card}
                 isOpen={cardDetailState.isOpen}
                 onClose={forceCloseCardDetail}
                 mode={cardDetailState.mode}
                 onMouseEnter={() => {
-                    // Cancel hide timeout when hovering over overlay
                     if (hoverTimeoutRef.current) {
                         clearTimeout(hoverTimeoutRef.current);
                         hoverTimeoutRef.current = null;
@@ -403,7 +415,6 @@ export default function NewGamePage() {
                 />
             }
             
-            {/* Game Over Overlay */}
             <GameOverOverlay
                 state={state}
                 onNewGame={() => {
@@ -411,6 +422,17 @@ export default function NewGamePage() {
                     setSnapshot(initialSetup(playerNames));
                 }}
             />
+
+            {showCombatPopup && (
+                <CombatNotificationOverlay
+                    notifications={combatNotifications}
+                    playerNames={Object.fromEntries(state.order.map(id => [id, id]))}
+                    onClose={() => {
+                        setShowCombatPopup(false);
+                        setCombatNotifications([]);
+                    }}
+                />
+            )}
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { initialSetup, shuffle } from "./initialSetup";
-import type { GameState } from "./state";
+import type { CombatNotification, GameState } from "./state";
 import type { Event, PID } from "./events";
 import { BaseDef, CardDef, cardRegistry, Effect } from "./cards";
 
@@ -515,10 +515,10 @@ export const applyEvent = (state: GameState, event: Event) => {
             if (attacker.combat < amount){
                 return state;
             }
-            // Only consume the combat needed to kill the player
             const actualDamage = Math.min(amount, target.authority);
             target.authority = Math.max(0, target.authority - amount);
             attacker.combat -= actualDamage;
+            state = handleCombatLogs(state, target.id, attacker.id, actualDamage, 'player')
             return state;
         case 'NextAcquireToTopSet':
             const player = state.players[event.player];
@@ -561,21 +561,26 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'BaseDamaged':
             const playerWithBaseToBeDamaged = state.players[event.player];
             
-            // Safety check: base might have been destroyed by a previous event
             if (!playerWithBaseToBeDamaged.bases[event.baseIndex]) {
                 return state;
             }
             
             const baseDef = cardRegistry[playerWithBaseToBeDamaged.bases[event.baseIndex].id] as BaseDef
+
             const currentShieldHealth = baseDef.defence - playerWithBaseToBeDamaged.bases[event.baseIndex].damage
+
             if (currentShieldHealth > event.amount) {
                 playerWithBaseToBeDamaged.bases[event.baseIndex].damage += event.amount;
                 state.players[state.order[state.activeIndex]].combat -= event.amount;
+                state = handleCombatLogs(state, event.player, state.order[state.activeIndex], event.amount, 'base', playerWithBaseToBeDamaged.bases[event.baseIndex].id, false)
                 return state;
             }
+
             state.players[state.order[state.activeIndex]].combat -= currentShieldHealth;
+
             const [ baseRemoved ] = playerWithBaseToBeDamaged.bases.splice(event.baseIndex, 1);
             state.players[event.player].discard.push(baseRemoved.id);
+            state = handleCombatLogs(state, event.player, state.order[state.activeIndex], event.amount, 'base', playerWithBaseToBeDamaged.bases[event.baseIndex].id, true)
             return state;
         case 'BaseChosenToDestroy':
             const targetPlayerState = state.players[event.targetPlayer];
@@ -594,6 +599,10 @@ export const applyEvent = (state: GameState, event: Event) => {
         case 'ShipPlayed':
             return state;
         case 'TurnAdvanced':
+            // Clear notifications for the player whose turn is ending
+            const endingPlayerId = state.order[state.activeIndex];
+            state.currentTurnNotifications[endingPlayerId] = [];
+            
             // Skip dead players
             let nextIndex = (state.activeIndex + 1) % state.order.length;
             let attempts = 0;
@@ -682,4 +691,25 @@ export const replay = (base: GameState, events: Event[]) => {
 const removeOne = (arr: string[], index: number): boolean => {
     arr.splice(index, 1);
     return true;
+}
+
+const handleCombatLogs = (state: GameState, targetPlayer: string, attacker: string, amount: number, targetType: 'player' | 'base', baseName?: string, baseDestroyed?: boolean) => {
+    const notification: CombatNotification = {
+        id: `combat-${state.combatLog.length + 1}`,
+        targetPlayer,
+        attacker,
+        amount,
+        targetType,
+        ...(targetType === 'base' && { baseName, baseDestroyed })  // Only add base fields if it's a base attack
+    }
+    // Add to global combat log
+    state.combatLog.push(notification)
+    
+    // Add to target player's current turn notifications
+    if (!state.currentTurnNotifications[targetPlayer]) {
+        state.currentTurnNotifications[targetPlayer] = []
+    }
+    state.currentTurnNotifications[targetPlayer].push(notification)
+    
+    return state;
 }

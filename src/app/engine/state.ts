@@ -1,9 +1,21 @@
+import { PID } from "./events";
+
 export interface BaseInstance {
     id: string;
     shield: 'outpost' | 'normal';
     defence: number;
     damage: number;
     activatedThisTurn: boolean;
+}
+
+export interface CombatNotification {
+    id: string;
+    targetPlayer: PID;
+    attacker: PID;
+    amount: number;
+    targetType: 'player' | 'base';
+    baseName?: string;
+    baseDestroyed?: boolean;
 }
 
 export interface PlayerState {
@@ -20,14 +32,14 @@ export interface PlayerState {
     freeNextAcquire: boolean;
     factionTags: Record<string, number>;
     isDead: boolean;
-    eliminationOrder: number; // 0 = not eliminated, 1 = first to die, 2 = second to die, etc.
+    eliminationOrder: number; 
 }
 
 export interface GameState {
     order: string[];
     activeIndex: number;
     players: Record<string, PlayerState>;
-    playerNames?: Record<string, string>; // Maps UID -> display name (optional for backwards compatibility)
+    playerNames?: Record<string, string>; 
     row: string[];
     tradeDeck: string[];
     explorerDeck: string[];
@@ -37,5 +49,7 @@ export interface GameState {
     log: string[];
     gameOver: boolean;
     winner: string | null;
-    eliminationCount: number; 
+    eliminationCount: number;
+    combatLog: CombatNotification[]; 
+    currentTurnNotifications: Record<string, CombatNotification[]>; 
 }

@@ -1,5 +1,3 @@
-import { Faction } from "./cards";
-
 export type Phase = 'MAIN'|'CLEANUP';
 export type PID = string;
 export type Zone = 'row' | 'hand' | 'inPlay' | 'discard' | 'bases'
@@ -39,5 +37,6 @@ export type Event =
   | { t: 'ShipPlayed'; player: PID; card: string }
   | { t: 'TurnAdvanced' }
   | { t: 'PhaseChanged'; from: Phase; to: Phase }
+  | { t: 'CombatNotification'; id: string; targetPlayer: PID; attacker: PID; amount: number; targetType: 'player' | 'base'; baseName?: string; baseDestroyed?: boolean }
   | { t: 'PromptShown'; player: PID; kind: string; optional?: boolean; data?: unknown }
   | { t: 'PromptCancelled'; kind: string };
