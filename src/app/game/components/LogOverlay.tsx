@@ -7,9 +7,10 @@ interface LogOverlayProps {
     players: string[];
     currentPlayerId: string;
     onClose?: () => void;
+    playerNames?: Record<string, string>;
 }
 
-export default function LogOverlay({ log, players, currentPlayerId, onClose }: LogOverlayProps) {
+export default function LogOverlay({ log, players, currentPlayerId, onClose, playerNames }: LogOverlayProps) {
     const [ isMinimized, setIsMinimized ] = useState(false);
     const [ selectedPlayer, setSelectedPlayer ] = useState<string>("all");
     const dragNodeRef = useRef(null);
@@ -75,7 +76,10 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose }: L
                                         className={`text-sm ${entry.type === 'chat' ? 'text-cyan-300' : 'text-slate-300'}`}
                                     >
                                         <span className="text-slate-500 mr-2">[{new Date(entry.timestamp).toLocaleTimeString()}]</span>
-                                        {entry.content}
+                                        {playerNames 
+                                            ? entry.content.replace(/\b\w+-\w+-\w+\b/g, id => playerNames[id] || id)
+                                            : entry.content
+                                        }
                                     </div>
                                 ))}
                             </div>
@@ -89,7 +93,10 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose }: L
                                 >
                                     <option value="all">All Players</option>
                                     {players
-                                        .filter(id => id !== currentPlayerId)
+                                        .filter(id => {
+                                            console.log(id, 'id', currentPlayerId, 'currentPlayerId')
+                                            return id !== currentPlayerId
+                                        })
                                         .map(playerId => (
                                             <option key={playerId} value={playerId}>{playerId}</option>
                                         ))

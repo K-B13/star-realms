@@ -670,8 +670,9 @@ export default function OnlineGamePage() {
             {showLog && (
                 <LogOverlay
                     log={currentState.log}
-                    players={currentState.order.map(uid => getPlayerName(uid))}
+                    players={currentState.order}
                     currentPlayerId={currentUserId}
+                    playerNames={Object.fromEntries(currentState.order.map(uid => [uid, getPlayerName(uid)]))}
                     onClose={() => setShowLog(false)}
                 />
             )}
