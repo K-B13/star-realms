@@ -45,8 +45,7 @@ export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPl
     };
     const { silverShields, blackShields } = countBases(player);
     const isDead = player.isDead;
-    // Use turnPlayerId if provided, otherwise fall back to currentPlayerId check
-    const isTheirTurn = turnPlayerId ? player.id === turnPlayerId : player.id === currentPlayerId;
+    const isTheirTurn = turnPlayerId ? currentPlayerId === turnPlayerId : player.id === currentPlayerId;
     const borderColor = isDead ? "border-gray-600" : isTheirTurn ? "border-yellow-500" : "border-purple-500";
     const shadowColor = isDead ? "shadow-gray-600/20" : isTheirTurn ? "shadow-yellow-500/50" : "shadow-purple-500/20";
     const bgColor = isDead ? "bg-gray-900" : "bg-slate-700";
@@ -141,7 +140,7 @@ export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPl
             </div>
 
             {/* Right Side: Player Info */}
-            <div className={`border-3 ${borderColor} rounded-xl ${bgColor} p-2 w-32 shadow-lg ${shadowColor} flex flex-col justify-between ${isTheirTurn && !isDead ? 'animate-pulse-border' : ''}`} style={isTheirTurn && !isDead ? {
+            <div className={`border-3 ${borderColor} rounded-xl ${bgColor} p-2 w-32 ${isTheirTurn && !isDead ? '' : `shadow-lg ${shadowColor}`} flex flex-col justify-between`} style={isTheirTurn && !isDead ? {
                 boxShadow: '0 0 20px rgba(234, 179, 8, 0.6), inset 0 0 20px rgba(234, 179, 8, 0.1)',
                 animation: 'rotateBorder 3s linear infinite'
             } : {}}>

@@ -27,7 +27,7 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
     };
 
     return (
-        <div className="border-3 border-cyan-500 rounded-xl bg-slate-800 p-2 shadow-lg shadow-cyan-500/20">
+        <div className="border-3 border-cyan-500 qrounded-xl bg-slate-800 p-2 shadow-lg shadow-cyan-500/20">
             <p className="text-xs font-bold text-cyan-300 mb-1 text-center">{playerId} Bases (You)</p>
             <div className="flex gap-2 justify-center flex-wrap items-center content-center min-h-[80px]">
                 {bases.length === 0 ? (
@@ -71,7 +71,7 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
                             <p className="text-center text-xs text-gray-200">
                                 Shield: {base.defence} {base.shield === 'outpost' ? '⚫' : '⚪'}
                             </p>
-                            {base.activatedThisTurn ? (
+                            {base.activatedThisTurn || !canActivate ? (
                                 <p className="text-center text-xs text-green-400 mt-0.5">✓ Activated</p>
                             ) : (
                                 <p className="text-center text-xs text-cyan-400 mt-0.5">● Ready</p>

@@ -55,7 +55,7 @@ export default function PlayerSummaryBar({ players, playerOrder, activeIndex, cu
                 const bgColor = isDead ? "bg-gray-900" : "bg-slate-700";
                 
                 return (
-                    <div key={pid} className={`w-48 h-28 border-3 ${borderColor} rounded-xl ${bgColor} p-2.5 shadow-lg ${shadowColor} flex flex-col relative ${isTheirTurn && !isDead ? 'animate-pulse-border' : ''}`} style={isTheirTurn && !isDead ? {
+                    <div key={pid} className={`w-48 h-28 border-3 ${borderColor} rounded-xl ${bgColor} p-2.5 ${isTheirTurn && !isDead ? '' : `shadow-lg ${shadowColor}`} flex flex-col relative`} style={isTheirTurn && !isDead ? {
                         boxShadow: '0 0 20px rgba(234, 179, 8, 0.6), inset 0 0 20px rgba(234, 179, 8, 0.1)',
                         animation: 'rotateBorder 3s linear infinite'
                     } : {}}>
