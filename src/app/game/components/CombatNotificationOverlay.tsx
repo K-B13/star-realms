@@ -49,7 +49,7 @@ export default function CombatNotificationOverlay({ notifications, playerNames, 
         <>
             {/* Toast Notification at Top */}
             {showToast && (
-                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-slideDown">
+                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
                     <div className={`px-6 py-3 rounded-lg border-2 shadow-xl ${
                         currentNotification.baseDestroyed 
                             ? 'bg-red-900/95 border-red-500' 

@@ -420,16 +420,20 @@ export default function OnlineGamePage() {
     }
 
     const handleClearCombatNotifications = () => {
-        // Clear combat notifications for the current player
+        // Clear combat notifications for the current player in the current state
         const updatedNotifications = { ...currentState.currentTurnNotifications }
         delete updatedNotifications[currentUserId]
         
-        // Update the game state in Firebase
+        // Update the base game state in Firebase with the current replayed state
+        // This ensures we don't lose any turn events
         const updatedState = {
-            ...gameState,
+            ...currentState,
             currentTurnNotifications: updatedNotifications
         }
         writeValue(gameStatePath(gameUid), updatedState)
+        
+        // Clear turn events since we've merged them into the base state
+        writeValue(eventPath(gameUid), [])
     }
 
     // Card detail handlers
