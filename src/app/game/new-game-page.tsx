@@ -226,6 +226,7 @@ export default function NewGamePage() {
                 <PlayerSummaryBar 
                     players={state.players}
                     playerOrder={state.order}
+                    activeIndex={state.activeIndex}
                     currentPlayerId={currentPlayerId}
                     append={append}
                 />
@@ -249,6 +250,7 @@ export default function NewGamePage() {
                 <PlayerHand 
                     player={currentPlayer}
                     currentPlayerId={currentPlayerId}
+                    turnPlayerId={state.order[state.activeIndex]}
                     onPlayCard={handlePlayCard}
                     onScrapCard={handleScrapCard}
                     onViewDiscard={handleViewDiscard}

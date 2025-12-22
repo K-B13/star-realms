@@ -460,6 +460,7 @@ export default function OnlineGamePage() {
                 <PlayerSummaryBar 
                     players={currentStateWithNames.players}
                     playerOrder={currentState.order}
+                    activeIndex={currentState.activeIndex}
                     currentPlayerId={currentUserId}
                     append={append}
                 />
@@ -485,6 +486,7 @@ export default function OnlineGamePage() {
                 <PlayerHand 
                     player={myPlayer}
                     currentPlayerId={currentUserId}
+                    turnPlayerId={currentState.order[currentState.activeIndex]}
                     onPlayCard={isMyTurn ? handlePlayCard : undefined}
                     onScrapCard={isMyTurn ? (() => {}) : undefined}
                     onViewDiscard={handleViewDiscard}

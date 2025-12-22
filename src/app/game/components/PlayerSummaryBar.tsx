@@ -4,13 +4,17 @@ import { Event } from "@/app/engine/events";
 interface PlayerSummaryBarProps {
     players: Record<string, PlayerState>;
     playerOrder: string[];
+    activeIndex: number;
     currentPlayerId: string;
     append: (event: Event | Event[]) => void;
 }
 
-export default function PlayerSummaryBar({ players, playerOrder, currentPlayerId, append }: PlayerSummaryBarProps) {
+export default function PlayerSummaryBar({ players, playerOrder, activeIndex, currentPlayerId, append }: PlayerSummaryBarProps) {
     // Filter out current player from summary
     const otherPlayers = playerOrder.filter(pid => pid !== currentPlayerId);
+
+    // Get the actual current turn player
+    const turnPlayerId = playerOrder[activeIndex];
 
     // Count bases by shield type
     const countBases = (playerId: string) => {
@@ -45,13 +49,16 @@ export default function PlayerSummaryBar({ players, playerOrder, currentPlayerId
                 const canAttackDirectly = !hasOutpost(pid) && currentPlayer.combat > 0;
                 
                 const isDead = player.isDead;
-                const borderColor = isDead ? "border-gray-600" : "border-blue-500";
-                const shadowColor = isDead ? "shadow-gray-600/20" : "shadow-blue-500/20";
+                const isTheirTurn = pid === turnPlayerId;
+                const borderColor = isDead ? "border-gray-600" : isTheirTurn ? "border-yellow-500" : "border-blue-500";
+                const shadowColor = isDead ? "shadow-gray-600/20" : isTheirTurn ? "shadow-yellow-500/50" : "shadow-blue-500/20";
                 const bgColor = isDead ? "bg-gray-900" : "bg-slate-700";
-                const isPlayerColor = pid === currentPlayerId ? "border-gold-500" : borderColor;
                 
                 return (
-                    <div key={pid} className={`w-48 h-28 border-3 ${isPlayerColor} rounded-xl ${bgColor} p-2.5 shadow-lg ${shadowColor} flex flex-col relative`}>
+                    <div key={pid} className={`w-48 h-28 border-3 ${borderColor} rounded-xl ${bgColor} p-2.5 shadow-lg ${shadowColor} flex flex-col relative ${isTheirTurn && !isDead ? 'animate-pulse-border' : ''}`} style={isTheirTurn && !isDead ? {
+                        boxShadow: '0 0 20px rgba(234, 179, 8, 0.6), inset 0 0 20px rgba(234, 179, 8, 0.1)',
+                        animation: 'rotateBorder 3s linear infinite'
+                    } : {}}>
                         {isDead && (
                             <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center">
                                 <span className="text-red-500 font-bold text-lg">☠ DEAD</span>

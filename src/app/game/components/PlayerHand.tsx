@@ -6,6 +6,7 @@ import { Zone } from "@/app/engine/events";
 interface PlayerHandProps {
     player: PlayerState;
     currentPlayerId: string;
+    turnPlayerId?: string;
     onPlayCard?: (card: CardDef, cardIndex: number) => void;
     onScrapCard?: (card: CardDef, from: Zone, cardIndex: number) => void;
     onViewDiscard?: () => void;
@@ -24,7 +25,7 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40", shadow: "shadow-gray-500/20" },
 };
 
-export default function PlayerHand({ player, currentPlayerId, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onViewScrap, onEndTurn, onCardClick, scrapPileCount = 0 }: PlayerHandProps) {
+export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onViewScrap, onEndTurn, onCardClick, scrapPileCount = 0 }: PlayerHandProps) {
     const countBases = (playerId: PlayerState) => {
         const silverShields = playerId.bases.reduce((acc, base) => {
             if (base.shield === 'normal') {
@@ -44,10 +45,11 @@ export default function PlayerHand({ player, currentPlayerId, onPlayCard, onScra
     };
     const { silverShields, blackShields } = countBases(player);
     const isDead = player.isDead;
-    const borderColor = isDead ? "border-gray-600" : "border-purple-500";
-    const shadowColor = isDead ? "shadow-gray-600/20" : "shadow-purple-500/20";
+    // Use turnPlayerId if provided, otherwise fall back to currentPlayerId check
+    const isTheirTurn = turnPlayerId ? player.id === turnPlayerId : player.id === currentPlayerId;
+    const borderColor = isDead ? "border-gray-600" : isTheirTurn ? "border-yellow-500" : "border-purple-500";
+    const shadowColor = isDead ? "shadow-gray-600/20" : isTheirTurn ? "shadow-yellow-500/50" : "shadow-purple-500/20";
     const bgColor = isDead ? "bg-gray-900" : "bg-slate-700";
-    const isPlayerColor = player.id === currentPlayerId ? "border-gold-500" : borderColor;
 
     return (
         <div className="flex gap-2.5 flex-1 min-h-0">
@@ -139,7 +141,10 @@ export default function PlayerHand({ player, currentPlayerId, onPlayCard, onScra
             </div>
 
             {/* Right Side: Player Info */}
-            <div className={`border-3 ${isPlayerColor} rounded-xl ${bgColor} p-2 w-32 shadow-lg ${shadowColor} flex flex-col justify-between`}>
+            <div className={`border-3 ${borderColor} rounded-xl ${bgColor} p-2 w-32 shadow-lg ${shadowColor} flex flex-col justify-between ${isTheirTurn && !isDead ? 'animate-pulse-border' : ''}`} style={isTheirTurn && !isDead ? {
+                boxShadow: '0 0 20px rgba(234, 179, 8, 0.6), inset 0 0 20px rgba(234, 179, 8, 0.1)',
+                animation: 'rotateBorder 3s linear infinite'
+            } : {}}>
                 <div>
                     <p className="text-sm font-bold text-yellow-400 mb-1.5 text-center">{player.id}</p>
                     <p className="text-xs text-gray-200 mb-0.5">Authority: {player.authority}</p>
