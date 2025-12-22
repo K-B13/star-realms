@@ -35,6 +35,16 @@ export interface PlayerState {
     eliminationOrder: number; 
 }
 
+export type LogEntryType = 'game_event' | 'chat' | 'system';
+
+export interface LogEntry {
+    type: LogEntryType;
+    content: string;
+    timestamp: number;
+    from?: string;   
+    to?: string;      
+}
+
 export interface GameState {
     order: string[];
     activeIndex: number;
@@ -46,7 +56,7 @@ export interface GameState {
     scrap: string[];
     turn: { phase: 'MAIN' | 'CLEANUP', playedThisTurn: string[] }
     prompt: null | { kind: string; player: string; optional?: boolean; data?: unknown}
-    log: string[];
+    log: LogEntry[];
     gameOver: boolean;
     winner: string | null;
     eliminationCount: number;

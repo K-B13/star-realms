@@ -35,6 +35,7 @@ import GameOverOverlay from "./components/GameOverOverlay";
 import CombatNotificationOverlay from "./components/CombatNotificationOverlay";
 import { CombatNotification } from "../engine/state";
 import { useEffect } from "react";
+import LogOverlay from "./components/LogOverlay";
 
 export default function NewGamePage() {
     const searchParams = useSearchParams();
@@ -45,6 +46,7 @@ export default function NewGamePage() {
     const [showTradeDeck, setShowTradeDeck] = useState(false);
     const [showCombatPopup, setShowCombatPopup] = useState(false);
     const [combatNotifications, setCombatNotifications] = useState<CombatNotification[]>([]);
+    const [showLog, setShowLog] = useState(false);
     
     // Parse players from URL
     const players: Player[] = useMemo(() => {
@@ -273,6 +275,7 @@ export default function NewGamePage() {
                     onViewScrap={handleViewScrap}
                     onEndTurn={handleEndTurn}
                     onCardClick={showCardDetail}
+                    onToggleLog={() => setShowLog(!showLog)}
                     scrapPileCount={state.scrap.length}
                 />
 
@@ -430,7 +433,24 @@ export default function NewGamePage() {
                     onClose={() => {
                         setShowCombatPopup(false);
                         setCombatNotifications([]);
+                        // Clear the notifications from the state to prevent them from reappearing
+                        setSnapshot(prev => ({
+                            ...prev,
+                            currentTurnNotifications: {
+                                ...prev.currentTurnNotifications,
+                                [currentPlayerId]: []
+                            }
+                        }));
                     }}
+                />
+            )}
+
+            {showLog && (
+                <LogOverlay
+                    log={state.log}
+                    players={state.order}
+                    currentPlayerId={currentPlayerId}
+                    onClose={() => setShowLog(false)}
                 />
             )}
         </div>

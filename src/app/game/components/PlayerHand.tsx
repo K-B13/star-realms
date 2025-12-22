@@ -14,6 +14,7 @@ interface PlayerHandProps {
     onViewScrap?: () => void;
     onEndTurn?: () => void;
     onCardClick?: (card: CardDef, mode: 'hover' | 'click') => void;
+    onToggleLog?: () => void;
     scrapPileCount?: number;
 }
 
@@ -25,7 +26,7 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40", shadow: "shadow-gray-500/20" },
 };
 
-export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onViewScrap, onEndTurn, onCardClick, scrapPileCount = 0 }: PlayerHandProps) {
+export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onViewScrap, onEndTurn, onCardClick, onToggleLog, scrapPileCount = 0 }: PlayerHandProps) {
     const countBases = (playerId: PlayerState) => {
         const silverShields = playerId.bases.reduce((acc, base) => {
             if (base.shield === 'normal') {
@@ -158,6 +159,12 @@ export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPl
                         </span>
                     </div>
                 </div>
+                <button 
+                    onClick={() => onToggleLog?.()}
+                    className="border-2 border-gray-500 rounded-lg px-2 py-1.5 text-gray-300 font-semibold hover:bg-gray-900/30 transition-colors w-full text-xs"
+                >
+                    View Log
+                </button>
                 {onEndTurn && (
                     <button 
                         onClick={onEndTurn}

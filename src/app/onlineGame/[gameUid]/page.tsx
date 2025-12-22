@@ -11,7 +11,6 @@ import { writeValue } from "../../firebase/firebaseActions"
 import { CardDef, cardRegistry } from "../../engine/cards"
 import { materialize, replay } from "../../engine/recompute"
 
-// Import components from offline game
 import TradeRowSection from "../../game/components/TradeRowSection"
 import PlayerSummaryBar from "../../game/components/PlayerSummaryBar"
 import OpponentBasesViewer from "../../game/components/OpponentBasesViewer"
@@ -34,6 +33,7 @@ import ScrapOverlay from "@/app/game/components/ScrapOverlay"
 import TradeRowDeckOverlay from "@/app/game/components/TradeRowDeckOverlay"
 import DiscardDeckOverlay from "@/app/game/components/DiscardDeckOverlay"
 import GameOverOverlay from "@/app/game/components/GameOverOverlay"
+import LogOverlay from "@/app/game/components/LogOverlay"
 import CombatNotificationOverlay from "@/app/game/components/CombatNotificationOverlay"
 
 export default function OnlineGamePage() {
@@ -62,13 +62,12 @@ export default function OnlineGamePage() {
     const router = useRouter()
     const gameUid = params.gameUid as string
 
-    // UI state (same as offline game)
-    const [showDiscardDeck, setShowDiscardDeck] = useState(false)
     const [showDeck, setShowDeck] = useState(false)
     const [showScrap, setShowScrap] = useState(false)
     const [showTradeDeck, setShowTradeDeck] = useState(false)
+    const [showDiscardDeck, setShowDiscardDeck] = useState(false)
+    const [showLog, setShowLog] = useState(false)
     
-    // Error notification state
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     
     // Card detail overlay state
@@ -153,20 +152,16 @@ export default function OnlineGamePage() {
         const currentUser = auth.currentUser
         if (!currentUser) return
 
-        // Only host initializes the game
         if (lobby.hostUid === currentUser.uid) {
-            // Use UIDs for order instead of names
             const playerUids = Object.keys(lobby.players)
             const initialGameState = initialSetup(playerUids)
             
-            // Store player names in game state (so they persist even if lobby.players changes)
             const playerNames: Record<string, string> = {}
             playerUids.forEach(uid => {
                 playerNames[uid] = lobby.players[uid]?.name || uid
             })
             initialGameState.playerNames = playerNames
             
-            // Write to separate gameState path
             writeValue(gameStatePath(gameUid), initialGameState)
         }
     }, [lobby, isGameReady, gameUid])
@@ -177,21 +172,15 @@ export default function OnlineGamePage() {
         const unsubscribe = onValue(ref(db, eventPath(gameUid)), (snapshot) => {
             const data = snapshot.val()
             
-            // If no events yet, initialize as empty array
             if (!data) {
                 setTurnEvents([])
                 return
             }
 
-            // Firebase stores arrays as objects with numeric keys
-            // Convert back to array if needed
             const eventsArray = Array.isArray(data) ? data : Object.values(data)
             
-            // Filter out null/undefined values (Firebase quirk)
             const validEvents = eventsArray.filter(e => e != null)
             
-            // Update local state with the events
-            // The UI will use replay(gameState, turnEvents) to compute current state
             setTurnEvents(validEvents)   
             
         })
@@ -216,7 +205,6 @@ export default function OnlineGamePage() {
     
     const { prompt: activePrompt } = getActivePrompt(turnEvents)
     
-    // Safety check - ensure all required fields exist (arrays can be empty, just need to exist)
     if (!currentPlayer || !Array.isArray(currentState.scrap) || !Array.isArray(currentState.row) || !Array.isArray(currentState.tradeDeck)) {
         console.log('Missing data - Current Player:', !!currentPlayer, 'Scrap:', Array.isArray(currentState.scrap), 'Row:', Array.isArray(currentState.row), 'TradeDeck:', Array.isArray(currentState.tradeDeck))
         return (
@@ -230,15 +218,12 @@ export default function OnlineGamePage() {
     }
 
     const getPlayerName = (uid: string) => {
-        // Try game state first (persists even if player disconnects from lobby)
         const nameFromGame = currentState.playerNames?.[uid]
         if (nameFromGame) return nameFromGame
         
-        // Fall back to lobby (for backwards compatibility with old games)
         const nameFromLobby = lobby?.players[uid]?.name
         if (nameFromLobby) return nameFromLobby
         
-        // Last resort: return UID
         return uid
     }
 
@@ -274,7 +259,6 @@ export default function OnlineGamePage() {
     const append = (rootEvent: Event | Event[]) => {
         const base = replay(gameState, turnEvents)
         
-        // Ensure turn.playedThisTurn exists (Firebase quirk: empty arrays become null)
         if (!base.turn.playedThisTurn) {
             base.turn.playedThisTurn = []
         }
@@ -282,7 +266,6 @@ export default function OnlineGamePage() {
         const roots = Array.isArray(rootEvent) ? rootEvent : [rootEvent]
         const { events: expandedEvents } = materialize(base, roots)
         
-        // Clean undefined values before writing to Firebase
         const cleanedEvents = cleanUndefined([...turnEvents, ...expandedEvents])
         
         writeValue(eventPath(gameUid), cleanedEvents)
@@ -399,44 +382,34 @@ export default function OnlineGamePage() {
     const handleEndTurn = () => {
         if (!isMyTurn) return // Guard: only on your turn
         
-        // Step 1: Merge all turn events into the base state
         const base = replay(gameState, turnEvents)
         
-        // Ensure required fields exist (Firebase quirks)
         if (!base.turn.playedThisTurn) {
             base.turn.playedThisTurn = []
         }
         
-        // Step 2: Apply the end turn event (triggers cleanup, draw, advance turn)
         const { state: endState } = materialize(base, [
             { t: 'PhaseChanged', from: 'MAIN', to: 'CLEANUP' }
         ])
         
-        // Step 3: Write the new base state to Firebase
         writeValue(gameStatePath(gameUid), endState)
         
-        // Step 4: Clear the events for the next turn
         writeValue(eventPath(gameUid), [])
     }
 
     const handleClearCombatNotifications = () => {
-        // Clear combat notifications for the current player in the current state
         const updatedNotifications = { ...currentState.currentTurnNotifications }
         delete updatedNotifications[currentUserId]
         
-        // Update the base game state in Firebase with the current replayed state
-        // This ensures we don't lose any turn events
         const updatedState = {
             ...currentState,
             currentTurnNotifications: updatedNotifications
         }
         writeValue(gameStatePath(gameUid), updatedState)
         
-        // Clear turn events since we've merged them into the base state
         writeValue(eventPath(gameUid), [])
     }
 
-    // Card detail handlers
     const showCardDetail = (card: CardDef, mode: 'hover' | 'click', onActivateBase?: () => void, baseAlreadyActivated?: boolean, onScrapBase?: () => void, buttonMode?: 'activate' | 'attack') => {
         if (hoverTimeoutRef.current) {
             clearTimeout(hoverTimeoutRef.current)
@@ -514,6 +487,7 @@ export default function OnlineGamePage() {
                     onViewScrap={handleViewScrap}
                     onEndTurn={isMyTurn ? handleEndTurn : undefined}
                     onCardClick={showCardDetail}
+                    onToggleLog={() => setShowLog(!showLog)}
                     scrapPileCount={currentState.scrap.length}
                 />
             </div>
@@ -689,6 +663,16 @@ export default function OnlineGamePage() {
                         currentState.order.map(uid => [uid, getPlayerName(uid)])
                     )}
                     onClose={handleClearCombatNotifications}
+                />
+            )}
+
+            {/* Game Log */}
+            {showLog && (
+                <LogOverlay
+                    log={currentState.log}
+                    players={currentState.order.map(uid => getPlayerName(uid))}
+                    currentPlayerId={currentUserId}
+                    onClose={() => setShowLog(false)}
                 />
             )}
         </div>

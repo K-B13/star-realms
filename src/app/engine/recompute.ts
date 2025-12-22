@@ -387,24 +387,57 @@ export const applyEvent = (state: GameState, event: Event) => {
             removeOne(p.hand, event.handIndex);
             p.inPlay.push(card);
             state.turn.playedThisTurn.push(card);
+
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} played ${card}`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'TradeAdded':
             state.players[ event.player ].trade += event.amount;
+
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} added ${event.amount} trade`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'CombatAdded':
             state.players[ event.player ].combat += event.amount;
+
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} added ${event.amount} combat`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'AuthorityAdded':
             state.players[ event.player ].authority += event.amount;
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} added ${event.amount} authority`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'TradeSpent':
             const currentPlayer = state.players[event.player]
             if (currentPlayer.freeNextAcquire) {
                 currentPlayer.freeNextAcquire = false;
+                state.log.push({
+                    type: 'game_event',
+                    content: `${event.player} used free next acquire`,
+                    timestamp: Date.now(),
+                })
                 return state
             }
             if (cardRegistry[event.card].cost > currentPlayer.trade) return state
             currentPlayer.trade = Math.max(0, currentPlayer.trade - event.amount);
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} spent ${event.amount} trade`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'CardPurchased':
             const filledInCard = cardRegistry[ event.card ];
@@ -418,9 +451,19 @@ export const applyEvent = (state: GameState, event: Event) => {
                 if (activePlayerCardPurchased.acquireLocation === 'top') {
                     activePlayerCardPurchased.deck.unshift(cardAtSlot)
                     activePlayerCardPurchased.acquireLocation = 'discard'
+                    state.log.push({
+                        type: 'game_event',
+                        content: `${event.player} purchased ${event.card} from row added to top of deck`,
+                        timestamp: Date.now(),
+                    })
                 }
                 else {
                     activePlayerCardPurchased.discard.push(cardAtSlot)
+                    state.log.push({
+                        type: 'game_event',
+                        content: `${event.player} purchased ${event.card} from row added to discard`,
+                        timestamp: Date.now(),
+                    })
                 }
                 return state
             }
@@ -428,10 +471,16 @@ export const applyEvent = (state: GameState, event: Event) => {
                 if (!state.explorerDeck.length) return state;
                 const cardId = state.explorerDeck.pop()!
                 activePlayerCardPurchased.discard.push(cardId)
+                state.log.push({
+                    type: 'game_event',
+                    content: `${event.player} purchased ${event.card} from explorer added to discard leaving ${state.explorerDeck.length} cards in explorer deck`,
+                    timestamp: Date.now(),
+                })
                 return state;
             }
             return state;
         case 'RowRefilled':
+            const oldCard = state.row[event.rowIndex];
             if (state.tradeDeck.length === 0) {
                 const beforeCard = state.row.slice(0, event.rowIndex)
                 const afterCard = state.row.slice(event.rowIndex + 1)
@@ -441,17 +490,32 @@ export const applyEvent = (state: GameState, event: Event) => {
             const newCard = state.tradeDeck.pop();
             if (!newCard) return state;
             state.row[event.rowIndex] = newCard;
+            state.log.push({
+                type: 'game_event',
+                content: `${oldCard} replaced by ${newCard} in the trade row`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'CardScrapped':
             if (event.from === 'row') {
                 const cardAtSlot = state.row[event.placementIndex];
                 state.scrap.push(cardAtSlot) 
+                state.log.push({
+                    type: 'game_event',
+                    content: `${cardAtSlot} scrapped from trade row`,
+                    timestamp: Date.now(),
+                })
             } else if (event.from === 'hand') {
                 const p = state.players[event.player]
                 const i = event.placementIndex;
                 if (i < 0 || i >= p.hand.length) return state;
                 const [ removed ] = p.hand.splice(i, 1)
                 state.scrap.push(removed)
+                state.log.push({
+                    type: 'game_event',
+                    content: `${event.player} scrapped ${removed} from hand`,
+                    timestamp: Date.now(),
+                })
                 return state 
             } else if (event.from === 'inPlay') {
                 const p = state.players[event.player]
@@ -459,6 +523,11 @@ export const applyEvent = (state: GameState, event: Event) => {
                 if (i < 0 || i >= p.inPlay.length) return state;
                 const [ removed ] = p.inPlay.splice(i, 1)
                 state.scrap.push(removed) 
+                state.log.push({
+                    type: 'game_event',
+                    content: `${event.player} scrapped ${removed} from discard`,
+                    timestamp: Date.now(),
+                })
                 return state 
             } else if (event.from === 'discard') {
                 const p = state.players[event.player]
@@ -466,6 +535,11 @@ export const applyEvent = (state: GameState, event: Event) => {
                 if (i < 0 || i >= p.discard.length) return state;
                 const [ removed ] = p.discard.splice(i, 1)
                 state.scrap.push(removed)
+                state.log.push({
+                    type: 'game_event',
+                    content: `${event.player} scrapped ${removed} from discard`,
+                    timestamp: Date.now(),
+                })
                 return state 
             } else if (event.from === 'bases') {
                 const p = state.players[event.player]
@@ -473,6 +547,11 @@ export const applyEvent = (state: GameState, event: Event) => {
                 if (i < 0 || i >= p.bases.length) return state;
                 const [ removed ] = p.bases.splice(i, 1)
                 state.scrap.push(removed.id)
+                state.log.push({
+                    type: 'game_event',
+                    content: `${event.player} scrapped ${removed.id} from bases`,
+                    timestamp: Date.now(),
+                })
                 return state
             }
             return state;
@@ -484,6 +563,13 @@ export const applyEvent = (state: GameState, event: Event) => {
             discardedPlayer.discard.push(removed)
             return state;
         case 'CardsDrawn':
+            if (state.turn.phase === 'MAIN') {
+                state.log.push({
+                    type: 'game_event',
+                    content: `${event.player} draws ${event.count} card(s)`,
+                    timestamp: Date.now()
+                })
+            }
             return state;
         case 'DrawOne':
             const pla = state.players[event.player];
@@ -518,14 +604,29 @@ export const applyEvent = (state: GameState, event: Event) => {
             const actualDamage = Math.min(amount, target.authority);
             target.authority = Math.max(0, target.authority - amount);
             attacker.combat -= actualDamage;
+            state.log.push({
+                type: 'game_event',
+                content: `${attacker.id} dealt ${actualDamage} damage to ${target.id}`,
+                timestamp: Date.now(),
+            })
             state = handleCombatLogs(state, target.id, attacker.id, actualDamage, 'player')
             return state;
         case 'NextAcquireToTopSet':
             const player = state.players[event.player];
             player.acquireLocation = 'top';
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} set next acquire to top of deck`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'NextAcquireFreeSet':
             state.players[event.player].freeNextAcquire = true;
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} set next acquire to free`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'FactionTagAdded': {
             const player = state.players[event.player];
@@ -546,33 +647,45 @@ export const applyEvent = (state: GameState, event: Event) => {
                 damage: 0,
                 activatedThisTurn: true,
             });
-            
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} played ${event.card}`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'BaseActivated':
             const playerWithBase = state.players[event.player];
-            
-            // safety check: base might have been destroyed by a previous event
-            if (!playerWithBase.bases[event.baseIndex]) {
+            const selectedBase = playerWithBase.bases[event.baseIndex];
+            if (!selectedBase) {
                 return state;
             }
-            
-            playerWithBase.bases[event.baseIndex].activatedThisTurn = true;
+            selectedBase.activatedThisTurn = true;
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} activated ${selectedBase.id}`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'BaseDamaged':
             const playerWithBaseToBeDamaged = state.players[event.player];
-            
-            if (!playerWithBaseToBeDamaged.bases[event.baseIndex]) {
+            const selectedBaseToBeDamaged = playerWithBaseToBeDamaged.bases[event.baseIndex];
+            if (!selectedBaseToBeDamaged) {
                 return state;
             }
             
-            const baseDef = cardRegistry[playerWithBaseToBeDamaged.bases[event.baseIndex].id] as BaseDef
+            const baseDef = cardRegistry[selectedBaseToBeDamaged.id] as BaseDef
 
-            const currentShieldHealth = baseDef.defence - playerWithBaseToBeDamaged.bases[event.baseIndex].damage
+            const currentShieldHealth = baseDef.defence - selectedBaseToBeDamaged.damage
 
             if (currentShieldHealth > event.amount) {
-                playerWithBaseToBeDamaged.bases[event.baseIndex].damage += event.amount;
+                selectedBaseToBeDamaged.damage += event.amount;
                 state.players[state.order[state.activeIndex]].combat -= event.amount;
-                state = handleCombatLogs(state, event.player, state.order[state.activeIndex], event.amount, 'base', playerWithBaseToBeDamaged.bases[event.baseIndex].id, false)
+                state = handleCombatLogs(state, event.player, state.order[state.activeIndex], event.amount, 'base', selectedBaseToBeDamaged.id, false)
+                state.log.push({
+                    type: 'game_event',
+                    content: `${event.player} dealt ${event.amount} damage to ${selectedBaseToBeDamaged.id} belonging to ${event.player}`,
+                    timestamp: Date.now(),
+                })
                 return state;
             }
 
@@ -581,12 +694,22 @@ export const applyEvent = (state: GameState, event: Event) => {
             const [ baseRemoved ] = playerWithBaseToBeDamaged.bases.splice(event.baseIndex, 1);
             state.players[event.player].discard.push(baseRemoved.id);
             state = handleCombatLogs(state, event.player, state.order[state.activeIndex], event.amount, 'base', playerWithBaseToBeDamaged.bases[event.baseIndex].id, true)
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} destroyed ${selectedBaseToBeDamaged.id} with ${event.amount} damage belonging to ${event.player}`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'BaseChosenToDestroy':
             const targetPlayerState = state.players[event.targetPlayer];
             if (event.baseIndex < 0 || event.baseIndex >= targetPlayerState.bases.length) return state;
             const [ destroyedBase ] = targetPlayerState.bases.splice(event.baseIndex, 1);
             targetPlayerState.discard.push(destroyedBase.id);
+            state.log.push({
+                type: 'game_event',
+                content: `${event.targetPlayer} chose to destroy ${destroyedBase.id} belonging to ${event.targetPlayer}`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'TwoOrMoreBasesInPlay':
             return state;
@@ -602,7 +725,11 @@ export const applyEvent = (state: GameState, event: Event) => {
             // Clear notifications for the player whose turn is ending
             const endingPlayerId = state.order[state.activeIndex];
             state.currentTurnNotifications[endingPlayerId] = [];
-            
+            state.log.push({
+                type: 'game_event',
+                content: `${endingPlayerId} has ended their turn`,
+                timestamp: Date.now(),
+            })
             // Skip dead players
             let nextIndex = (state.activeIndex + 1) % state.order.length;
             let attempts = 0;
@@ -612,6 +739,11 @@ export const applyEvent = (state: GameState, event: Event) => {
                 attempts++;
             }
             state.activeIndex = nextIndex;
+            state.log.push({
+                type: 'game_event',
+                content: `${state.order[state.activeIndex]} is now active`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'PhaseChanged':
             state.turn.phase = event.to;
@@ -624,10 +756,20 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.players[event.player].isDead = true;
             state.eliminationCount++;
             state.players[event.player].eliminationOrder = state.eliminationCount;
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} has died`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'GameOver':
             state.gameOver = true;
             state.winner = event.winner;
+            state.log.push({
+                type: 'game_event',
+                content: `${event.winner} has won the game`,
+                timestamp: Date.now(),
+            })
             return state;
         default:
             return state;
