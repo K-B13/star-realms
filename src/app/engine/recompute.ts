@@ -725,6 +725,24 @@ export const applyEvent = (state: GameState, event: Event) => {
             return state;
         case 'ShipPlayed':
             return state;
+        case 'Chat':
+            if (event.to) {
+                state.log.push({
+                    type: event.type,
+                    content: event.content,
+                    timestamp: Date.now(),
+                    from: event.from,
+                    to: event.to
+                })
+            } else {
+                state.log.push({
+                    type: event.type,
+                    content: event.content,
+                    timestamp: Date.now(),
+                    from: event.from,
+                })
+            }
+            return state;
         case 'TurnAdvanced':
             // Clear notifications for the player whose turn is ending
             const endingPlayerId = state.order[state.activeIndex];

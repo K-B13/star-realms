@@ -1,3 +1,4 @@
+import { Event } from "@/app/engine/events";
 import { LogEntry } from "@/app/engine/state";
 import { useState, useRef, useEffect } from "react";
 import Draggable from "react-draggable";
@@ -8,16 +9,21 @@ interface LogOverlayProps {
     currentPlayerId: string;
     onClose?: () => void;
     playerNames?: Record<string, string>;
+    append: (event: Event | Event[]) => void;
 }
 
-export default function LogOverlay({ log, players, currentPlayerId, onClose, playerNames }: LogOverlayProps) {
+export default function LogOverlay({ log, players, currentPlayerId, onClose, playerNames, append }: LogOverlayProps) {
     const [ isMinimized, setIsMinimized ] = useState(false);
     const [ selectedPlayer, setSelectedPlayer ] = useState<string>("all");
     const dragNodeRef = useRef(null);
     const scrollRef = useRef<HTMLDivElement>(null);
-    const [showOnlyChat, setShowOnlyChat] = useState(true);
+    const [ showOnlyChat, setShowOnlyChat ] = useState(true);
 
-    const filteredLogs = showOnlyChat ? log.filter(entry => entry.type === 'chat') : log;
+    const filteredLogs = showOnlyChat ? log.filter(entry => {
+        const currentPlayerName = playerNames ? playerNames[currentPlayerId] : currentPlayerId
+        
+        return entry.type === 'chat' && (!entry.to || entry.to === currentPlayerName || entry.from === currentPlayerName)
+    }) : log;
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -37,6 +43,20 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
             return playerNames?.[word];
         }).join(' ')
         return updatedLog
+    }
+
+    const handleSubmitMessage = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key !== 'Enter') return
+        e.preventDefault()
+
+        const message = e.currentTarget.value
+        e.currentTarget.value = ''
+
+        if (selectedPlayer === 'all') {
+            append({ t: 'Chat', type: 'chat', from: playerNames ? playerNames[currentPlayerId] : currentPlayerId, content: message })
+        } else {
+            append({ t: 'Chat', type: 'chat', from: playerNames ? playerNames[currentPlayerId] : currentPlayerId, to: selectedPlayer, content: message })
+        }
     }
 
     return (
@@ -83,13 +103,27 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
                                 {filteredLogs.map((entry, index) => (
                                     <div 
                                         key={index}
-                                        className={`text-sm ${entry.type === 'chat' ? 'text-cyan-300' : 'text-slate-300'}`}
+                                        className={`text-sm ${entry.type === 'chat' 
+                                            ? entry.to 
+                                                ? 'text-purple-300'
+                                                : 'text-cyan-300'  
+                                            : 'text-slate-300'    
+                                        }`}
                                     >
                                         <span className="text-slate-500 mr-2">[{new Date(entry.timestamp).toLocaleTimeString()}]</span>
-                                        {playerNames 
-                                            ? handlePlayerNames(entry)
-                                            : entry.content
-                                        }
+                                        {entry.type === 'chat' ? (
+                                            <>
+                                                <span className="font-semibold mr-1">[{entry.from === (playerNames ? playerNames[currentPlayerId] : currentPlayerId) ? 'You' : (playerNames?.[entry.from || ''] || entry.from)}]</span>
+                                                {entry.to && (
+                                                    <span className="text-slate-400 mr-1">(to {playerNames?.[entry.to] || entry.to})</span>
+                                                )}
+                                                {entry.content}
+                                            </>
+                                        ) : (
+                                            playerNames 
+                                                ? handlePlayerNames(entry)
+                                                : entry.content
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -116,6 +150,7 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
                                 </select>
                                 <input
                                     type="text"
+                                    onKeyDown={handleSubmitMessage}
                                     placeholder={`Message ${selectedPlayer === 'all' ? 'everyone' : selectedPlayer}...`}
                                     className="flex-1 bg-slate-700 text-slate-200 rounded px-3 py-1 text-sm border border-slate-600 placeholder:text-slate-400"
                                 />

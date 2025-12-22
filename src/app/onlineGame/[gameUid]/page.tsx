@@ -673,6 +673,7 @@ export default function OnlineGamePage() {
                     players={currentState.order}
                     currentPlayerId={currentUserId}
                     playerNames={currentState.playerNames}
+                    append={append}
                     onClose={() => setShowLog(false)}
                 />
             )}

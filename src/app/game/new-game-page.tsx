@@ -451,6 +451,7 @@ export default function NewGamePage() {
                     players={state.order}
                     currentPlayerId={currentPlayerId}
                     onClose={() => setShowLog(false)}
+                    append={append}
                 />
             )}
         </div>
