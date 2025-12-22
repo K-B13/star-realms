@@ -29,6 +29,17 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
         setShowOnlyChat(e.target.checked);
     };
 
+    const handlePlayerNames = (log: LogEntry) => {
+        const updatedLog = log.content.split(' ').map(word => {
+            if (word in players) {
+                return playerNames?.[word]
+            }
+            return word;
+        }).join(' ')
+        console.log(updatedLog)
+        return updatedLog
+    }
+
     return (
         <div className="fixed right-4 top-20 w-full max-w-2xl z-40">
             <Draggable handle=".drag-handle" nodeRef={dragNodeRef}>
@@ -77,7 +88,7 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
                                     >
                                         <span className="text-slate-500 mr-2">[{new Date(entry.timestamp).toLocaleTimeString()}]</span>
                                         {playerNames 
-                                            ? entry.content.replace(/\b\w+-\w+-\w+\b/g, id => playerNames[id] || id)
+                                            ? handlePlayerNames(entry)
                                             : entry.content
                                         }
                                     </div>
@@ -94,7 +105,6 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
                                     <option value="all">All Players</option>
                                     {players
                                         .filter(id => {
-                                            console.log(id, 'id', currentPlayerId, 'currentPlayerId')
                                             return id !== currentPlayerId
                                         })
                                         .map(playerId => (

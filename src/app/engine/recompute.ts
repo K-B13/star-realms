@@ -364,7 +364,7 @@ const emitEffects = (e: Effect, player: PID, emit: Emit) => {
             emit({ t: "FactionTagAdded", player, faction: 'Star Empire', amount: 1 })
             break;
         }
-        case 'prompt':         emit({ t:'PromptShown', player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
+        case 'prompt': emit({ t:'PromptShown', player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
       }
 }
 
@@ -561,6 +561,11 @@ export const applyEvent = (state: GameState, event: Event) => {
             if (i === null || i < 0 || i >= discardedPlayer.hand.length) return state;
             const [ removed ] = discardedPlayer.hand.splice(i, 1)
             discardedPlayer.discard.push(removed)
+            state.log.push({
+                type: 'game_event',
+                content: `${event.player} discarded ${removed}`,
+                timestamp: Date.now(),
+            })
             return state;
         case 'CardsDrawn':
             if (state.turn.phase === 'MAIN') {
@@ -690,13 +695,12 @@ export const applyEvent = (state: GameState, event: Event) => {
             }
 
             state.players[state.order[state.activeIndex]].combat -= currentShieldHealth;
-
             const [ baseRemoved ] = playerWithBaseToBeDamaged.bases.splice(event.baseIndex, 1);
             state.players[event.player].discard.push(baseRemoved.id);
-            state = handleCombatLogs(state, event.player, state.order[state.activeIndex], event.amount, 'base', playerWithBaseToBeDamaged.bases[event.baseIndex].id, true)
+            state = handleCombatLogs(state, event.player, state.order[state.activeIndex], event.amount, 'base', baseRemoved.id, true)
             state.log.push({
                 type: 'game_event',
-                content: `${event.player} destroyed ${selectedBaseToBeDamaged.id} with ${event.amount} damage belonging to ${event.player}`,
+                content: `${event.player} destroyed ${baseRemoved.id} with ${baseRemoved.defence - baseRemoved.damage} damage belonging to ${event.player}`,
                 timestamp: Date.now(),
             })
             return state;
