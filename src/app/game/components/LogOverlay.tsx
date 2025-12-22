@@ -31,12 +31,11 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
 
     const handlePlayerNames = (log: LogEntry) => {
         const updatedLog = log.content.split(' ').map(word => {
-            if (word in players) {
-                return playerNames?.[word]
+            if (!players.includes(word)) {
+                return word;
             }
-            return word;
+            return playerNames?.[word];
         }).join(' ')
-        console.log(updatedLog)
         return updatedLog
     }
 
@@ -107,9 +106,12 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
                                         .filter(id => {
                                             return id !== currentPlayerId
                                         })
-                                        .map(playerId => (
-                                            <option key={playerId} value={playerId}>{playerId}</option>
-                                        ))
+                                        .map(playerId => {
+                                            const displayNames = playerNames ? playerNames[playerId] : playerId
+                                            return (
+                                                <option key={displayNames} value={displayNames}>{displayNames}</option>
+                                            )
+                                        })
                                     }
                                 </select>
                                 <input

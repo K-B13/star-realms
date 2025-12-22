@@ -672,7 +672,7 @@ export default function OnlineGamePage() {
                     log={currentState.log}
                     players={currentState.order}
                     currentPlayerId={currentUserId}
-                    playerNames={Object.fromEntries(currentState.order.map(uid => [uid, getPlayerName(uid)]))}
+                    playerNames={currentState.playerNames}
                     onClose={() => setShowLog(false)}
                 />
             )}
