@@ -19,8 +19,8 @@ export default function GameOverOverlay({ state, onNewGame }: GameOverOverlayPro
         const playerB = state.players[b];
         
         // Winner always first
-        if (playerA.id === state.winner) return -1;
-        if (playerB.id === state.winner) return 1;
+        if (a === state.winner) return -1;
+        if (b === state.winner) return 1;
         
         // Among dead players, higher eliminationOrder (died later) ranks better
         return playerB.eliminationOrder - playerA.eliminationOrder;
@@ -32,7 +32,7 @@ export default function GameOverOverlay({ state, onNewGame }: GameOverOverlayPro
                 <div className="text-center">
                     <h1 className="text-5xl font-bold text-yellow-400 mb-4">🏆 GAME OVER 🏆</h1>
                     <div className="bg-gradient-to-r from-yellow-600/20 to-yellow-400/20 border-2 border-yellow-500 rounded-xl p-6 mb-6">
-                        <p className="text-3xl font-bold text-yellow-300 mb-2">{winner.id} WINS!</p>
+                        <p className="text-3xl font-bold text-yellow-300 mb-2">{state.playerNames?.[state.winner] || winner.id} WINS!</p>
                         <p className="text-xl text-gray-300">Authority: {winner.authority}</p>
                     </div>
                     
@@ -42,7 +42,6 @@ export default function GameOverOverlay({ state, onNewGame }: GameOverOverlayPro
                             {sortedPlayers.map((pid, idx) => {
                                 const player = state.players[pid];
                                 const isWinner = pid === state.winner;
-                                const isDead = player.isDead;
                                 const rank = idx + 1;
                                 
                                 // Determine medal/emoji for top 3
@@ -74,7 +73,7 @@ export default function GameOverOverlay({ state, onNewGame }: GameOverOverlayPro
                                                 rank === 3 ? 'text-orange-300' :
                                                 'text-gray-400'
                                             }`}>
-                                                {player.id}
+                                                {state.playerNames?.[pid] || player.id}
                                             </span>
                                             {isWinner && <span className="text-yellow-400 text-sm">👑 Winner</span>}
                                         </div>

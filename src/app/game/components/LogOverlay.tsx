@@ -30,9 +30,9 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
     };
 
     return (
-        <div className="fixed right-4 top-20 w-full max-w-2xl z-40">
+        <div className="fixed right-4 top-20 w-full max-w-2xl z-40 pointer-events-none">
             <Draggable handle=".drag-handle" nodeRef={dragNodeRef}>
-                <div ref={dragNodeRef} className="bg-slate-800/95 border-2 border-slate-600 rounded-xl shadow-2xl pointer-events-auto">
+                <div ref={dragNodeRef} className="bg-slate-800/95 border-2 border-slate-600 rounded-xl shadow-2xl pointer-events-auto w-full ml-auto">
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-2 border-b border-slate-600 drag-handle cursor-move">
                         <div className="flex items-center gap-4">
@@ -75,9 +75,9 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
                                         key={index}
                                         className={`text-sm ${entry.type === 'chat' ? 'text-cyan-300' : 'text-slate-300'}`}
                                     >
-                                        <span className="text-slate-500 mr-2">[{new Date(entry.timestamp).toLocaleTimeString()}]</span>
+                                        <span className="text-slate-500 mr-2">[{entry.timestamp}]</span>
                                         {playerNames 
-                                            ? entry.content.replace(/\b\w+-\w+-\w+\b/g, id => playerNames[id] || id)
+                                            ? entry.content.replace(/\b[\w-]{20,}\b/g, id => playerNames[id] || id)
                                             : entry.content
                                         }
                                     </div>
@@ -93,18 +93,17 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
                                 >
                                     <option value="all">All Players</option>
                                     {players
-                                        .filter(id => {
-                                            console.log(id, 'id', currentPlayerId, 'currentPlayerId')
-                                            return id !== currentPlayerId
-                                        })
+                                        .filter(id => id !== currentPlayerId)
                                         .map(playerId => (
-                                            <option key={playerId} value={playerId}>{playerId}</option>
+                                            <option key={playerId} value={playerId}>
+                                                {playerNames?.[playerId] || playerId}
+                                            </option>
                                         ))
                                     }
                                 </select>
                                 <input
                                     type="text"
-                                    placeholder={`Message ${selectedPlayer === 'all' ? 'everyone' : selectedPlayer}...`}
+                                    placeholder={`Message ${selectedPlayer === 'all' ? 'everyone' : (playerNames?.[selectedPlayer] || selectedPlayer)}...`}
                                     className="flex-1 bg-slate-700 text-slate-200 rounded px-3 py-1 text-sm border border-slate-600 placeholder:text-slate-400"
                                 />
                             </div>
