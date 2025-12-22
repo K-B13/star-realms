@@ -399,7 +399,7 @@ export const applyEvent = (state: GameState, event: Event) => {
 
             state.log.push({
                 type: 'game_event',
-                content: `${event.player} added ${event.amount} trade`,
+                content: `${event.player} added ${event.amount} Trade`,
                 timestamp: Date.now(),
             })
             return state;
@@ -408,7 +408,7 @@ export const applyEvent = (state: GameState, event: Event) => {
 
             state.log.push({
                 type: 'game_event',
-                content: `${event.player} added ${event.amount} combat`,
+                content: `${event.player} added ${event.amount} Combat`,
                 timestamp: Date.now(),
             })
             return state;
@@ -416,7 +416,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.players[ event.player ].authority += event.amount;
             state.log.push({
                 type: 'game_event',
-                content: `${event.player} added ${event.amount} authority`,
+                content: `${event.player} added ${event.amount} Authority`,
                 timestamp: Date.now(),
             })
             return state;
