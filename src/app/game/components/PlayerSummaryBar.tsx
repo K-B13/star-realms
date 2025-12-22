@@ -60,6 +60,7 @@ export default function PlayerSummaryBar({ players, playerOrder, currentPlayerId
                         <div className="text-center">
                             <p className="text-sm font-bold text-yellow-400 mb-1">{player.id}</p>
                             <p className="text-xs text-gray-200 mb-1">Authority: {player.authority}</p>
+                            <p className="text-xs text-gray-200 mb-1">Combat: {player.combat}</p>
                             <div className="flex gap-3 text-xs text-gray-200 justify-center">
                                 <span className="flex items-center gap-1">
                                     <span className="text-gray-300">⚪</span> {silverShields}

@@ -252,14 +252,6 @@ export default function OnlineGamePage() {
     const myPlayer = currentStateWithNames.players[currentUserId]
     const isMyTurn = currentUserId === currentPlayerId
 
-    /**
-     * cleanUndefined: Remove undefined values from objects (Firebase doesn't allow them)
-     * 
-     * WHY: Some events have optional properties that can be undefined
-     *      Example: PromptShown event has optional 'data' field
-     *      Firebase rejects: { data: undefined }
-     *      Firebase accepts: { } (property omitted)
-     */
     const cleanUndefined = <T,>(obj: T): T => {
         if (Array.isArray(obj)) {
             return obj.map(cleanUndefined) as T
@@ -502,10 +494,8 @@ export default function OnlineGamePage() {
                     onCardClick={showCardDetail}
                     scrapPileCount={currentState.scrap.length}
                 />
-
             </div>
 
-            {/* OVERLAYS - Wire these up to show based on activePrompt */}
             {activePrompt?.t === 'PromptShown' && activePrompt.kind === 'scrapRow' && isMyTurn && (
                 <ScrapPromptOverlay 
                     state={currentState}
