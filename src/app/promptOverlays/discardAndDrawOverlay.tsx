@@ -40,12 +40,12 @@ export default function DiscardAndDrawOverlay({ state, activePrompt, append, cur
     };
 
     const confirm = () => {
-        append({ t: 'CardsDiscardedOrScrappedForDraw', player: currentPlayer, action, discardedIndices: selectedIndices });
+        append({ t: 'CardsDiscardedOrScrappedForDraw', player: currentPlayer, action, discardedIndices: selectedIndices, timestamp: Date.now() });
         setSelectedIndices([]);
     };
 
     const skip = () => {
-        append({ t: 'PromptCancelled', kind: 'discardOrScrapAndDraw' });
+        append({ t: 'PromptCancelled', kind: 'discardOrScrapAndDraw', timestamp: Date.now() });
         setSelectedIndices([]);
     };
 

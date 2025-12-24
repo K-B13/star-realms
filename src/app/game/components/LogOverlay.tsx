@@ -20,10 +20,12 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
     const [ showOnlyChat, setShowOnlyChat ] = useState(true);
 
     const filteredLogs = showOnlyChat ? log.filter(entry => {
-        const currentPlayerName = playerNames ? playerNames[currentPlayerId] : currentPlayerId
-        
-        return entry.type === 'chat' && (!entry.to || entry.to === currentPlayerName || entry.from === currentPlayerName)
-    }) : log;
+        if (entry.type !== 'chat') return false;
+        return !entry.to || entry.from === currentPlayerId || entry.to === currentPlayerId;
+    }) : 
+        log.filter(entry => {
+            return !entry.to || entry.to === currentPlayerId || entry.from === currentPlayerId
+        });
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -45,17 +47,24 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
         return updatedLog
     }
 
+    // Reset selected player when component mounts or when currentPlayerId changes
+    useEffect(() => {
+        setSelectedPlayer('all');
+    }, [currentPlayerId]);
+
     const handleSubmitMessage = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key !== 'Enter') return
         e.preventDefault()
 
         const message = e.currentTarget.value
         e.currentTarget.value = ''
+        // Reset selected player to 'all' after sending a message
+        setSelectedPlayer('all')
 
         if (selectedPlayer === 'all') {
-            append({ t: 'Chat', type: 'chat', from: playerNames ? playerNames[currentPlayerId] : currentPlayerId, content: message })
+            append({ t: 'Chat', type: 'chat', from: currentPlayerId, content: message, timestamp: Date.now() })
         } else {
-            append({ t: 'Chat', type: 'chat', from: playerNames ? playerNames[currentPlayerId] : currentPlayerId, to: selectedPlayer, content: message })
+            append({ t: 'Chat', type: 'chat', from: currentPlayerId, to: selectedPlayer, content: message, timestamp: Date.now() })
         }
     }
 
@@ -113,9 +122,9 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
                                         <span className="text-slate-500 mr-2">[{new Date(entry.timestamp).toLocaleTimeString()}]</span>
                                         {entry.type === 'chat' ? (
                                             <>
-                                                <span className="font-semibold mr-1">[{entry.from === (playerNames ? playerNames[currentPlayerId] : currentPlayerId) ? 'You' : (playerNames?.[entry.from || ''] || entry.from)}]</span>
+                                                <span className="font-semibold mr-1">[{entry.from === currentPlayerId ? 'You' : (playerNames?.[entry.from || ''] || entry.from)}]</span>
                                                 {entry.to && (
-                                                    <span className="text-slate-400 mr-1">(to {playerNames?.[entry.to] || entry.to})</span>
+                                                    <span className="text-slate-400 mr-1">(to {entry.to === currentPlayerId ? "You" : (playerNames?.[entry.to] || entry.to)})</span>
                                                 )}
                                                 {entry.content}
                                             </>

@@ -42,7 +42,6 @@ export default function GameOverOverlay({ state, onNewGame }: GameOverOverlayPro
                             {sortedPlayers.map((pid, idx) => {
                                 const player = state.players[pid];
                                 const isWinner = pid === state.winner;
-                                const isDead = player.isDead;
                                 const rank = idx + 1;
                                 
                                 // Determine medal/emoji for top 3

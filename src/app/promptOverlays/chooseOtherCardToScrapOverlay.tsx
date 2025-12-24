@@ -36,10 +36,10 @@ export default function ChooseOtherCardToScrapOverlay({ state, activePrompt, app
     
     
   
-    const ScrapChosenCard = (idx: number, cardId: string, from: From) => append({ t: 'CardScrapped', player: currentPlayer, from: from, placementIndex: idx, card: cardId });
+    const ScrapChosenCard = (idx: number, cardId: string, from: From) => append({ t: 'CardScrapped', player: currentPlayer, from: from, placementIndex: idx, card: cardId, timestamp: Date.now() });
   
     const skip = () =>
-      append({ t: 'PromptCancelled', kind: 'chooseOtherCardToScrap' });
+      append({ t: 'PromptCancelled', kind: 'chooseOtherCardToScrap', timestamp: Date.now() });
   
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">

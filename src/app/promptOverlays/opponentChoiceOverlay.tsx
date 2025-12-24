@@ -44,7 +44,7 @@ export default function OpponentChoiceOverlay({ state, activePrompt, append, cur
       append({ t: 'TargetChosen', player: currentPlayer, target: pid, purpose } as Event);
 
     const skip = () =>
-        append({ t: 'PromptCancelled', kind: 'choosePlayer' });  
+        append({ t: 'PromptCancelled', kind: 'choosePlayer', timestamp: Date.now() });  
     
     // Determine what info to show based on purpose
     const isDestroyBase = purpose === 'destroyOpponentBase';

@@ -29,10 +29,10 @@ export default function ChooseCardToCopyOverlay({ state, activePrompt, append }:
     const playedThisTurn = state.turn.playedThisTurn;
     
     const choose = (idx: number) => {
-      append({ t:'TargetCardChosen', player: p, source: 'copyShip', inPlayIndex: idx });
+      append({ t:'TargetCardChosen', player: p, source: 'copyShip', inPlayIndex: idx, timestamp: Date.now() });
     };
     const skip = () =>
-        append({ t: 'PromptCancelled', kind: 'chooseInPlayShip' });  
+        append({ t: 'PromptCancelled', kind: 'chooseInPlayShip', timestamp: Date.now() });  
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">

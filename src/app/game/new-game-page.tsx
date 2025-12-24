@@ -111,8 +111,8 @@ export default function NewGamePage() {
 
     const handleSelectTradeCard = (card: CardDef, source: 'row' | 'explorer', index: number) => {
         append([
-            { t: 'CardPurchased', player: currentPlayerId, card: card.id, source: source, rowIndex: index },
-            { t: 'TradeSpent', player: currentPlayerId, card: card.id, amount: card.cost }
+            { t: 'CardPurchased', player: currentPlayerId, card: card.id, source: source, rowIndex: index, timestamp: Date.now() },
+            { t: 'TradeSpent', player: currentPlayerId, card: card.id, amount: card.cost, timestamp: Date.now() }
         ])
         // Close the overlay when buying a card
         forceCloseCardDetail();
@@ -120,18 +120,18 @@ export default function NewGamePage() {
 
     const handlePlayCard = (card: CardDef, cardIndex: number) => {
         if (card.type === 'base') {
-            append({ t: 'BasePlayed', player: currentPlayerId, handIndex: cardIndex, card: card.id })
+            append({ t: 'BasePlayed', player: currentPlayerId, handIndex: cardIndex, card: card.id, timestamp: Date.now() })
         } else {
-            append({ t: 'CardPlayed', player: currentPlayerId, handIndex: cardIndex })
+            append({ t: 'CardPlayed', player: currentPlayerId, handIndex: cardIndex, timestamp: Date.now() })
         }
     };
 
     const handleActivateBase = (baseIndex: number) => {
-        append({ t: 'BaseActivated', player: currentPlayerId, baseIndex })
+        append({ t: 'BaseActivated', player: currentPlayerId, baseIndex, timestamp: Date.now() })
     };
 
     const handleScrapCard = (card: CardDef, from: Zone, cardIndex: number) => {
-        append({ t: 'CardScrapped', player: currentPlayerId, from, placementIndex: cardIndex, card: card.id })
+        append({ t: 'CardScrapped', player: currentPlayerId, from, placementIndex: cardIndex, card: card.id, timestamp: Date.now() })
     };
 
     const handleScrapTradeRow = (idx: number, card: string, currentPlayer: string) => {
@@ -140,16 +140,16 @@ export default function NewGamePage() {
 
     const handleFreeCard = (idx: number, card: string, currentPlayer: string) => {
         append([
-            { t: 'NextAcquireFreeSet', player: currentPlayer },
-            { t: 'NextAcquireToTopSet', player: currentPlayer },
-            { t: 'CardPurchased', player: currentPlayer, card: card, source: 'row', rowIndex: idx },
-            { t: "TradeSpent", player: state.order[state.activeIndex], card: card, amount: cardRegistry[card].cost }
+            { t: 'NextAcquireFreeSet', player: currentPlayer, timestamp: Date.now() },
+            { t: 'NextAcquireToTopSet', player: currentPlayer, timestamp: Date.now() },
+            { t: 'CardPurchased', player: currentPlayer, card: card, source: 'row', rowIndex: idx, timestamp: Date.now() },
+            { t: "TradeSpent", player: state.order[state.activeIndex], card: card, amount: cardRegistry[card].cost, timestamp: Date.now() }
         ])
     }
 
     const handleScrapBase = (baseIndex: number) => {
         const base = currentPlayer.bases[baseIndex];
-        append({ t: 'CardScrapped', player: currentPlayerId, from: 'bases', placementIndex: baseIndex, card: base.id })
+        append({ t: 'CardScrapped', player: currentPlayerId, from: 'bases', placementIndex: baseIndex, card: base.id, timestamp: Date.now() })
     };
 
     const handleViewDiscard = () => {
@@ -186,7 +186,7 @@ export default function NewGamePage() {
 
     const handleEndTurn = () => {
         const base = replay(snapshot, turnEvents);
-        const { state: endState } = materialize(base, [{ t: 'PhaseChanged', from: 'MAIN', to: 'CLEANUP' }]);
+        const { state: endState } = materialize(base, [{ t: 'PhaseChanged', from: 'MAIN', to: 'CLEANUP', timestamp: Date.now() }]);
 
         setSnapshot(endState)
         setTurnEvents([])

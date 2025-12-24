@@ -88,7 +88,7 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
                                     className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-2 w-40 h-28 shadow-md ${colors.shadow} flex flex-col cursor-pointer hover:brightness-110 transition-all`}
                                     onMouseEnter={() => {
                                         const attackCallback = currentPlayer.combat > 0 ? () => {
-                                            append({ t: 'BaseDamaged', player: selectedPlayerId, baseIndex: index, amount: currentPlayer.combat })
+                                            append({ t: 'BaseDamaged', player: selectedPlayerId, baseIndex: index, amount: currentPlayer.combat, timestamp: Date.now() })
                                         } : undefined;
                                         onCardHover?.(cardDef, 'hover', attackCallback);
                                     }}
@@ -109,7 +109,7 @@ export default function OpponentBasesViewer({ players, playerOrder, currentPlaye
                                     { currentPlayer.combat > 0 && (
                                         <button 
                                             onClick={() => {
-                                                append({ t: 'BaseDamaged', player: selectedPlayerId, baseIndex: index, amount: currentPlayer.combat })
+                                                append({ t: 'BaseDamaged', player: selectedPlayerId, baseIndex: index, amount: currentPlayer.combat, timestamp: Date.now() })
                                             }}
                                             className="w-full border border-red-500 bg-red-900/40 hover:bg-red-800/60 text-red-200 px-1 py-0.5 rounded text-xs font-semibold transition-all mt-1"
                                         >

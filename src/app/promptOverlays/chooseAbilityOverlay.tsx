@@ -19,7 +19,7 @@ export default function ChooseAbilityOverlay({ state, activePrompt, append, curr
       };
       
         const skip = () =>
-          append({ t: 'PromptCancelled', kind: 'chooseAbility' });
+          append({ t: 'PromptCancelled', kind: 'chooseAbility', timestamp: Date.now() });
       
         return (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">

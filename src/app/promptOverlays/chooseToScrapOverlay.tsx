@@ -20,10 +20,10 @@ export default function ChooseToScrapOverlay({ state, activePrompt, append, curr
     const card = cardRegistry[cardId];
     
   
-    const scrapGivenCard = () => append({ t: 'CardScrapped', player: currentPlayer, from: 'inPlay', placementIndex: inPlayIndex, card: cardId });
+    const scrapGivenCard = () => append({ t: 'CardScrapped', player: currentPlayer, from: 'inPlay', placementIndex: inPlayIndex, card: cardId, timestamp: Date.now() });
   
     const skip = () =>
-      append({ t: 'PromptCancelled', kind: 'scrapSelf' });
+      append({ t: 'PromptCancelled', kind: 'scrapSelf', timestamp: Date.now() });
   
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">

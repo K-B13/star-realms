@@ -79,7 +79,7 @@ export default function PlayerSummaryBar({ players, playerOrder, activeIndex, cu
                         </div>
                         {canAttackDirectly && !isDead && (
                             <button 
-                                onClick={() => append({ t: 'DamageDealt', from: currentPlayerId, to: pid, amount: currentPlayer.combat })}
+                                onClick={() => append({ t: 'DamageDealt', from: currentPlayerId, to: pid, amount: currentPlayer.combat, timestamp: Date.now() })}
                                 className="border border-orange-500 bg-orange-900/80 hover:bg-orange-800 text-orange-200 px-2 py-1 rounded-lg text-xs font-semibold transition-all shadow-md mt-auto mb-2"
                             >
                                 ⚔️ Attack ({currentPlayer.combat})

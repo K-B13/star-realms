@@ -21,7 +21,8 @@ const onPlayRule: Rule<'CardPlayed'> = {
             emit({
                 t: "ShipPlayed",
                 player: ev.player,
-                card: justPlayed
+                card: justPlayed,
+                timestamp: Date.now()
             })
         }
         if (def.selfScrap) {
@@ -33,7 +34,8 @@ const onPlayRule: Rule<'CardPlayed'> = {
                 data: {
                     card: justPlayed,
                     inPlayIndex: p.inPlay.length - 1
-                }
+                },
+                timestamp: Date.now()
             })
         }
         for (const ability of def.abilities) {
@@ -108,7 +110,7 @@ const applyCopyRule: Rule<'TargetCardChosen'> = {
                 emitEffects(e, ev.player, emit)
             }
         }
-        emit({ t: "FactionTagAdded", player: ev.player, faction: targetDef.faction, amount: 1 })
+        emit({ t: "FactionTagAdded", player: ev.player, faction: targetDef.faction, amount: 1, timestamp: Date.now() })
 
         const factionCounter = factionCalculator(targetDef, state, ev.player);
 
@@ -164,12 +166,12 @@ const cleanupRule: Rule<'PhaseChanged'> = {
         
         // Only discard and draw if player is alive
         if (!state.players[active].isDead) {
-            emit({ t: 'DiscardInPlayAndHand', player: active })
-            emit({ t: 'CardsDrawn', player: active, count: 5 })
+            emit({ t: 'DiscardInPlayAndHand', player: active, timestamp: Date.now() })
+            emit({ t: 'CardsDrawn', player: active, count: 5, timestamp: Date.now() })
         }
         
-        emit({ t: 'TurnAdvanced' })
-        emit({ t: 'PhaseChanged', from: 'CLEANUP', to: 'MAIN' })
+        emit({ t: 'TurnAdvanced', timestamp: Date.now() })
+        emit({ t: 'PhaseChanged', from: 'CLEANUP', to: 'MAIN', timestamp: Date.now() })
     }
 }
 
@@ -180,7 +182,7 @@ const refillRule: Rule<'CardPurchased'> = {
         if (ev.rowIndex === undefined) return;
         const filledInCard = cardRegistry[ ev.card ];
         if (filledInCard.cost > state.players[ev.player].trade && !state.players[ev.player].freeNextAcquire) return;
-        emit({ t: 'RowRefilled', rowIndex: ev.rowIndex })
+        emit({ t: 'RowRefilled', rowIndex: ev.rowIndex, timestamp: Date.now() })
     }
 }
 
@@ -188,7 +190,7 @@ const drawManyRule: Rule<'CardsDrawn'> = {
     on: 'CardsDrawn',
     run: (_state, ev, emit) => {
         for (let i = 0; i < ev.count; i++) {
-          emit({ t: 'DrawOne', player: ev.player });
+          emit({ t: 'DrawOne', player: ev.player, timestamp: Date.now() });
         }
     }
 }
@@ -200,8 +202,8 @@ const ensureDeckRule: Rule<'DrawOne'> = {
         if (pl.deck.length > 0) return;           
         if (pl.discard.length === 0) return;      
         const newDeck = shuffle(pl.discard.slice());
-        emit({ t: 'DeckShuffle', player: ev.player, newDeck });
-        emit({ t: 'DrawOne', player: ev.player });
+        emit({ t: 'DeckShuffle', player: ev.player, newDeck, timestamp: Date.now() });
+        emit({ t: 'DrawOne', player: ev.player, timestamp: Date.now() });
     }
 }
 
@@ -209,7 +211,7 @@ const onScrapTradeRowRules: Rule<'CardScrapped'> = {
     on: "CardScrapped",
     run: (state, ev, emit) => {
         if (ev.from === 'row') {
-            emit({ t: 'RowRefilled', rowIndex: ev.placementIndex })   
+            emit({ t: 'RowRefilled', rowIndex: ev.placementIndex, timestamp: Date.now() })   
         }
     }
 }
@@ -224,7 +226,8 @@ const opponentSelectedRules: Rule<'TargetChosen'> = {
                     player: ev.player,
                     kind: 'opponentDiscard',
                     optional: false,
-                    data: { target: ev.target }
+                    data: { target: ev.target },
+                    timestamp: Date.now()
                 })
                 break;
             case 'destroyOpponentBase':
@@ -233,7 +236,8 @@ const opponentSelectedRules: Rule<'TargetChosen'> = {
                     player: ev.player,
                     kind: 'chooseOpponentBase',
                     optional: true,
-                    data: { target: ev.target }
+                    data: { target: ev.target },
+                    timestamp: Date.now()
                 })
                 break;
             default:
@@ -275,7 +279,7 @@ const twoOrMoreBasesInPlayRule: Rule<'TwoOrMoreBasesInPlay'> = {
     on: 'TwoOrMoreBasesInPlay',
     run: (state, _ev, emit) => {
         if (state.players[state.order[state.activeIndex]].bases.length >= 2) {
-            emit({ t: 'CardsDrawn', player: state.order[state.activeIndex], count: 2 })
+            emit({ t: 'CardsDrawn', player: state.order[state.activeIndex], count: 2, timestamp: Date.now() })
         }
     }
 }
@@ -285,7 +289,7 @@ const drawPerFactionCardRule: Rule<'DrawPerFactionCard'> = {
     run: (state, ev, emit) => {
         const factionCounter = factionCalculator(cardRegistry[ev.card], state, state.order[state.activeIndex]);
         if (factionCounter >= 1) {
-            emit({ t: 'CardsDrawn', player: state.order[state.activeIndex], count: factionCounter - 1})
+            emit({ t: 'CardsDrawn', player: state.order[state.activeIndex], count: factionCounter - 1, timestamp: Date.now() })
         }
     }
 }
@@ -293,7 +297,7 @@ const drawPerFactionCardRule: Rule<'DrawPerFactionCard'> = {
 const discardOrScrapAndDrawChosenRule: Rule<'DiscardOrScrapAndDrawChosen'> = {
     on: 'DiscardOrScrapAndDrawChosen',
     run: (state, ev, emit) => {
-        emit({ t: 'PromptShown', player: ev.player, kind: 'discardOrScrapAndDraw', optional: true, data: { maxCards: ev.maxCards, action: ev.action } });
+        emit({ t: 'PromptShown', player: ev.player, kind: 'discardOrScrapAndDraw', optional: true, data: { maxCards: ev.maxCards, action: ev.action }, timestamp: Date.now() });
     }
 }
 
@@ -303,14 +307,14 @@ const discardOrScrapAndDrawRule: Rule<'CardsDiscardedOrScrappedForDraw'> = {
         const sortedIndices = [...ev.discardedIndices].sort((a, b) => b - a);
         for (const idx of sortedIndices) {
             if (ev.action === 'scrap') {
-                emit({ t: 'CardScrapped', player: ev.player, from: 'hand', placementIndex: idx, card: state.players[ev.player].hand[idx] });
+                emit({ t: 'CardScrapped', player: ev.player, from: 'hand', placementIndex: idx, card: state.players[ev.player].hand[idx], timestamp: Date.now() });
             } else {
-                emit({ t: 'CardDiscarded', player: ev.player, card: state.players[ev.player].hand[idx], rowIndex: idx });
+                emit({ t: 'CardDiscarded', player: ev.player, card: state.players[ev.player].hand[idx], rowIndex: idx, timestamp: Date.now() });
             }
         }
 
         if (ev.discardedIndices.length > 0) {
-            emit({ t: 'CardsDrawn', player: ev.player, count: ev.discardedIndices.length });
+            emit({ t: 'CardsDrawn', player: ev.player, count: ev.discardedIndices.length, timestamp: Date.now() });
         }
     }
 }
@@ -321,7 +325,7 @@ const fleetHQRule: Rule<'ShipPlayed'> = {
         const hasFleetHQ = state.players[ev.player].bases.some(base => base.id === 'FLEETHQ')
 
         if (hasFleetHQ) {
-            emit({ t: 'CombatAdded', player: ev.player, amount: 1 });
+            emit({ t: 'CombatAdded', player: ev.player, amount: 1, timestamp: Date.now() });
         }
     }
 }
@@ -331,7 +335,7 @@ const playerDeathRule: Rule<'DamageDealt'> = {
     run: (state, ev, emit) => {
         const target = state.players[ev.to];
         if (target.authority <= 0 && !target.isDead) {
-            emit({ t: 'PlayerDied', player: ev.to });
+            emit({ t: 'PlayerDied', player: ev.to, timestamp: Date.now() });
         }
     }
 }
@@ -341,7 +345,7 @@ const gameOverRule: Rule<'PlayerDied'> = {
     run: (state, _ev, emit) => {
         const alivePlayers = state.order.filter(pid => !state.players[pid].isDead);
         if (alivePlayers.length === 1) {
-            emit({ t: 'GameOver', winner: alivePlayers[0] });
+            emit({ t: 'GameOver', winner: alivePlayers[0], timestamp: Date.now() });
         }
     }
 }
@@ -350,21 +354,21 @@ const rules: Rule<Event['t']>[] = [ onPlayRule, onBasePlayRule, onAllyRule, onBa
 
 const emitEffects = (e: Effect, player: PID, emit: Emit) => {
     switch (e.kind) {
-        case 'addTrade':       emit({ t:'TradeAdded',     player, amount: e.amount }); break;
-        case 'addCombat':      emit({ t:'CombatAdded',    player, amount: e.amount }); break;
-        case 'addAuthority':   emit({ t:'AuthorityAdded', player, amount: e.amount }); break;
-        case 'drawCards':      emit({ t:'CardsDrawn',     player, count:  e.amount }); break;
-        case 'nextAcquireTop': emit({ t:'NextAcquireToTopSet',  player }); break;
-        case 'nextAcquireFree': emit({ t:'NextAcquireFreeSet',   player }); break;
-        case 'multiBaseCondition': emit({ t: 'TwoOrMoreBasesInPlay', player, amount: e.amount }); break;
-        case 'scrapAndDraw': emit({ t: 'DiscardOrScrapAndDrawChosen', player, maxCards: e.maxCards, action: 'scrap' }); break;
+        case 'addTrade':       emit({ t:'TradeAdded',     player, amount: e.amount, timestamp: Date.now() }); break;
+        case 'addCombat':      emit({ t:'CombatAdded',    player, amount: e.amount, timestamp: Date.now() }); break;
+        case 'addAuthority':   emit({ t:'AuthorityAdded', player, amount: e.amount, timestamp: Date.now() }); break;
+        case 'drawCards':      emit({ t:'CardsDrawn',     player, count:  e.amount, timestamp: Date.now() }); break;
+        case 'nextAcquireTop': emit({ t:'NextAcquireToTopSet',  player, timestamp: Date.now() }); break;
+        case 'nextAcquireFree': emit({ t:'NextAcquireFreeSet',   player, timestamp: Date.now() }); break;
+        case 'multiBaseCondition': emit({ t: 'TwoOrMoreBasesInPlay', player, amount: e.amount, timestamp: Date.now() }); break;
+        case 'scrapAndDraw': emit({ t: 'DiscardOrScrapAndDrawChosen', player, maxCards: e.maxCards, action: 'scrap', timestamp: Date.now() }); break;
         case 'addAllFactionTags': {
-            emit({ t: "FactionTagAdded", player, faction: 'Trade Federation', amount: 1 })
-            emit({ t: "FactionTagAdded", player, faction: 'Blob Faction', amount: 1 })
-            emit({ t: "FactionTagAdded", player, faction: 'Star Empire', amount: 1 })
+            emit({ t: "FactionTagAdded", player, faction: 'Trade Federation', amount: 1, timestamp: Date.now() })
+            emit({ t: "FactionTagAdded", player, faction: 'Blob Faction', amount: 1, timestamp: Date.now() })
+            emit({ t: "FactionTagAdded", player, faction: 'Star Empire', amount: 1, timestamp: Date.now() })
             break;
         }
-        case 'prompt': emit({ t:'PromptShown', player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data }); break;
+        case 'prompt': emit({ t:'PromptShown', player, kind: e.prompt.kind, optional: !!e.prompt.optional, data: e.prompt.data, timestamp: Date.now() }); break;
       }
 }
 
@@ -391,7 +395,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} played ${card}`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'TradeAdded':
@@ -400,7 +404,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} added ${event.amount} trade`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'CombatAdded':
@@ -409,7 +413,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} added ${event.amount} combat`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'AuthorityAdded':
@@ -417,7 +421,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} added ${event.amount} authority`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'TradeSpent':
@@ -427,7 +431,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: 'game_event',
                     content: `${event.player} used free next acquire`,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                 })
                 return state
             }
@@ -436,7 +440,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} spent ${event.amount} trade`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'CardPurchased':
@@ -454,7 +458,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                     state.log.push({
                         type: 'game_event',
                         content: `${event.player} purchased ${event.card} from row added to top of deck`,
-                        timestamp: Date.now(),
+                        timestamp: event.timestamp,
                     })
                 }
                 else {
@@ -462,7 +466,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                     state.log.push({
                         type: 'game_event',
                         content: `${event.player} purchased ${event.card} from row added to discard`,
-                        timestamp: Date.now(),
+                        timestamp: event.timestamp,
                     })
                 }
                 return state
@@ -474,7 +478,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: 'game_event',
                     content: `${event.player} purchased ${event.card} from explorer added to discard leaving ${state.explorerDeck.length} cards in explorer deck`,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                 })
                 return state;
             }
@@ -493,7 +497,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${oldCard} replaced by ${newCard} in the trade row`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'CardScrapped':
@@ -503,7 +507,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: 'game_event',
                     content: `${cardAtSlot} scrapped from trade row`,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                 })
             } else if (event.from === 'hand') {
                 const p = state.players[event.player]
@@ -514,7 +518,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: 'game_event',
                     content: `${event.player} scrapped ${removed} from hand`,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                 })
                 return state 
             } else if (event.from === 'inPlay') {
@@ -526,7 +530,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: 'game_event',
                     content: `${event.player} scrapped ${removed} from discard`,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                 })
                 return state 
             } else if (event.from === 'discard') {
@@ -538,7 +542,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: 'game_event',
                     content: `${event.player} scrapped ${removed} from discard`,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                 })
                 return state 
             } else if (event.from === 'bases') {
@@ -550,7 +554,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: 'game_event',
                     content: `${event.player} scrapped ${removed.id} from bases`,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                 })
                 return state
             }
@@ -564,7 +568,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} discarded ${removed}`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'CardsDrawn':
@@ -572,7 +576,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: 'game_event',
                     content: `${event.player} draws ${event.count} card(s)`,
-                    timestamp: Date.now()
+                    timestamp: event.timestamp,
                 })
             }
             return state;
@@ -612,7 +616,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${attacker.id} dealt ${actualDamage} damage to ${target.id}`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             state = handleCombatLogs(state, target.id, attacker.id, actualDamage, 'player')
             return state;
@@ -622,7 +626,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} set next acquire to top of deck`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'NextAcquireFreeSet':
@@ -630,7 +634,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} set next acquire to free`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'FactionTagAdded': {
@@ -655,7 +659,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} played ${event.card}`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'BaseActivated':
@@ -668,7 +672,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} activated ${selectedBase.id}`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'BaseDamaged':
@@ -689,7 +693,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: 'game_event',
                     content: `${event.player} dealt ${event.amount} damage to ${selectedBaseToBeDamaged.id} belonging to ${event.player}`,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                 })
                 return state;
             }
@@ -701,7 +705,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} destroyed ${baseRemoved.id} with ${baseRemoved.defence - baseRemoved.damage} damage belonging to ${event.player}`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'BaseChosenToDestroy':
@@ -712,7 +716,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.targetPlayer} chose to destroy ${destroyedBase.id} belonging to ${event.targetPlayer}`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'TwoOrMoreBasesInPlay':
@@ -730,7 +734,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: event.type,
                     content: event.content,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                     from: event.from,
                     to: event.to
                 })
@@ -738,7 +742,7 @@ export const applyEvent = (state: GameState, event: Event) => {
                 state.log.push({
                     type: event.type,
                     content: event.content,
-                    timestamp: Date.now(),
+                    timestamp: event.timestamp,
                     from: event.from,
                 })
             }
@@ -750,7 +754,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${endingPlayerId} has ended their turn`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             // Skip dead players
             let nextIndex = (state.activeIndex + 1) % state.order.length;
@@ -764,7 +768,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${state.order[state.activeIndex]} is now active`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'PhaseChanged':
@@ -781,7 +785,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.player} has died`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         case 'GameOver':
@@ -790,7 +794,7 @@ export const applyEvent = (state: GameState, event: Event) => {
             state.log.push({
                 type: 'game_event',
                 content: `${event.winner} has won the game`,
-                timestamp: Date.now(),
+                timestamp: event.timestamp,
             })
             return state;
         default:
@@ -864,7 +868,7 @@ const handleCombatLogs = (state: GameState, targetPlayer: string, attacker: stri
         attacker,
         amount,
         targetType,
-        ...(targetType === 'base' && { baseName, baseDestroyed })  // Only add base fields if it's a base attack
+        ...(targetType === 'base' && { baseName, baseDestroyed })
     }
     // Add to global combat log
     state.combatLog.push(notification)

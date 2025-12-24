@@ -30,10 +30,10 @@ export default function ChooseOpponentBaseOverlay({ state, activePrompt, append,
     const targetBases = state.players[target].bases;
 
     const destroyBase = (idx: number) =>
-        append({ t: 'BaseChosenToDestroy', player: currentPlayer, targetPlayer: target, baseIndex: idx });
+        append({ t: 'BaseChosenToDestroy', player: currentPlayer, targetPlayer: target, baseIndex: idx, timestamp: Date.now() });
 
     const skip = () =>
-        append({ t: 'PromptCancelled', kind: 'chooseOpponentBase' });
+        append({ t: 'PromptCancelled', kind: 'chooseOpponentBase', timestamp: Date.now() });
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
