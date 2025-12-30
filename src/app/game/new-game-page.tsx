@@ -47,6 +47,7 @@ export default function NewGamePage() {
     const [showCombatPopup, setShowCombatPopup] = useState(false);
     const [combatNotifications, setCombatNotifications] = useState<CombatNotification[]>([]);
     const [showLog, setShowLog] = useState(false);
+    const [togglePopUps, setTogglePopUps] = useState(true)
     
     // Parse players from URL
     const players: Player[] = useMemo(() => {
@@ -226,7 +227,7 @@ export default function NewGamePage() {
 
     return (
         <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 overflow-hidden">
-            <div className="max-w-[1600px] mx-auto flex flex-col gap-2.5 h-full">
+            <div className="mx-auto flex flex-col gap-2.5 h-full">
                 
                 <TradeRowSection 
                     tradeDeck={state.tradeDeck}
@@ -262,6 +263,7 @@ export default function NewGamePage() {
                     onScrapBase={handleScrapBase}
                     onCardHover={showCardDetail}
                     onCardLeave={hideCardDetail}
+                    togglePopUps={togglePopUps}
                 />
 
                 <PlayerHand 
@@ -277,6 +279,7 @@ export default function NewGamePage() {
                     onCardClick={showCardDetail}
                     onToggleLog={() => setShowLog(!showLog)}
                     scrapPileCount={state.scrap.length}
+                    togglePopUps={togglePopUps}
                 />
 
             </div>

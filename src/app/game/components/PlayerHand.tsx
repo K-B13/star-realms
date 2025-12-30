@@ -2,6 +2,8 @@ import { PlayerState } from "@/app/engine/state";
 import Card from "../reusableComponents/card";
 import { CardDef, cardRegistry, Faction } from "@/app/engine/cards";
 import { Zone } from "@/app/engine/events";
+import ConfirmDialog from "./ConfirmDialog";
+import { useState } from "react";
 
 interface PlayerHandProps {
     player: PlayerState;
@@ -16,6 +18,7 @@ interface PlayerHandProps {
     onCardClick?: (card: CardDef, mode: 'hover' | 'click') => void;
     onToggleLog?: () => void;
     scrapPileCount?: number;
+    togglePopUps?: boolean;
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
@@ -26,7 +29,8 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40", shadow: "shadow-gray-500/20" },
 };
 
-export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onViewScrap, onEndTurn, onCardClick, onToggleLog, scrapPileCount = 0 }: PlayerHandProps) {
+export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPlayCard, onScrapCard, onViewDiscard, onViewDeck, onViewScrap, onEndTurn, onCardClick, onToggleLog, scrapPileCount = 0, togglePopUps }: PlayerHandProps) {
+    const [endTurnConfirmation, setEndTurnConfirmation] = useState(false)
     const countBases = (playerId: PlayerState) => {
         const silverShields = playerId.bases.reduce((acc, base) => {
             if (base.shield === 'normal') {
@@ -50,6 +54,20 @@ export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPl
     const borderColor = isDead ? "border-gray-600" : isTheirTurn ? "border-yellow-500" : "border-purple-500";
     const shadowColor = isDead ? "shadow-gray-600/20" : isTheirTurn ? "shadow-yellow-500/50" : "shadow-purple-500/20";
     const bgColor = isDead ? "bg-gray-900" : "bg-slate-700";
+
+    const selectEndTurn = () => {
+        if (togglePopUps && !endTurnConfirmation && player.combat > 0) {
+             setEndTurnConfirmation(true)
+             return
+         } else if (togglePopUps && endTurnConfirmation) {
+             setEndTurnConfirmation(false)
+         }
+         onEndTurn?.()
+    }
+
+    const closeConfirmation = () => {
+        setEndTurnConfirmation(false)
+    }
 
     return (
         <div className="flex gap-2.5 flex-1 min-h-0">
@@ -167,12 +185,26 @@ export default function PlayerHand({ player, currentPlayerId, turnPlayerId, onPl
                 </button>
                 {onEndTurn && (
                     <button 
-                        onClick={onEndTurn}
+                        onClick={() => {
+                            selectEndTurn()
+                        }}
                         className="border-2 border-red-500 rounded-lg px-2 py-1.5 text-red-300 font-semibold hover:bg-red-900/30 transition-colors w-full text-xs"
                     >
                         End Turn
                     </button>
                 )}
+                {
+                    endTurnConfirmation &&
+                    <ConfirmDialog
+                        message="Are you sure you want to end your turn? You have leftover combat."
+                        onConfirm={() => {
+                            selectEndTurn()
+                        }}
+                        onCancel={() => {
+                            closeConfirmation()
+                        }}
+                    />
+                }
             </div>
         </div>
     );

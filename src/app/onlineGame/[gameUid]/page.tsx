@@ -67,6 +67,7 @@ export default function OnlineGamePage() {
     const [showTradeDeck, setShowTradeDeck] = useState(false)
     const [showDiscardDeck, setShowDiscardDeck] = useState(false)
     const [showLog, setShowLog] = useState(false)
+    const [togglePopUps, setTogglePopUps] = useState(true)
     
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     
@@ -340,7 +341,7 @@ export default function OnlineGamePage() {
 
     const handleScrapBase = (baseIndex: number) => {
         if (!isMyTurn) return
-        const base = currentPlayer.bases[baseIndex]
+        const base = currentPlayer.bases[baseIndex] 
         append({
             t: 'CardScrapped',
             player: currentPlayerId,
@@ -384,8 +385,7 @@ export default function OnlineGamePage() {
     };
 
     const handleEndTurn = () => {
-        if (!isMyTurn) return // Guard: only on your turn
-        
+        if (!isMyTurn) return        
         const base = replay(gameState, turnEvents)
         
         if (!base.turn.playedThisTurn) {
@@ -478,6 +478,7 @@ export default function OnlineGamePage() {
                     onScrapBase={isMyTurn ? handleScrapBase : undefined}
                     onCardHover={showCardDetail}
                     onCardLeave={hideCardDetail}
+                    togglePopUps={togglePopUps}
                 />
 
                 <PlayerHand 
@@ -493,6 +494,7 @@ export default function OnlineGamePage() {
                     onCardClick={showCardDetail}
                     onToggleLog={() => setShowLog(!showLog)}
                     scrapPileCount={currentState.scrap.length}
+                    togglePopUps={togglePopUps}
                 />
             </div>
 

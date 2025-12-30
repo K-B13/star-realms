@@ -1,5 +1,7 @@
 import { BaseInstance } from "@/app/engine/state";
 import { BaseDef, CardDef, cardRegistry, Faction } from "@/app/engine/cards";
+import ConfirmDialog from "./ConfirmDialog";
+import { useState } from "react";
 
 interface CurrentPlayerBasesProps {
     bases: BaseInstance[];
@@ -8,6 +10,7 @@ interface CurrentPlayerBasesProps {
     onScrapBase?: (baseIndex: number) => void;
     onCardHover?: (card: CardDef, mode: 'hover' | 'click', onActivate?: () => void, alreadyActivated?: boolean, onScrap?: () => void) => void;
     onCardLeave?: () => void;
+    togglePopUps: boolean;
 }
 
 const factionColors: Record<Faction, { border: string, bg: string, shadow: string }> = {
@@ -18,13 +21,28 @@ const factionColors: Record<Faction, { border: string, bg: string, shadow: strin
     "Neutral": { border: "border-gray-400", bg: "bg-gray-800/40", shadow: "shadow-gray-500/20" },
 };
 
-export default function CurrentPlayerBases({ bases, playerId, onActivateBase, onScrapBase, onCardHover, onCardLeave }: CurrentPlayerBasesProps) {
+export default function CurrentPlayerBases({ bases, playerId, onActivateBase, onScrapBase, onCardHover, onCardLeave, togglePopUps }: CurrentPlayerBasesProps) {
+    const [baseIndex, setBaseIndex] = useState<number | null>(null);
     // Helper: Check if a base has activatable abilities (not just scrap or passive shield)
     const hasActivatableAbilities = (cardDef: BaseDef): boolean => {
         return cardDef.abilities.some(ability => 
             ability.trigger === 'onPlay' || ability.trigger === 'onAlly'
         );
     };
+
+    const selectBaseToScrap = async (index: number) => {
+        if (togglePopUps && baseIndex === null) {
+            setBaseIndex(index)
+            return
+        } else if (togglePopUps && baseIndex !== null) {
+            setBaseIndex(null)
+        }
+        onScrapBase?.(index)
+    }
+
+    const closeConfirmation = () => {
+        setBaseIndex(null)
+    }
 
     return (
         <div className="border-3 border-cyan-500 qrounded-xl bg-slate-800 p-2 shadow-lg shadow-cyan-500/20">
@@ -44,7 +62,7 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
                             className={`border-2 ${colors.border} rounded-lg ${colors.bg} p-2 w-36 shadow-md ${colors.shadow} cursor-pointer hover:brightness-110 transition-all relative`}
                             onMouseEnter={() => {
                                 const activateCallback = canActivate ? () => onActivateBase(index) : undefined;
-                                const scrapCallback = cardDef.selfScrap ? () => onScrapBase?.(index) : undefined;
+                                const scrapCallback = cardDef.selfScrap ? () => selectBaseToScrap(index) : undefined;
                                 onCardHover?.(cardDef, 'hover', activateCallback, base.activatedThisTurn, scrapCallback);
                             }}
                             onMouseLeave={() => onCardLeave?.()}
@@ -59,7 +77,7 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onScrapBase?.(index);
+                                        selectBaseToScrap(index);
                                     }}
                                     className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600/80 hover:bg-red-500 text-white text-xs font-bold flex items-center justify-center transition-all shadow-md z-10"
                                     title="Scrap this base"
@@ -87,6 +105,18 @@ export default function CurrentPlayerBases({ bases, playerId, onActivateBase, on
                         );
                     })
                 )}
+                {
+                    baseIndex !== null &&
+                    <ConfirmDialog 
+                        message="Are you sure you want to scrap this base?"
+                        onConfirm={() => {
+                            selectBaseToScrap(baseIndex)
+                        }}
+                        onCancel={() => {
+                            closeConfirmation()
+                        }}
+                    />
+                }
             </div>
         </div>
     );
