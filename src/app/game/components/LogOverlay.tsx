@@ -160,7 +160,7 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
                                 <input
                                     type="text"
                                     onKeyDown={handleSubmitMessage}
-                                    placeholder={`Message ${selectedPlayer === 'all' ? 'everyone' : selectedPlayer}...`}
+                                    placeholder={`Message ${selectedPlayer === 'all' ? 'everyone' : playerNames?.[selectedPlayer] || selectedPlayer}...`}
                                     className="flex-1 bg-slate-700 text-slate-200 rounded px-3 py-1 text-sm border border-slate-600 placeholder:text-slate-400"
                                 />
                             </div>
