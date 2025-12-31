@@ -21,7 +21,8 @@ export default function LogOverlay({ log, players, currentPlayerId, onClose, pla
 
     const filteredLogs = showOnlyChat ? log.filter(entry => {
         if (entry.type !== 'chat') return false;
-        return !entry.to || entry.from === currentPlayerId || entry.to === currentPlayerId;
+        const currentPlayerAltered = playerNames ? playerNames[currentPlayerId] : currentPlayerId;
+        return !entry.to || entry.from === currentPlayerAltered || entry.to === currentPlayerAltered;
     }) : 
         log.filter(entry => {
             return !entry.to || entry.to === currentPlayerId || entry.from === currentPlayerId
